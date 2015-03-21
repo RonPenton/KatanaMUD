@@ -1,0 +1,26 @@
+﻿@if(Context.User.Identity.IsAuthenticated)
+{
+    <h1>AUTHENTICATED</h1>
+}
+<script>
+    var connection;
+
+    function connect() {
+        connection = new WebSocket("ws://localhost:5000", "kmud");
+        connection.onopen = function () {
+            connection.send('Ping');
+        };
+        connection.onerror = function (error) {
+            console.log('WebSocket Error ' + error);
+        };
+        connection.onmessage = function (e) {
+            console.log('Server: ' + e.data);
+        };
+    }
+    function ping() {
+        connection.send('Ping');
+    }
+</script>
+<button onclick="connect()">Connect</button>
+<button onclick="ping()">Ping</button>
+
