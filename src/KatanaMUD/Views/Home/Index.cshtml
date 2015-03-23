@@ -1,6 +1,6 @@
-﻿@if(Context.User.Identity.IsAuthenticated)
+﻿@if (Context.User.Identity.IsAuthenticated)
 {
-    <h1>AUTHENTICATED</h1>
+	<h1>AUTHENTICATED</h1>
 }
 <script>
     var connection;
@@ -23,4 +23,3 @@
 </script>
 <button onclick="connect()">Connect</button>
 <button onclick="ping()">Ping</button>
-

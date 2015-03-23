@@ -1,0 +1,17 @@
+﻿@model String
+@{
+// ViewBag.Title = "Home Page";
+}
+
+@if (!String.IsNullOrWhiteSpace(Model))
+{
+	<div class="warning">@Model</div>
+}
+
+<form action="/Account/Login" method="post">
+	<div><label for="Username">Username</label><input id="Username" name="Username" /></div>
+	<div><label for="Password">Password</label><input id="Password" name="Password" type="password" /></div>
+	<input type="submit" value="Login" />
+</form>
+
+<a href="/Account/Register">Register New Account</a>
