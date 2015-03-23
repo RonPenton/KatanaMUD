@@ -25,3 +25,4 @@ Due to requiring Websockets, The MUD will not run (in its current state) on any 
 * Web-based content editor.
 * (?) Design Customization Module, to allow for altering the game without the need for rebooting/resetting.
 * (?) Look into expanding the features of the game. Factions, Auctions, etc.
+* Automation of client (ie: MegaMUD-like features)
