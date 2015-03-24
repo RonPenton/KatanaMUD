@@ -12,6 +12,7 @@ using KatanaMUD.Models;
 using KatanaMUD.Authorization;
 using Microsoft.AspNet.Security.Cookies;
 using Microsoft.AspNet.StaticFiles;
+using KatanaMUD.Messages;
 
 namespace KatanaMUD
 {
@@ -61,8 +62,9 @@ namespace KatanaMUD
 
                     if(!context.User?.Identity.IsAuthenticated ?? true)
                     {
-                        var rejection = Encoding.UTF8.GetBytes("Connection Rejected.");
-                        await webSocket.SendAsync(new ArraySegment<byte>(rejection, 0, rejection.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                        var rejection = new LoginRejected() { RejectionMessage = "User is not authenticated" };
+                        var message = Encoding.UTF8.GetBytes(MessageSerializer.SerializeMessage(rejection));
+                        await webSocket.SendAsync(new ArraySegment<byte>(message, 0, message.Length), WebSocketMessageType.Text, true, CancellationToken.None);
                         await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "User is not authenticated", CancellationToken.None);
                         return;
                     }
