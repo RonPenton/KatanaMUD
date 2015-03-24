@@ -10,9 +10,9 @@ Due to requiring Websockets, The MUD will not run (in its current state) on any 
 
 #Roadmap
 
-* (current) Basic Proof-Of-Concept using Websockets
-* Design Membership system
-* Design Login/Socket Management System
+* *Basic Proof-Of-Concept using Websockets*
+* **Design Membership system**
+* **Design Login/Socket Management System**
 * Design messaging system (Typescript code-gen of message classes?)
 * Design world module
 * Design communication module
