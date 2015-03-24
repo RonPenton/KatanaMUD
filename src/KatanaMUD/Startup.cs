@@ -57,7 +57,16 @@ namespace KatanaMUD
 				if (context.IsWebSocketRequest)
 				{
 					WebSocket webSocket = await context.AcceptWebSocketAsync(context.WebSocketRequestedProtocols[0]);
-					await EchoWebSocket(webSocket);
+
+                    if(!context.User?.Identity.IsAuthenticated ?? true)
+                    {
+                        var rejection = Encoding.UTF8.GetBytes("Connection Rejected.");
+                        await webSocket.SendAsync(new ArraySegment<byte>(rejection, 0, rejection.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                        await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "User is not authenticated", CancellationToken.None);
+                        return;
+                    }
+
+                    await EchoWebSocket(webSocket, context);
 				}
 				else
 				{
@@ -71,7 +80,7 @@ namespace KatanaMUD
 			});
 		}
 
-		private async Task EchoWebSocket(WebSocket webSocket)
+		private async Task EchoWebSocket(WebSocket webSocket, HttpContext context)
 		{
 			byte[] buffer = new byte[1024];
 			WebSocketReceiveResult received = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
