@@ -11,6 +11,7 @@ using Microsoft.AspNet.Hosting;
 using KatanaMUD.Models;
 using KatanaMUD.Authorization;
 using Microsoft.AspNet.Security.Cookies;
+using Microsoft.AspNet.StaticFiles;
 
 namespace KatanaMUD
 {
@@ -64,6 +65,8 @@ namespace KatanaMUD
 					await next();
 				}
 			});
+
+			app.UseStaticFiles();
 
 			app.UseMvc(routes =>
 			{

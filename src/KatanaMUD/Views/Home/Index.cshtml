@@ -2,6 +2,8 @@
 {
 	<h1>AUTHENTICATED</h1>
 }
+
+<script src="~/scripts/test.js"></script>
 <script>
     var connection;
 
@@ -20,6 +22,8 @@
     function ping() {
         connection.send('Ping');
     }
+
+    KMud.Test.doTest();
 </script>
 <button onclick="connect()">Connect</button>
 <button onclick="ping()">Ping</button>
