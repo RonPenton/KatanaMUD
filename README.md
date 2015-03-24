@@ -28,6 +28,12 @@ Due to requiring Websockets, The MUD will not run (in its current state) on any 
 * Automation of client (ie: MegaMUD-like features)
 * ~~Design multi-tennancy system (to run multiple MUDs on the same server)~~
 
+Key: 
+* *italic - Done or mostly done*
+* **bold - Currently in progress**
+* regular - To Do
+* ~~strikethrough - Removed from roadmap~~
+
 #Notes
 
 I've temporarily removed Multi-tennancy from the roadmap. The idea behind this concept is that eventually people might want to run multiple games on the same server, like have one realm for PvP, one realm for PvE, and maybe add new realms periodically instead of wiping an old realm. Supporting mutli-tennancy innately would have multiple benefits, such as allowing one single server to run multiple games, making administration easier, and so forth. However, after thinking about it, I'm not really sure how likely it is that this feature would be used extensively. It's a "good idea" but may just be one of those things that you spend a lot of time on for little to no real world benefit. MUD Games already have population issues so perhaps it's not the greatest idea to encourage more servers to open and spread out the population. So I'm removing it from the roadmap for the time being, with an option to look at it again in the future. The design of the system would be to use the same websocket for all games, using the Websocket protocol to specify which server the user wants to join. Once they connect, their connection will be handed off to the correct socket manager, each of which runs its own instance of the game, attached to a separate SQL database. The reason for the separate SQL databases is because it'll just be a thousand times easier to manage, rather than having to maintain an "instance ID" on each table as well. In theory, it shouldn't be too difficult to adapt the game to use this model if we ever end up implementing it. 
