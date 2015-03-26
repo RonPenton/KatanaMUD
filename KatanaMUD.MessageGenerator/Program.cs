@@ -26,15 +26,16 @@ namespace KatanaMUD.MessageGenerator
 
                     foreach(var message in messages)
                     {
-                        writer.WriteLine(String.Format("    export class {0} {{", message.Name));
-                        writer.WriteLine(String.Format("        constructor() {{ this.MessageName = '{0}'; }}", message.Name));
+                        writer.WriteLine(String.Format("    export class {0} extends MessageBase {{", message.Name));
+                        writer.WriteLine(String.Format("        constructor() {{ super('{0}'); }}", message.Name));
 
-                        var properties = message.GetProperties().OrderBy(x => x.Name != "MessageName");
+                        var properties = message.GetProperties().Where(x => x.Name != "MessageName");
                         foreach(var property in properties)
                         {
                             writer.WriteLine(String.Format("        public {1}: {0};", GetPropertyType(property.PropertyType, enumBuilder), property.Name));
                         }
 
+                        writer.WriteLine(String.Format("        public static ClassName: string = '{0}';", message.Name));
                         writer.WriteLine("    }");
                     }
 

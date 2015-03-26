@@ -160,6 +160,7 @@ ClientBin/
 *.publishsettings
 node_modules/
 bower_components/
+src/KatanaMUD/node_modules/
 
 # RIA/Silverlight projects
 Generated_Code/

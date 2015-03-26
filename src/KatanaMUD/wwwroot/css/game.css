@@ -1,0 +1,21 @@
+body {
+  background-color: #111;
+}
+.game-text {
+  font-size: 14px;
+  font-family: Consolas, Courier New, Courier, monospace;
+  color: white;
+}
+.game-text span {
+  padding: 2px;
+  display: inline-block;
+}
+.error-text {
+  background-color: crimson;
+  font-weight: bold;
+}
+#Output {
+  height: 70%;
+  width: 100%;
+  overflow-y: scroll;
+}

@@ -1,16 +1,27 @@
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
 var KMud;
 (function (KMud) {
-    var LoginRejected = (function () {
+    var LoginRejected = (function (_super) {
+        __extends(LoginRejected, _super);
         function LoginRejected() {
-            this.MessageName = "LoginRejected";
+            _super.call(this, 'LoginRejected');
         }
+        LoginRejected.ClassName = 'LoginRejected';
         return LoginRejected;
-    })();
+    })(KMud.MessageBase);
     KMud.LoginRejected = LoginRejected;
-    (function (TestEnum) {
-        TestEnum[TestEnum["OK"] = 0] = "OK";
-        TestEnum[TestEnum["Noo"] = 4] = "Noo";
-        TestEnum[TestEnum["Test"] = 6] = "Test";
-    })(KMud.TestEnum || (KMud.TestEnum = {}));
-    var TestEnum = KMud.TestEnum;
+    var ServerMessage = (function (_super) {
+        __extends(ServerMessage, _super);
+        function ServerMessage() {
+            _super.call(this, 'ServerMessage');
+        }
+        ServerMessage.ClassName = 'ServerMessage';
+        return ServerMessage;
+    })(KMud.MessageBase);
+    KMud.ServerMessage = ServerMessage;
 })(KMud || (KMud = {}));

@@ -12,5 +12,10 @@ namespace KatanaMUD.Controllers
 		{
 			return View();
 		}
+
+        public IActionResult Game()
+        {
+            return View();
+        }
 	}
 }

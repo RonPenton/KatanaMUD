@@ -1,0 +1,23 @@
+﻿@{
+    ViewBag.Title = "KatanaMUD";
+}
+
+<link href="~/css/game.css" rel="stylesheet" />
+<script src="~/scripts/game.js"></script>
+<script src="~/scripts/Message.js"></script>
+<script src="~/scripts/Messages.g.js"></script>
+<script>
+    window.onload = function () {
+        var game = new KMud.Game();
+        game.connect("ws://localhost:5000");
+    }
+</script>
+<div id="Output" class="game-text"></div>
+<div id="Status" class="game-text"></div>
+<div id="Input" class="game-text">
+    <input type="text" id="InputBox" />
+</div>
+
+<div id="Tabs" >
+    <div id="Debug" class="game-text"></div>
+</div>

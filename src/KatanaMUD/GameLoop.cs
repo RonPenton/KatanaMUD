@@ -11,7 +11,7 @@ namespace KatanaMUD
         public static void Run()
         {
             try {
-                Console.WriteLine("Server Started");
+                Console.WriteLine("KatanaMUD 0.1 Server Started");
                 while (true)
                 {
                     string message;

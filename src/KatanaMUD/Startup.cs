@@ -54,16 +54,24 @@ namespace KatanaMUD
 				opts.LoginPath = new PathString("/Account/Login");
 			});
 
-			app.Use(async (context, next) =>
+			app.Use(async (HttpContext context, Func<Task> next) =>
 			{
 				if (context.IsWebSocketRequest)
 				{
 					WebSocket webSocket = await context.AcceptWebSocketAsync(context.WebSocketRequestedProtocols[0]);
 
-                    if(!context.User?.Identity.IsAuthenticated ?? true)
+                    Console.WriteLine("Incoming connection: " + context.Request.Host.Value);
+
+                    // TODO: obviously refactor sending messages to be more streamlined.
+                    var serverMessage = new ServerMessage() { Contents = "Welcome to KatanaMUD. A MUD on the Web. Because I'm apparently insane. Dear lord." };
+                    var message = Encoding.UTF8.GetBytes(MessageSerializer.SerializeMessage(serverMessage));
+                    await webSocket.SendAsync(new ArraySegment<byte>(message, 0, message.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+
+                    if (!context.User?.Identity.IsAuthenticated ?? true)
                     {
+                        Console.WriteLine("Connection Aborted: Not Authorized.");
                         var rejection = new LoginRejected() { RejectionMessage = "User is not authenticated" };
-                        var message = Encoding.UTF8.GetBytes(MessageSerializer.SerializeMessage(rejection));
+                        message = Encoding.UTF8.GetBytes(MessageSerializer.SerializeMessage(rejection));
                         await webSocket.SendAsync(new ArraySegment<byte>(message, 0, message.Length), WebSocketMessageType.Text, true, CancellationToken.None);
                         await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "User is not authenticated", CancellationToken.None);
                         return;
