@@ -9,7 +9,6 @@ using System.Text;
 using Microsoft.Framework.ConfigurationModel;
 using Microsoft.AspNet.Hosting;
 using KatanaMUD.Models;
-using KatanaMUD.Authorization;
 using Microsoft.AspNet.Security.Cookies;
 using Microsoft.AspNet.StaticFiles;
 using KatanaMUD.Messages;
