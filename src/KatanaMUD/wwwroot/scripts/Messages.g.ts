@@ -4,6 +4,16 @@ module KMud {
         public RejectionMessage: string;
         public static ClassName: string = 'LoginRejected';
     }
+    export class PingMessage extends MessageBase {
+        constructor() { super('PingMessage'); }
+        public SendTime: Date;
+        public static ClassName: string = 'PingMessage';
+    }
+    export class PongMessage extends MessageBase {
+        constructor() { super('PongMessage'); }
+        public SendTime: Date;
+        public static ClassName: string = 'PongMessage';
+    }
     export class ServerMessage extends MessageBase {
         constructor() { super('ServerMessage'); }
         public Contents: string;

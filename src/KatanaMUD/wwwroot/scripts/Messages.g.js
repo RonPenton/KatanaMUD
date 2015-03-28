@@ -15,6 +15,24 @@ var KMud;
         return LoginRejected;
     })(KMud.MessageBase);
     KMud.LoginRejected = LoginRejected;
+    var PingMessage = (function (_super) {
+        __extends(PingMessage, _super);
+        function PingMessage() {
+            _super.call(this, 'PingMessage');
+        }
+        PingMessage.ClassName = 'PingMessage';
+        return PingMessage;
+    })(KMud.MessageBase);
+    KMud.PingMessage = PingMessage;
+    var PongMessage = (function (_super) {
+        __extends(PongMessage, _super);
+        function PongMessage() {
+            _super.call(this, 'PongMessage');
+        }
+        PongMessage.ClassName = 'PongMessage';
+        return PongMessage;
+    })(KMud.MessageBase);
+    KMud.PongMessage = PongMessage;
     var ServerMessage = (function (_super) {
         __extends(ServerMessage, _super);
         function ServerMessage() {

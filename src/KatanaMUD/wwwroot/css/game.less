@@ -1,14 +1,18 @@
 ﻿body {
     background-color: #111;
+    overflow:hidden;
+    display: flex;
+    height: 100vh;
+
+    font-size: 15px;
+    font-family: Consolas, Courier New, Courier, monospace;
+    color: white;
 }
 
 .game-text {
-    font-size: 14px;
-    font-family: Consolas, Courier New, Courier, monospace;
-    color: white;
 
     span {
-        padding: 2px;
+        padding: 2px 0px;
         display:inline-block;
     }
 }
@@ -18,8 +22,57 @@
     font-weight: bold;
 }
 
-#Output {
-    height: 70%;
+.system-text {
+    background-color: green;
+    font-weight: bold;
+}
+
+input {
+    background-color: #111;
+    border: none;
+    outline: 0;
+
+    &:focus{
+        border: none;
+        outline: 0;
+    }
+}
+
+#TelnetArea {
+    display: flex;
+    flex-direction:column;
+    flex-grow: 1;
+}
+
+#InformationArea {
+    flex-grow: 0;
+    width: 200px;
+    height: 100%;
+    border: solid 1px white;
+}
+
+#Tabs {
     width: 100%;
+    flex-grow: 0;
+    height: 200px;
+    min-height: 200px;
+    border: solid 1px white;
+}
+
+#Output{
+    width: 100%;
+    flex-grow: 1;
     overflow-y: scroll;
+}
+
+#InputArea {
+    height: 24px;
+    min-height: 24px;
+    font-weight: bold;
+    flex-grow: 0;
+    display: flex;
+
+    #InputBox {
+        flex-grow: 1;
+    }
 }

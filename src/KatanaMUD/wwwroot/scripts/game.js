@@ -1,8 +1,56 @@
+/// <reference path="jquery.d.ts" />
 var KMud;
 (function (KMud) {
     var Game = (function () {
         function Game() {
+            var _this = this;
+            this.lastCommands = [];
+            this.currentCommand = -1;
+            this.input = document.getElementById("InputBox");
+            $("#InputBox").keypress(function (x) {
+                if (x.keyCode == 13 && _this.input.value.trim() != "") {
+                    _this.addOutput(document.getElementById("Output"), _this.input.value, "command-text");
+                    _this.lastCommands.unshift(_this.input.value);
+                    _this.processCommand(_this.input.value);
+                    _this.input.value = "";
+                    _this.currentCommand = -1;
+                    while (_this.lastCommands.length > 20) {
+                        _this.lastCommands.shift();
+                    }
+                }
+            }).keydown(function (x) {
+                if (x.keyCode == 38 && x.ctrlKey) {
+                    if (_this.currentCommand < _this.lastCommands.length - 1) {
+                        _this.currentCommand++;
+                        _this.input.value = _this.lastCommands[_this.currentCommand];
+                    }
+                }
+                else if (x.keyCode == 40 && x.ctrlKey) {
+                    if (_this.currentCommand >= 1) {
+                        _this.currentCommand--;
+                        _this.input.value = _this.lastCommands[_this.currentCommand];
+                    }
+                    else if (_this.currentCommand == 0) {
+                        _this.input.value = "";
+                        _this.currentCommand = -1;
+                    }
+                }
+            });
+            ;
+            $(window).mouseup(function (x) {
+                if (window.getSelection().toString().length == 0)
+                    $("#InputBox").focus();
+            });
         }
+        Game.prototype.processCommand = function (command) {
+            var lower = command.toLocaleLowerCase().trim();
+            var words = command.split(/\s+/gi);
+            if (words[0] == "ping") {
+                var message = new KMud.PingMessage();
+                message.SendTime = new Date();
+                this._socket.send(JSON.stringify(message));
+            }
+        };
         Game.prototype.connect = function (url) {
             var _this = this;
             this._socket = new WebSocket(url, "kmud");
@@ -31,15 +79,24 @@ var KMud;
             if (message.MessageName == KMud.ServerMessage.ClassName) {
                 this.addOutput(document.getElementById("Output"), message.Contents);
             }
+            if (message.MessageName == KMud.PongMessage.ClassName) {
+                var latency = new Date().getMilliseconds() - new Date(message.SendTime).getMilliseconds();
+                this.addOutput(document.getElementById("Output"), "Ping: Latency " + latency + "ms", "system-text");
+            }
         };
         Game.prototype.addOutput = function (element, text, css) {
             if (css === void 0) { css = null; }
+            var scrolledToBottom = (element.scrollHeight - element.scrollTop === element.offsetHeight);
             var span = document.createElement("span");
             span.textContent = text;
             span.className = css;
             element.appendChild(span);
             var br = document.createElement("br");
             element.appendChild(br);
+            // Keep scrolling to bottom if they're already there.
+            if (scrolledToBottom) {
+                element.scrollTop = element.scrollHeight;
+            }
         };
         return Game;
     })();

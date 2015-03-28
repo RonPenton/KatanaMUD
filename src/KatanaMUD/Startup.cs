@@ -44,8 +44,10 @@ namespace KatanaMUD
 
 		public void Configure(IApplicationBuilder app)
 		{
-			var thread = new Thread(GameLoop.Run);
+			var thread = new Thread(Game.Run);
 			thread.Start();
+
+            app.UseErrorPage();
 
 			app.UseCookieAuthentication(opts =>
 			{
@@ -76,6 +78,7 @@ namespace KatanaMUD
                         return;
                     }
 
+                    Game.Sockets.Add(webSocket);
                     await EchoWebSocket(webSocket, context);
 				}
 				else
@@ -99,8 +102,8 @@ namespace KatanaMUD
 
 			while (!webSocket.CloseStatus.HasValue)
 			{
-				var message = Encoding.UTF8.GetString(buffer, 0, received.Count);
-				GameLoop.Messages.Enqueue(message);
+                var message = MessageSerializer.DeserializeMessage(Encoding.UTF8.GetString(buffer, 0, received.Count));
+				Game.Messages.Enqueue(message);
 
 				await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, received.Count), received.MessageType, received.EndOfMessage, CancellationToken.None);
 				received = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);

@@ -1,29 +1,6 @@
-﻿@if (Context.User.Identity.IsAuthenticated)
-{
-	<h1>AUTHENTICATED</h1>
+﻿@{
+    Layout = "/Views/Shared/_Layout.cshtml";
 }
-
-<script src="~/scripts/test.js"></script>
-<script>
-    var connection;
-
-    function connect() {
-        connection = new WebSocket("ws://localhost:5000", "kmud");
-        connection.onopen = function () {
-            connection.send('Ping');
-        };
-        connection.onerror = function (error) {
-            console.log('WebSocket Error ' + error);
-        };
-        connection.onmessage = function (e) {
-            console.log('Server: ' + e.data);
-        };
-    }
-    function ping() {
-        connection.send('Ping');
-    }
-
-    KMud.Test.doTest();
-</script>
-<button onclick="connect()">Connect</button>
-<button onclick="ping()">Ping</button>
+<p>
+    Welcome to KatanaMUD. KatanaMUD is a web MUD based on the old Worldgroup MUD MajorMUD. TODO: Insert more here.
+</p>

@@ -1,6 +1,13 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model KatanaMUD.Models.Actor
 @{
-    // ViewBag.Title = "Home Page";
+    ViewBag.Title = "Create a new Character";
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm("CreateCharacter", "Home", FormMethod.Post))
+{
+    @Html.LabelFor(x => x.Name)
+    @Html.TextBoxFor(x => x.Name)
+    @Html.LabelFor(x => x.Surname)
+    @Html.TextBoxFor(x => x.Surname)
 }

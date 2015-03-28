@@ -95,7 +95,7 @@ namespace KatanaMUD.Controllers
 			}
 		}
 
-		[HttpGet]
+		[HttpPost]
 		public IActionResult Logout()
 		{
 			Context.Response.SignOut(CookieAuthenticationDefaults.AuthenticationType);

@@ -1,4 +1,5 @@
 ﻿using KatanaMUD.Messages;
+using KatanaMUD.Models;
 using Microsoft.AspNet.Mvc;
 
 // For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
@@ -13,9 +14,17 @@ namespace KatanaMUD.Controllers
 			return View();
 		}
 
+        [Authorize]
         public IActionResult Game()
         {
             return View();
+        }
+
+        [Authorize]
+        public IActionResult CreateCharacter()
+        {
+            var actor = new Actor() { Name = Context.User.Identity.Name };
+            return View(actor);
         }
 	}
 }
