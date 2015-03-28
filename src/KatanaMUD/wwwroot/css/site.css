@@ -23,3 +23,32 @@ textarea {
 .navbar-inverse .navbar-nav > li > a.play-link:hover {
   text-decoration: underline;
 }
+form div label {
+  display: inline-block;
+  width: 115px;
+  min-width: 115px;
+  font-weight: bold;
+  text-align: right;
+  margin-right: 5px;
+}
+.ChooseRace #ChoiceArea,
+.ChooseClass #ChoiceArea {
+  display: flex;
+}
+.ChooseRace select,
+.ChooseClass select {
+  flex-grow: 0;
+  min-width: 200px;
+  width: 200px;
+}
+.ChooseRace .Description,
+.ChooseClass .Description {
+  flex-grow: 1;
+  padding: 0px 0px 0px 5px;
+  text-align: justify;
+  max-width: 50%;
+}
+.ChooseRace input[type='submit'],
+.ChooseClass input[type='submit'] {
+  margin-top: 5px;
+}

@@ -1,0 +1,39 @@
+﻿@model KatanaMUD.Models.Actor
+@{
+    ViewBag.Title = "Choose a Race";
+    Layout = "/Views/Shared/_Layout.cshtml";
+    ViewBag.PageClass = "ChooseRace";
+    var races = (List<KatanaMUD.Models.RaceTemplate>)ViewBag.Races;
+}
+
+<script>
+    var descriptions = [];
+    @foreach(var race in races)
+    {
+        @:descriptions[@race.Id] = '@Html.Raw(race.Description.Replace("'", "\\'"))';
+    }
+    function showDescription(raceId) {
+        $(".Description").text(descriptions[raceId]);
+    }
+    $(function() {
+        $("#RaceTemplateId").change(function() {
+            showDescription($("#RaceTemplateId").val());
+        });
+    });
+</script>
+
+<h3>Choose a Race:</h3>
+@using (Html.BeginForm("ChooseClass", "Home", FormMethod.Post, htmlAttributes: new { @class = "form-horizontal" }))
+{
+
+    <div id="ChoiceArea">
+        <select id="RaceTemplateId" name="RaceTemplateId" size="@races.Count">
+            @foreach (var race in races)
+            {
+                <option value="@race.Id">@race.Name</option>
+            }
+        </select>
+        <div class="Description"></div>
+    </div>
+    <input type="submit" value="Next" />
+}

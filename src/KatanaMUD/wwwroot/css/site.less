@@ -28,3 +28,38 @@ textarea {
     }
 }
 
+form {
+    div {
+        label {
+            display: inline-block;
+            width: 115px;
+            min-width: 115px;
+            font-weight: bold;
+            text-align: right;
+            margin-right: 5px;
+        }
+
+        input {
+        }
+    }
+}
+
+.ChooseRace, .ChooseClass {
+    #ChoiceArea {
+        display: flex;
+    }
+    select {
+        flex-grow: 0;
+        min-width: 200px;
+        width: 200px;
+    }
+    .Description {
+        flex-grow: 1;
+        padding: 0px 0px 0px 5px;
+        text-align: justify;
+        max-width: 50%;
+    }
+    input[type='submit'] {
+        margin-top: 5px;
+    }
+}

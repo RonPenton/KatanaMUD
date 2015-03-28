@@ -4,7 +4,6 @@ namespace KatanaMUD.Models
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Data.Entity.Spatial;
 
     [Table("RaceTemplate")]
     public partial class RaceTemplate
@@ -13,6 +12,7 @@ namespace KatanaMUD.Models
         public RaceTemplate()
         {
             Actors = new HashSet<Actor>();
+            ClassTemplates = new HashSet<ClassTemplate>();
         }
 
         public int Id { get; set; }
@@ -49,5 +49,8 @@ namespace KatanaMUD.Models
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Actor> Actors { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ClassTemplate> ClassTemplates { get; set; }
     }
 }

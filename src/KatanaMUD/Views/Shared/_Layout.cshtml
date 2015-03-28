@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KatanaMUD - @ViewBag.Title</title>
+
+    <link rel="stylesheet" href="~/lib/normalize-css/normalize.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <script src="~/lib/jquery/jquery.js"></script>
+</head>
+<body class="@ViewBag.PageClass">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("KatanaMUD", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li>@Html.ActionLink("About", "About", "Home")</li>
+                    <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                    <li>@Html.ActionLink("PLAY!", "Game", "Home", null, htmlAttributes: new { @class = "play-link" })</li>
+                </ul>
+                @await Html.PartialAsync("_LoginPartial")
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - KatanaMUD</p>
+        </footer>
+    </div>
+    <script src="~/lib/bootstrap/bootstrap.js"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

@@ -12,6 +12,7 @@ namespace KatanaMUD.Models
         public RaceTemplate()
         {
             Actors = new HashSet<Actor>();
+            ClassTemplates = new HashSet<ClassTemplate>();
         }
 
         public int Id { get; set; }
@@ -46,7 +47,13 @@ namespace KatanaMUD.Models
 
         public int CharmCap { get; set; }
 
+        [Required]
+        public string Description { get; set; }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Actor> Actors { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ClassTemplate> ClassTemplates { get; set; }
     }
 }

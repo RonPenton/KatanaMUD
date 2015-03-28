@@ -23,6 +23,10 @@ namespace KatanaMUD.Models
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<ClassTemplate>()
+                .HasMany(e => e.RaceTemplates)
+                .WithMany(e => e.ClassTemplates)
+                .Map(m => m.ToTable("RaceClassRestrictions").MapLeftKey("ClassTemplateId").MapRightKey("RaceTemplateId"));
         }
     }
 }
