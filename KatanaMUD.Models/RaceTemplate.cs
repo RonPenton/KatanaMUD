@@ -15,6 +15,8 @@ namespace KatanaMUD.Models
             ClassTemplates = new HashSet<ClassTemplate>();
         }
 
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
 
         [Required]

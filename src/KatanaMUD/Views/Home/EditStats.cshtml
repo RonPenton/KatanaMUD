@@ -1,0 +1,66 @@
+﻿@model KatanaMUD.Models.Actor
+@{
+    ViewBag.Title = "Edit Stats";
+    Layout = "/Views/Shared/_Layout.cshtml";
+    ViewBag.PageClass = "EditStats";
+    bool isNew = (bool)ViewBag.IsNew;
+}
+
+<h3>Edit Stats</h3>
+
+@using (Html.BeginForm("EditStats", "Home", FormMethod.Post, htmlAttributes: new { @class = "form-horizontal" }))
+{
+    <div>
+        <label for="Name">Given Name</label>
+        @if (isNew)
+        {
+            @Html.TextBoxFor(x => x.Name)
+        }
+        else
+        {
+            @Html.HiddenFor(x => x.Name);
+            <input type="text" disabled value="@Model.Surname" />
+        }
+    </div>
+    <div>
+        <label for="Surname">Family Name</label>
+        @Html.TextBoxFor(x => x.Surname)
+    </div>
+    <div>
+        <label for="Race">Race</label>
+        <input type="text" disabled value="@Model.RaceTemplate.Name" />
+    </div>
+    <div>
+        <label for="Class">Class</label>
+        <input type="text" disabled value="@Model.ClassTemplate.Name" />
+    </div>
+    <div>
+        <label for="CPS">CP's</label>
+        <input type="hidden" id="initialcps" value="@Model.CharacterPoints" />
+        <input type="text" id="cps" disabled value="@Model.CharacterPoints" />
+    </div>
+
+    @helper EditControl(int initial, int max, int current, string label)
+    {
+            <div class="statrow">
+                <label>@label</label>
+                <input type="hidden" class="initial" value="@initial" />
+                <input type="hidden" class="current" value="@current" />
+                <label class="range">@String.Format("{0}-{1}", initial, max)</label>
+                <input type="button" class="reset" value="Reset" />
+                <input type="button" class="down" value="-" />
+                <input type="text" value="@current" />
+                <input type="button" class="up" value="+" />
+                <input type="button" class="max" value="Max" />
+            </div>
+    }
+
+    <div class="stat-area">
+        @EditControl(Model.RaceTemplate.Strength, Model.RaceTemplate.StrengthCap, Model.Strength, "Strength")
+        @EditControl(Model.RaceTemplate.Intelligence, Model.RaceTemplate.IntelligenceCap, Model.Intelligence, "Intellect")
+        @EditControl(Model.RaceTemplate.Wisdom, Model.RaceTemplate.WisdomCap, Model.Wisdom, "Willpower")
+        @EditControl(Model.RaceTemplate.Agility, Model.RaceTemplate.AgilityCap, Model.Agility, "Agility")
+        @EditControl(Model.RaceTemplate.Health, Model.RaceTemplate.HealthCap, Model.Health, "Health")
+        @EditControl(Model.RaceTemplate.Charm, Model.RaceTemplate.CharmCap, Model.Charm, "Charm")
+    </div>
+}

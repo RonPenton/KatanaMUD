@@ -23,9 +23,8 @@
 </script>
 
 <h3>Choose a Race:</h3>
-@using (Html.BeginForm("ChooseClass", "Home", FormMethod.Post, htmlAttributes: new { @class = "form-horizontal" }))
+@using (Html.BeginForm("ChooseRace", "Home", FormMethod.Post, htmlAttributes: new { @class = "form-horizontal" }))
 {
-
     <div id="ChoiceArea">
         <select id="RaceTemplateId" name="RaceTemplateId" size="@races.Count">
             @foreach (var race in races)

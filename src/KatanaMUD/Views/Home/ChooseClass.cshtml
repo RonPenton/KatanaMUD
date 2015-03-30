@@ -1,6 +1,40 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model KatanaMUD.Models.Actor
 @{
-    // ViewBag.Title = "Home Page";
+    ViewBag.Title = "Choose a Class";
+    Layout = "/Views/Shared/_Layout.cshtml";
+    ViewBag.PageClass = "ChooseClass";
+    var classes = (List<KatanaMUD.Models.ClassTemplate>)ViewBag.Classes;
+    //var disabledClasses = (List<KatanaMUD.Models.ClassTemplate>)ViewBag.DisabledClasses;
+}
+
+<script>
+    var descriptions = [];
+    @foreach (var cls in classes)
+    {
+        @:descriptions[@cls.Id] = '@Html.Raw(cls.Description.Replace("'", "\\'").Trim())';
+    }
+    function showDescription(classId) {
+        $(".Description").text(descriptions[classId]);
+    }
+    $(function() {
+        $("#ClassTemplateId").change(function() {
+            showDescription($("#ClassTemplateId").val());
+        });
+    });
+</script>
+
+<h3>Choose a Class:</h3>
+@using (Html.BeginForm("ChooseClass", "Home", FormMethod.Post, htmlAttributes: new { @class = "form-horizontal" }))
+{
+    <input type="hidden" name="RaceTemplateId" value="@Model.RaceTemplateId" />
+    <div id="ChoiceArea">
+        <select id="ClassTemplateId" name="ClassTemplateId" size="@classes.Count">
+            @foreach (var cls in classes)
+            {
+                <option value="@cls.Id">@cls.Name</option>
+            }
+        </select>
+        <div class="Description"></div>
+    </div>
+    <input type="submit" value="Next" />
 }

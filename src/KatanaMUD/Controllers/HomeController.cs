@@ -35,9 +35,31 @@ namespace KatanaMUD.Controllers
         [HttpPost]
         public IActionResult ChooseRace(Actor actor)
         {
-            return View(actor);
+            var context = new GameContext();
+            ViewBag.Classes = context.ClassTemplates.ToList();
+
+            return View("ChooseClass", actor);
         }
 
+        [Authorize]
+        [HttpPost]
+        public IActionResult ChooseClass(Actor actor)
+        {
+            ViewBag.IsNew = true;
+            var context = new GameContext();
+            actor.CharacterPoints = 100;    // TODO: From settings?
+            actor.RaceTemplate = context.RaceTemplates.Single(x => x.Id == actor.RaceTemplateId);
+            actor.ClassTemplate = context.ClassTemplates.Single(x => x.Id == actor.ClassTemplateId);
+            actor.Agility = actor.RaceTemplate.Agility;
+            actor.Charm = actor.RaceTemplate.Charm;
+            actor.Health = actor.RaceTemplate.Health;
+            actor.Intelligence = actor.RaceTemplate.Intelligence;
+            actor.Strength = actor.RaceTemplate.Strength;
+            actor.Wisdom = actor.RaceTemplate.Wisdom;
+            actor.Name = Context.User.Identity.Name;
+
+            return View("EditStats", actor);
+        }
 
         [Authorize]
         public IActionResult CreateCharacter()
@@ -45,6 +67,5 @@ namespace KatanaMUD.Controllers
             var actor = new Actor() { Name = Context.User.Identity.Name };
             return View(actor);
         }
-
     }
 }

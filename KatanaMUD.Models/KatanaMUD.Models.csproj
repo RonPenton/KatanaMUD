@@ -54,11 +54,6 @@
     <Compile Include="ClassTemplate.cs" />
     <Compile Include="ClassTemplateArmorType.cs" />
     <Compile Include="ClassTemplateWeaponType.cs" />
-    <Compile Include="Database1.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Database1.tt</DependentUpon>
-    </Compile>
     <Compile Include="GameContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaceTemplate.cs" />
@@ -67,15 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="EF.Reverse.POCO.Core.ttinclude" />
-    <None Include="EF.Reverse.POCO.ttinclude" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Database1.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Database1.cs</LastGenOutput>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

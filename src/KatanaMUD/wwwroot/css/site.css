@@ -52,3 +52,16 @@ form div label {
 .ChooseClass input[type='submit'] {
   margin-top: 5px;
 }
+.EditStats label {
+  text-align: left;
+}
+.EditStats label.range {
+  width: 75px;
+  min-width: 75px;
+}
+.EditStats .stat-area {
+  margin-top: 25px;
+}
+.EditStats .statrow input[type='text'] {
+  width: 50px;
+}

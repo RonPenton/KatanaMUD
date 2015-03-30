@@ -40,6 +40,8 @@ namespace KatanaMUD.Models
 
         public int Charm { get; set; }
 
+        public int CharacterPoints { get; set; }
+
         public virtual ClassTemplate ClassTemplate { get; set; }
 
         public virtual RaceTemplate RaceTemplate { get; set; }

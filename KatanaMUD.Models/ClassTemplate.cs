@@ -15,6 +15,8 @@ namespace KatanaMUD.Models
             RaceTemplates = new HashSet<RaceTemplate>();
         }
 
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
 
         [Required]
@@ -25,7 +27,6 @@ namespace KatanaMUD.Models
 
         public int HpMax { get; set; }
 
-        [Required]
         public string Description { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
