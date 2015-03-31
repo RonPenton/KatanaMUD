@@ -7,8 +7,15 @@ namespace Spam
     {
         public abstract K Key { get; set; }
 
-        public abstract SqlCommand GetAllCommand();
+		internal bool IsChanged { get; set; }
 
+		internal IChangeNotifier<K> Container { get; set; }
 
+		protected void Changed()
+		{
+			this.IsChanged = true;
+			if (this.Container != null)
+				this.Container.SetChanged(this);
+		}
     }
 }

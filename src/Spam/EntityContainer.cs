@@ -5,11 +5,11 @@ using System.Linq;
 
 namespace Spam
 {
-    public class EntityContainer<T, K> : ICollection<T> where T : Entity<K>
+    public class EntityContainer<T, K> : ICollection<T> where T : Entity<K>, IChangeNotifier<K>
     {
         Dictionary<K, T> _storage = new Dictionary<K, T>();
         HashSet<T> _changed = new HashSet<T>(comparer: EntityContainer<T, K>.GetDefaultHashComparer<T, K>());
-        HashSet<T> _new = new HashSet<T>(comparer: EntityContainer<T, K>.GetDefaultHashComparer<T, K>());
+		HashSet<T> _new = new HashSet<T>(comparer: EntityContainer<T, K>.GetDefaultHashComparer<T, K>());
         HashSet<T> _deleted = new HashSet<T>(comparer: EntityContainer<T, K>.GetDefaultHashComparer<T, K>());
         KeyGenerator<K> _keyGenerator = EntityContainer<T, K>.GetDefaultKeyGenerator<K>();
 
@@ -37,11 +37,18 @@ namespace Spam
                 throw new InvalidOperationException("Key already exists");
             }
 
+			if (item.Container != null)
+			{
+				// Another sanity check. Shouldn't ever happen but hey why not.
+				throw new InvalidOperationException("Entity already belongs to another container");
+			}
+
             _new.Add(item);
+			item.Container = (IChangeNotifier<K>)this;
             _storage[item.Key] = item;
         }
 
-        public void Clear()
+		public void Clear()
         {
             foreach (var item in _storage)
             {
@@ -114,9 +121,14 @@ namespace Spam
 
             throw new InvalidOperationException("Type of key not supported: " + typeof(Key).Name);
         }
-    }
 
-    internal class EntityCompare<T, K> : IEqualityComparer<T> where T : Entity<K>
+		internal void SetChanged(T entity)
+		{
+			this._changed.Add(entity);
+		}
+	}
+
+	internal class EntityCompare<T, K> : IEqualityComparer<T> where T : Entity<K>
     {
         private IEqualityComparer<K> _keyCompare;
         public EntityCompare(IEqualityComparer<K> keyCompare)

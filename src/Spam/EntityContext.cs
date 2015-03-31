@@ -16,20 +16,13 @@ namespace Spam
 
         private SqlConnection _connection;
 
-        //Dictionary<Type, EntityContainer<Entity>> _containers = new Dictionary<Type, EntityContainer<Entity>>();
-
         public EntityContext(string connectionString)
         {
             _connectionString = connectionString;
             _connection = new SqlConnection(_connectionString);
         }
 
-        public void RegisterEntityType(Type entityType)
-        {
-            //if (_containers.ContainsKey(entityType))
-            //    throw new InvalidOperationException("Entity Type already Registered: " + entityType.Name);
-            //_containers
-        }
+		protected abstract void LoadAllData();
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls

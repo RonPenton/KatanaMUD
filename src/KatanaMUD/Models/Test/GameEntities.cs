@@ -7,5 +7,10 @@ namespace KatanaMUD.Models.Test
         GameEntities(string connectionString)
             : base(connectionString)
         { }
-    }
+
+		protected override void LoadAllData()
+		{
+			
+		}
+	}
 }
