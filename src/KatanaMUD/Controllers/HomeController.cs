@@ -1,6 +1,8 @@
 ﻿using KatanaMUD.Messages;
 using KatanaMUD.Models;
 using Microsoft.AspNet.Mvc;
+using System;
+using System.Data.SqlClient;
 using System.Linq;
 
 // For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
@@ -66,6 +68,40 @@ namespace KatanaMUD.Controllers
         {
             var actor = new Actor() { Name = Context.User.Identity.Name };
             return View(actor);
+        }
+
+
+        public IActionResult SQLTest()
+        {
+            string connectionString = "Data Source=(local);Initial Catalog=KatanaMUD;Integrated Security=true";
+
+            string queryString = "SELECT [Id],[Name],[Hp],[Strength],[Agility],[Wisdom],[Intelligence],[Health]" +
+                                ",[Charm],[StrengthCap],[AgilityCap],[WisdomCap],[IntelligenceCap],[HealthCap],[CharmCap],[Description]" +
+                                " FROM[KatanaMUD].[dbo].[RaceTemplate]";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand command = new SqlCommand(queryString, connection);
+                //command.Parameters.AddWithValue("@pricePoint", paramValue);
+
+                // set to the console window. 
+                try
+                {
+                    connection.Open();
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+
+                        while (reader.Read())
+                        {
+
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                }
+            }
+            return null;
         }
     }
 }
