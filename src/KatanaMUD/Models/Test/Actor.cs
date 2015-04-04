@@ -45,6 +45,19 @@ namespace KatanaMUD.Models.Test
             }
         }
 
+        public static Actor Load(SqlDataReader reader)
+        {
+            var entity = new Actor();
+            entity.Id = reader.GetGuid(0);
+            entity.Name = reader.GetSafeString(1);
+            entity.Surname = reader.GetSafeString(2);
+            entity.ActorType = reader.GetInt32(3);
+            entity.CharacterPoints = reader.GetInt32(4);
+            entity.Stats = new JsonContainer(entity);
+            entity.Stats.FromJson(reader.GetSafeString(5));
+            return entity;
+        }
+
         private static void AddSqlParameters(SqlCommand c, Actor e)
         {
             c.Parameters.AddWithValue("@Id", e.Id);
@@ -53,18 +66,19 @@ namespace KatanaMUD.Models.Test
             c.Parameters.AddWithValue("@ActorType", e.ActorType);
             c.Parameters.AddWithValue("@CharacterPoints", e.CharacterPoints);
             c.Parameters.AddWithValue("@JSONStats", e.Stats.ToJson());
+            c.Parameters.AddWithValue("@RaceTemplateId", e.RaceTemplate?.Id);
         }
 
         public static void GenerateInsertCommand(SqlCommand c, Actor e)
         {
-            c.CommandText = @"INSERT INTO [Actor] ([Id], [Name], [Surname], [ActorType], [CharacterPoints], [JSONStats])
-                              VALUES (@Id, @Name, @Surname, @ActorType, @CharacterPoints, @JSONStats)";
+            c.CommandText = @"INSERT INTO [Actor] ([Id], [Name], [Surname], [ActorType], [CharacterPoints], [JSONStats], [RaceTemplateId])
+                              VALUES (@Id, @Name, @Surname, @ActorType, @CharacterPoints, @JSONStats, @RaceTemplateId)";
             AddSqlParameters(c, e);
         }
 
         public static void GenerateUpdateCommand(SqlCommand c, Actor e)
         {
-            c.CommandText = @"UPDATE [Actor] SET [Name] = @Name, [Surname] = @Surname, [ActorType] = @ActorType, [CharacterPoints] = @CharacterPoints, [JSONStats] = @JSONStats
+            c.CommandText = @"UPDATE [Actor] SET [Name] = @Name, [Surname] = @Surname, [ActorType] = @ActorType, [CharacterPoints] = @CharacterPoints, [JSONStats] = @JSONStats, [RaceTemplateId] = @RaceTemplateId
                               WHERE [Id] = @Id";
             AddSqlParameters(c, e);
         }

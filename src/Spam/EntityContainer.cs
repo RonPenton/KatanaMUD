@@ -163,6 +163,13 @@ namespace Spam
         public IEnumerable<IEntity> NewEntities => _new;
 
         public IEnumerable<IEntity> DeletededEntities => _deleted;
+
+        public void ClearChanges()
+        {
+            _changed.Clear();
+            _new.Clear();
+            _deleted.Clear();
+        }
     }
 
     internal class EntityCompare<K> : IEqualityComparer<Entity<K>>

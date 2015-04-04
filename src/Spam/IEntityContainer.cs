@@ -4,9 +4,11 @@ namespace Spam
 {
     public interface IEntityContainer
     {
-        ICollection<IEntity> ChangedEntities { get; }
-        ICollection<IEntity> NewEntities { get; }
-        ICollection<IEntity> DeletededEntities { get; }
+        IEnumerable<IEntity> ChangedEntities { get; }
+        IEnumerable<IEntity> NewEntities { get; }
+        IEnumerable<IEntity> DeletededEntities { get; }
+
+        void ClearChanges();
     }
 
     public interface IEntityContainer<K> : IEntityContainer

@@ -11,10 +11,8 @@ namespace KatanaMUD.Models.Test
             : base(connectionString)
         { }
 
-
         public EntityContainer<RaceTemplate, int> Races { get; } = new EntityContainer<RaceTemplate, int>();
         public EntityContainer<Actor, Guid> Actors { get; } = new EntityContainer<Actor, Guid>();
-
 
         protected override void LoadMetaData()
         {
@@ -37,6 +35,7 @@ namespace KatanaMUD.Models.Test
         protected override void LoadAllData(SqlConnection connection)
 		{
             LoadData(connection, Races, "RaceTemplate", RaceTemplate.Load);
+            LoadData(connection, Actors, "Actor", Actor.Load);
         }
     }
 }

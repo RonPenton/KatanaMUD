@@ -8,7 +8,7 @@ namespace Spam
     public class JsonContainer : DynamicObject
     {
         IEntity _owner;
-        Dictionary<string, object> _dictionary = new Dictionary<string, object>(StringComparer.InvariantCultureIgnoreCase);
+        Dictionary<string, object> _dictionary = new Dictionary<string, object>();
 
         public JsonContainer(IEntity owner)
         {
@@ -36,6 +36,11 @@ namespace Spam
 
         public void FromJson(string json)
         {
+            if(String.IsNullOrWhiteSpace(json))
+            {
+                this._dictionary = new Dictionary<string, object>();
+                return;
+            }
             this._dictionary = (Dictionary<string, object>)JsonConvert.DeserializeObject(json, typeof(Dictionary<string, object>));
         }
     }

@@ -36,10 +36,10 @@ namespace KatanaMUD.Models.Test
         {
             var entity = new RaceTemplate();
             entity.Id = reader.GetInt32(0);
-            entity.Name = reader.GetString(1);
-            entity.Description = reader.GetString(2);
+            entity.Name = reader.GetSafeString(1);
+            entity.Description = reader.GetSafeString(2);
             entity.Stats = new JsonContainer(entity);
-            entity.Stats.FromJson(reader.GetString(3));
+            entity.Stats.FromJson(reader.GetSafeString(3));
             return entity;
         }
 

@@ -6,11 +6,15 @@
     "frameworks" : {
         "aspnet50" : { 
             "dependencies": {
+            },
+            "frameworkAssemblies": {
+                "System.Data": "4.0.0.0"
             }
         },
         "aspnetcore50" : { 
             "dependencies": {
-                "System.Runtime": "4.0.20-beta-22523"
+                "System.Runtime": "4.0.20-beta-22523",
+                "System.Data.SqlClient": "4.0.0-beta-*"
             }
         }
     }

@@ -7,6 +7,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using KatanaMUD.Models.Test;
+using System.Linq;
 
 namespace KatanaMUD
 {
@@ -17,7 +18,23 @@ namespace KatanaMUD
 
         async public static void Run()
         {
-            var c = new GameEntities("Server=.\\MSSQL10.MSSQLSERVER;Database=KatanaMUD;integrated security=True");
+            var c = new GameEntities("Server=localhost;Database=KatanaMUD;integrated security=True;");
+
+
+
+            var actor = new Actor();
+            actor.Name = "Inigo";
+            actor.Surname = "Montoya";
+            actor.RaceTemplate = c.Races.First();
+            actor.CharacterPoints = 100;
+            actor.Stats.FireResist = 5;
+            actor.Stats.ManaRegen = 20;
+
+            c.Actors.Add(actor);
+
+            c.SaveChanges();
+
+
 
             DateTime lastTime = DateTime.UtcNow;
             var pingTime = lastTime;

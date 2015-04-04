@@ -13,7 +13,7 @@ namespace Spam
     /// implementations. These objects should be periodically written back out to disk as the game progresses, 
     /// to handle events like a server crash or power outage. 
     /// </summary>
-    public abstract class EntityContext : IDisposable
+    public abstract class EntityContext
     {
         private string _connectionString;
 
@@ -25,6 +25,7 @@ namespace Spam
 
             using (var connection = new SqlConnection(_connectionString))
             {
+                connection.Open();
                 LoadMetaData();
                 LoadAllData(connection);
                 AttachRelationships();
@@ -64,24 +65,36 @@ namespace Spam
 
             using (var connection = new SqlConnection(_connectionString))
             {
-                
+                connection.Open();
                 var transaction = connection.BeginTransaction();
                 var command = connection.CreateCommand();
                 command.Connection = connection;
                 command.Transaction = transaction;
 
-
-                foreach (var type in EntityTypes)
+                try
                 {
-                    foreach (var entity in type.Container.NewEntities)
-                        InsertEntity(command, entity, type, visited, processed);
-                    foreach (var entity in type.Container.ChangedEntities)
-                        UpdateEntity(command, entity, type, visited, processed);
-                    foreach (var entity in type.Container.DeletededEntities)
-                        DeleteEntity(command, entity, type, visited, processed);
-                }
+                    foreach (var type in EntityTypes)
+                    {
+                        foreach (var entity in type.Container.NewEntities)
+                            InsertEntity(command, entity, type, visited, processed);
+                        foreach (var entity in type.Container.ChangedEntities)
+                            UpdateEntity(command, entity, type, visited, processed);
+                        foreach (var entity in type.Container.DeletededEntities)
+                            DeleteEntity(command, entity, type, visited, processed);
+                    }
 
-                transaction.Commit();
+                    transaction.Commit();
+
+                    foreach (var type in EntityTypes)
+                    {
+                        type.Container.ClearChanges();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    transaction.Rollback();
+                }
             }
         }
 
@@ -152,31 +165,5 @@ namespace Spam
 
             processed.Add(entity);
         }
-        
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    if(_connection != null)
-                    {
-                        _connection.Close();
-                        _connection = null;
-                    }
-                }
-
-                disposedValue = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-        #endregion
     }
 }
