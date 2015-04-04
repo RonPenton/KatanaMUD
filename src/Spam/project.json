@@ -1,8 +1,9 @@
 ﻿{
     "version": "1.0.0-*",
     "dependencies": {
-        "System.Linq": ""
-
+        "System.Linq": "",
+        "KatanaMUD.Helpers": "1.0.0-*",
+        "Newtonsoft.Json": "7.0.1-beta1"
     },
 
     "frameworks": {

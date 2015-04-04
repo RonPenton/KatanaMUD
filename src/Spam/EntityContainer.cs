@@ -1,17 +1,22 @@
-﻿using System;
+﻿using KatanaMUD;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Spam
 {
-    public class EntityContainer<T, K> : ICollection<T> where T : Entity<K>, IChangeNotifier<K>
+    public class EntityContainer<T, K> : ICollection<T>, IEntityContainer<K>, IEntityContainer where T : Entity<K>
     {
         Dictionary<K, T> _storage = new Dictionary<K, T>();
-        HashSet<T> _changed = new HashSet<T>(comparer: EntityContainer<T, K>.GetDefaultHashComparer<T, K>());
-		HashSet<T> _new = new HashSet<T>(comparer: EntityContainer<T, K>.GetDefaultHashComparer<T, K>());
-        HashSet<T> _deleted = new HashSet<T>(comparer: EntityContainer<T, K>.GetDefaultHashComparer<T, K>());
+        HashSet<Entity<K>> _changed = new HashSet<Entity<K>>(comparer: EntityContainer<T, K>.GetDefaultHashComparer<K>());
+        HashSet<Entity<K>> _new = new HashSet<Entity<K>>(comparer: EntityContainer<T, K>.GetDefaultHashComparer<K>());
+        HashSet<Entity<K>> _deleted = new HashSet<Entity<K>>(comparer: EntityContainer<T, K>.GetDefaultHashComparer<K>());
         KeyGenerator<K> _keyGenerator = EntityContainer<T, K>.GetDefaultKeyGenerator<K>();
+
+        public EntityContainer()
+        {
+        }
 
         public T this[K key] { get { return _storage[key]; } }
 
@@ -25,34 +30,40 @@ namespace Spam
 
         public void Add(T item)
         {
+            Add(item, false);
+        }
+
+        internal void Add(T item, bool fromLoad)
+        {
             // Set the key if it's not already set.
-            if(item.Key.Equals(default(K)))
+            if (item.Key.Equals(default(K)))
             {
                 item.Key = _keyGenerator.NewKey();
             }
 
-            if(_storage.ContainsKey(item.Key))
+            if (_storage.ContainsKey(item.Key))
             {
                 // Sanity check, make sure we're not overwriting an existing item.
                 throw new InvalidOperationException("Key already exists");
             }
 
-			if (item.Container != null)
-			{
-				// Another sanity check. Shouldn't ever happen but hey why not.
-				throw new InvalidOperationException("Entity already belongs to another container");
-			}
+            if (item.Container != null && item.Container != this)
+            {
+                // Another sanity check. Shouldn't ever happen but hey why not.
+                throw new InvalidOperationException("Entity already belongs to another container");
+            }
 
-            _new.Add(item);
-			item.Container = (IChangeNotifier<K>)this;
+            if (!fromLoad)
+                _new.Add(item);
+            item.Container = (IEntityContainer<K>)this;
             _storage[item.Key] = item;
         }
 
-		public void Clear()
+        public void Clear()
         {
-            foreach (var item in _storage)
+            foreach (var item in _storage.Values.ToList())
             {
-                _deleted.Add(item.Value);
+                Remove(item);
             }
 
             _storage.Clear();
@@ -69,7 +80,7 @@ namespace Spam
         public bool Remove(K key)
         {
             T item;
-            if(!_storage.TryGetValue(key, out item))
+            if (!_storage.TryGetValue(key, out item))
             {
                 return false;
             }
@@ -80,7 +91,12 @@ namespace Spam
         public bool Remove(T item)
         {
             _storage.Remove(item.Key);
-            _deleted.Add(item);
+            if (!_new.Remove(item))
+            {
+                _deleted.Add(item);
+            }
+            _changed.Remove(item);
+
             return true;
         }
 
@@ -94,14 +110,14 @@ namespace Spam
             return _storage.GetEnumerator();
         }
 
-        private static IEqualityComparer<Key> GetDefaultComparer<Key>()
+        internal static IEqualityComparer<Key> GetDefaultComparer<Key>()
         {
             return (IEqualityComparer<Key>)EqualityComparer<Key>.Default;
         }
 
-        private static IEqualityComparer<Ty> GetDefaultHashComparer<Ty, Key>() where Ty : Entity<Key>
+        internal static IEqualityComparer<Entity<Key>> GetDefaultHashComparer<Key>()
         {
-            return new EntityCompare<Ty, Key>(GetDefaultComparer<Key>());
+            return new EntityCompare<Key>(GetDefaultComparer<Key>());
         }
 
         private static KeyGenerator<Key> GetDefaultKeyGenerator<Key>()
@@ -122,13 +138,34 @@ namespace Spam
             throw new InvalidOperationException("Type of key not supported: " + typeof(Key).Name);
         }
 
-		internal void SetChanged(T entity)
-		{
-			this._changed.Add(entity);
-		}
-	}
+        public void SetChanged(Entity<K> entity)
+        {
+            this._changed.Add(entity);
+        }
 
-	internal class EntityCompare<T, K> : IEqualityComparer<T> where T : Entity<K>
+        public bool IsChanged(Entity<K> entity)
+        {
+            return this._changed.Contains(entity);
+        }
+
+        public bool IsNew(Entity<K> entity)
+        {
+            return this._new.Contains(entity);
+        }
+
+        public bool IsDeleted(Entity<K> entity)
+        {
+            return this._deleted.Contains(entity);
+        }
+
+        public IEnumerable<IEntity> ChangedEntities => _changed;
+
+        public IEnumerable<IEntity> NewEntities => _new;
+
+        public IEnumerable<IEntity> DeletededEntities => _deleted;
+    }
+
+    internal class EntityCompare<K> : IEqualityComparer<Entity<K>>
     {
         private IEqualityComparer<K> _keyCompare;
         public EntityCompare(IEqualityComparer<K> keyCompare)
@@ -136,12 +173,12 @@ namespace Spam
             _keyCompare = keyCompare;
         }
 
-        public bool Equals(T x, T y)
+        public bool Equals(Entity<K> x, Entity<K> y)
         {
             return this._keyCompare.Equals(x.Key, y.Key);
         }
 
-        public int GetHashCode(T obj)
+        public int GetHashCode(Entity<K> obj)
         {
             return _keyCompare.GetHashCode(obj.Key);
         }

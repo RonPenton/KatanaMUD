@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
+using KatanaMUD.Models.Test;
 
 namespace KatanaMUD
 {
@@ -16,6 +17,8 @@ namespace KatanaMUD
 
         async public static void Run()
         {
+            var c = new GameEntities("Server=.\\MSSQL10.MSSQLSERVER;Database=KatanaMUD;integrated security=True");
+
             DateTime lastTime = DateTime.UtcNow;
             var pingTime = lastTime;
 
