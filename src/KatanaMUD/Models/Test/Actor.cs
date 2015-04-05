@@ -17,10 +17,10 @@ namespace KatanaMUD.Models.Test
         private string _surname;
         private int _actorType;
         private int _characterPoints;
-        
+
         //private User _user;
         //private Room _room;
-        //private ClassTemplate _classTemplate;
+        private ClassTemplate _classTemplate;
         private RaceTemplate _raceTemplate;
 
         public Actor()
@@ -42,6 +42,17 @@ namespace KatanaMUD.Models.Test
                 ChangeParent(value, ref _raceTemplate, 
                     (RaceTemplate parent, Actor child) => parent.Actors.Remove(child), 
                     (RaceTemplate parent, Actor child) => parent.Actors.Add(child));
+            }
+        }
+
+        public ClassTemplate ClassTemplate
+        {
+            get { return _classTemplate; }
+            set
+            {
+                ChangeParent(value, ref _classTemplate,
+                    (ClassTemplate parent, Actor child) => parent.Actors.Remove(child),
+                    (ClassTemplate parent, Actor child) => parent.Actors.Add(child));
             }
         }
 

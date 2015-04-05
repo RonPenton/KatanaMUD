@@ -36,7 +36,7 @@ namespace Spam
         internal void Add(T item, bool fromLoad)
         {
             // Set the key if it's not already set.
-            if (item.Key.Equals(default(K)))
+            if (item.Key.Equals(default(K)) && _keyGenerator != null)
             {
                 item.Key = _keyGenerator.NewKey();
             }
@@ -241,4 +241,16 @@ namespace Spam
         }
     }
 
+    public class LinkEntityCompare<K1, K2> : IEqualityComparer<LinkEntity<K1, K2>>
+    {
+        public bool Equals(LinkEntity<K1, K2> x, LinkEntity<K1, K2> y)
+        {
+            return x.Key.Item1.Equals(y.Key.Item1) && x.Key.Item2.Equals(y.Key.Item2);
+        }
+
+        public int GetHashCode(LinkEntity<K1, K2> obj)
+        {
+            return obj.Key.Item1.GetHashCode() ^ obj.Key.Item2.GetHashCode();
+        }
+    }
 }
