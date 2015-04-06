@@ -21,7 +21,6 @@ namespace KatanaMUD.Models.Test
         {
             Stats = new JsonContainer(this);
             Actors = new ParentChildRelationshipContainer<ClassTemplate, Actor, Guid>(this, child => child.ClassTemplate, (child, parent) => child.ClassTemplate = parent);
-            Actors = new ManyToManyRelationshipContainer<ClassTemplate, RaceTemplate, int, int>(this, child => child.ClassTemplate, (child, parent) => child.ClassTemplate = parent);
         }
 
         public int Id { get { return _id; } set { _id = value; this.Changed(); } }

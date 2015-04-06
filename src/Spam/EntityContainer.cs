@@ -241,16 +241,18 @@ namespace Spam
         }
     }
 
-    public class LinkEntityCompare<K1, K2> : IEqualityComparer<LinkEntity<K1, K2>>
+    public class LinkEntityCompare<K1, K2> : IEqualityComparer<Tuple<K1, K2>>
     {
-        public bool Equals(LinkEntity<K1, K2> x, LinkEntity<K1, K2> y)
+        public bool Equals(Tuple<K1, K2> x, Tuple<K1, K2> y)
         {
-            return x.Key.Item1.Equals(y.Key.Item1) && x.Key.Item2.Equals(y.Key.Item2);
+            return x.Item1.Equals(y.Item1) && x.Item2.Equals(y.Item2);
         }
 
-        public int GetHashCode(LinkEntity<K1, K2> obj)
+        public int GetHashCode(Tuple<K1, K2> obj)
         {
-            return obj.Key.Item1.GetHashCode() ^ obj.Key.Item2.GetHashCode();
+			// Perform an XOR on the respective hash codes. It's consistent, 
+			// it takes both into account, and it's fast. Should work.
+            return obj.Item1.GetHashCode() ^ obj.Item2.GetHashCode();
         }
     }
 }
