@@ -21,16 +21,18 @@ namespace KatanaMUD.Models.Test
         {
             Stats = new JsonContainer(this);
             Actors = new ParentChildRelationshipContainer<RaceTemplate, Actor, Guid>(this, child => child.RaceTemplate, (child, parent) => child.RaceTemplate = parent);
-        }
+			ClassTemplates = new ObservableHashSet<ClassTemplate>();
+			ClassTemplates.ItemsAdded += ClassTemplates_ItemsAdded;
+			ClassTemplates.ItemsRemoved += ClassTemplates_ItemsRemoved;
+		}
 
-        public int Id { get { return _id; } set { _id = value; this.Changed(); } }
+		public int Id { get { return _id; } set { _id = value; this.Changed(); } }
         public string Name { get { return _name; } set { _name = value; this.Changed(); } }
         public string Description { get { return _description; } set { _description = value; this.Changed(); } }
         public dynamic Stats { get; private set; }
         public ICollection<Actor> Actors { get; private set; }
 
-		//public virtual ICollection<ClassTemplate> ClassTemplates { get; set; }
-
+		public ObservableHashSet<ClassTemplate> ClassTemplates { get; set; }
 
         public static RaceTemplate Load(SqlDataReader reader)
         {

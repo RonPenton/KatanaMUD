@@ -25,10 +25,11 @@ namespace KatanaMUD.Models.Test
             Stats = new JsonContainer(this);
             Actors = new ParentChildRelationshipContainer<ClassTemplate, Actor, Guid>(this, child => child.ClassTemplate, (child, parent) => child.ClassTemplate = parent);
             RaceTemplates = new ObservableHashSet<RaceTemplate>();
-            RaceTemplates.CollectionChanged += RaceTemplates_CollectionChanged;
+			RaceTemplates.ItemsAdded += RaceTemplates_ItemsAdded;
+			RaceTemplates.ItemsRemoved += RaceTemplates_ItemsRemoved;
         }
 
-        public int Id { get { return _id; } set { _id = value; this.Changed(); } }
+		public int Id { get { return _id; } set { _id = value; this.Changed(); } }
         public string Name { get { return _name; } set { _name = value; this.Changed(); } }
         public string Description { get { return _description; } set { _description = value; this.Changed(); } }
         public dynamic Stats { get; private set; }
@@ -74,19 +75,22 @@ namespace KatanaMUD.Models.Test
             c.Parameters.AddWithValue("@Id", e.Id);
         }
 
-        private void RaceTemplates_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            e.Chan
-            switch(e.Action)
-            {
-                case NotifyCollectionChangedAction.Add:
-                    Context
-                    break;
-            }
+		private void RaceTemplates_ItemsAdded(object sender, CollectionChangedEventArgs<RaceTemplate> e)
+		{
+			foreach (var item in e.Items)
+			{
+				item.ClassTemplates.Add(this, true);
+				Context.ClassTemplatesRaceTemplates.Link(this, item, false);
+			}
+		}
 
-            Context.ClassTemplatesRaceTemplates.
-            throw new NotImplementedException();
-        }
-
-    }
+		private void RaceTemplates_ItemsRemoved(object sender, CollectionChangedEventArgs<RaceTemplate> e)
+		{
+			foreach (var item in e.Items)
+			{
+				item.ClassTemplates.Remove(this, true);
+				Context.ClassTemplatesRaceTemplates.Unlink(this, item);
+			}
+		}
+	}
 }

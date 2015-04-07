@@ -6,11 +6,11 @@ using System.Linq;
 
 namespace Spam
 {
-	public class ObservableHashSet<T> : ICollection<T>
+	public class ObservableHashSet<T> : IEnumerable<T>
 	{
 		private HashSet<T> _container;
 
-        public ObservableHashSet()
+		public ObservableHashSet()
 		{
 			_container = new HashSet<T>();
 		}
@@ -28,34 +28,56 @@ namespace Spam
 			_container = new HashSet<T>(collection, comparer);
 		}
 
-        public event EventHandler<CollectionChangedEventArgs<T>> CollectionChanged;
+		public event EventHandler<CollectionChangedEventArgs<T>> ItemsAdded;
 
-        protected void Notify(CollectionChangedAction action, params T[] items) {
-            if (CollectionChanged != null)
-                CollectionChanged(this, new CollectionChangedEventArgs<T>(action, items));
+		public event EventHandler<CollectionChangedEventArgs<T>> ItemsRemoved;
+
+		protected void NotifyAdd(params T[] items) {
+			if (ItemsAdded != null)
+				ItemsAdded(this, new CollectionChangedEventArgs<T>(items));
+		}
+		protected void NotifyRemove(params T[] items)
+		{
+			if (ItemsRemoved != null)
+				ItemsRemoved(this, new CollectionChangedEventArgs<T>(items));
 		}
 
 		public int Count => _container.Count;
 
 		public bool IsReadOnly => false;
 
-		public void Add(T item)
+		public void AddRange(IEnumerable<T> items)
 		{
-			if(_container.Add(item))
+			List<T> added = new List<T>();
+			foreach (var item in items)
+			{
+				if (_container.Add(item))
+				{
+					added.Add(item);
+				}
+			}
+
+			if (added.Any())
+				NotifyAdd(added.ToArray());
+		}
+	
+		public void Add(T item, bool skipNotify = false)
+		{
+			if(_container.Add(item) && !skipNotify)
             {
-                Notify(CollectionChangedAction.Add, item);
+                NotifyAdd(item);
             }
         }
 
-        public void Clear()
-        {
-            var any = _container.Any();
-            if (any)
-            {
-                _container.Clear();
-                Notify( .Reset);
-            }
-        }
+		public void Clear()
+		{
+			var items = _container.ToArray();
+			if (items.Any())
+			{
+				_container.Clear();
+				NotifyRemove(items);
+			}
+		}
 
 		public bool Contains(T item) => _container.Contains(item);
 
@@ -63,35 +85,27 @@ namespace Spam
 
 		public IEnumerator<T> GetEnumerator() => _container.GetEnumerator();
 
-        public bool Remove(T item)
-        {
-            if (_container.Remove(item))
-            {
-                Notify(NotifyCollectionChangedAction.Remove, item);
-                return true;
-            }
-            return false;
-        }
+		public bool Remove(T item, bool skipNotify = false)
+		{
+			if (_container.Remove(item))
+			{
+				if (!skipNotify)
+					NotifyRemove(item);
+				return true;
+			}
+			return false;
+		}
 
 		IEnumerator IEnumerable.GetEnumerator() => _container.GetEnumerator();
 	}
 
     public class CollectionChangedEventArgs<T>
     {
-        public CollectionChangedEventArgs(CollectionChangedAction action, T[] items)
+        public CollectionChangedEventArgs(T[] items)
         {
-            Action = action;
             Items = items;
         }
 
-        public CollectionChangedAction Action { get; private set; }
-
         public T[] Items { get; private set; }
-    }
-
-    public enum CollectionChangedAction
-    {
-        Add,
-        Remove
     }
 }
