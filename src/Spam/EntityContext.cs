@@ -38,7 +38,7 @@ namespace Spam
         {
         }
 
-        protected void LoadData<T, K>(SqlConnection connection, EntityContainer<T, K> container, string tableName, Func<SqlDataReader, T> creator) where T : Entity<K>
+        protected void LoadData<T, K>(SqlConnection connection, EntityContainer<T, K> container, string tableName, Func<SqlDataReader, T> creator) where T : Entity<K>, new() where K : struct
         {
             // I'm ok with not doing SQL injection protection here. TableName shouldn't ever come from user input, but a code generator.
             // God help me if this assumption ever changes.

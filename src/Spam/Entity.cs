@@ -5,6 +5,8 @@ namespace Spam
 {
     public abstract class Entity<K> : IEntity, IEntity<K>
     {
+        protected EntityContext __context;
+
         public abstract K Key { get; set; }
 
         internal IEntityContainer<K> Container { get; set; }
@@ -48,6 +50,11 @@ namespace Spam
                 //value.Actors.Add(this);
                 addChild(value, (T)this);
             }
+        }
+
+        internal void Attach(EntityContext context)
+        {
+            __context = context;
         }
     }
 }

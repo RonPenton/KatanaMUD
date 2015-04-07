@@ -2,6 +2,7 @@
 using System.Data.SqlClient;
 using Spam;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 
 namespace KatanaMUD.Models.Test
 {
@@ -13,6 +14,8 @@ namespace KatanaMUD.Models.Test
 			set { Id = value; }
 		}
 
+        private GameEntities Context => (GameEntities)__context;
+
 		private int _id;
         private string _name;
         private string _description;
@@ -21,6 +24,8 @@ namespace KatanaMUD.Models.Test
         {
             Stats = new JsonContainer(this);
             Actors = new ParentChildRelationshipContainer<ClassTemplate, Actor, Guid>(this, child => child.ClassTemplate, (child, parent) => child.ClassTemplate = parent);
+            RaceTemplates = new ObservableHashSet<RaceTemplate>();
+            RaceTemplates.CollectionChanged += RaceTemplates_CollectionChanged;
         }
 
         public int Id { get { return _id; } set { _id = value; this.Changed(); } }
@@ -28,10 +33,8 @@ namespace KatanaMUD.Models.Test
         public string Description { get { return _description; } set { _description = value; this.Changed(); } }
         public dynamic Stats { get; private set; }
         public ICollection<Actor> Actors { get; private set; }
-        public ICollection<RaceTemplate> RaceTemplates { get; private set; }
-
-
-
+        public ObservableHashSet<RaceTemplate> RaceTemplates { get; private set; }
+        
         public static ClassTemplate Load(SqlDataReader reader)
         {
             var entity = new ClassTemplate();
@@ -70,5 +73,20 @@ namespace KatanaMUD.Models.Test
             c.CommandText = @"DELETE FROM [RaceTemplate] WHERE [Id] = @Id";
             c.Parameters.AddWithValue("@Id", e.Id);
         }
+
+        private void RaceTemplates_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            e.Chan
+            switch(e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    Context
+                    break;
+            }
+
+            Context.ClassTemplatesRaceTemplates.
+            throw new NotImplementedException();
+        }
+
     }
 }

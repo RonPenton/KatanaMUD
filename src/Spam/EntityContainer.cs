@@ -6,16 +6,18 @@ using System.Linq;
 
 namespace Spam
 {
-    public class EntityContainer<T, K> : ICollection<T>, IEntityContainer<K>, IEntityContainer where T : Entity<K>
+    public class EntityContainer<T, K> : IEnumerable<T>, IEntityContainer<K>, IEntityContainer where T : Entity<K>, new() where K : struct
     {
+        EntityContext _context;
         Dictionary<K, T> _storage = new Dictionary<K, T>();
         HashSet<Entity<K>> _changed = new HashSet<Entity<K>>(comparer: EntityContainer<T, K>.GetDefaultHashComparer<K>());
         HashSet<Entity<K>> _new = new HashSet<Entity<K>>(comparer: EntityContainer<T, K>.GetDefaultHashComparer<K>());
         HashSet<Entity<K>> _deleted = new HashSet<Entity<K>>(comparer: EntityContainer<T, K>.GetDefaultHashComparer<K>());
         KeyGenerator<K> _keyGenerator = EntityContainer<T, K>.GetDefaultKeyGenerator<K>();
 
-        public EntityContainer()
+        public EntityContainer(EntityContext context)
         {
+            _context = context;
         }
 
         public T this[K key] { get { return _storage[key]; } }
@@ -28,9 +30,16 @@ namespace Spam
 
         public ICollection<T> Values => _storage.Values;
 
-        public void Add(T item)
+        public T New(Nullable<K> key = null)
         {
+            T item = new T();
+            if(key != null)
+            {
+                item.Key = key.Value;
+            }
+
             Add(item, false);
+            return item;
         }
 
         internal void Add(T item, bool fromLoad)
@@ -47,7 +56,7 @@ namespace Spam
                 throw new InvalidOperationException("Key already exists");
             }
 
-            if (item.Container != null && item.Container != this)
+            if (item.Container != null)
             {
                 // Another sanity check. Shouldn't ever happen but hey why not.
                 throw new InvalidOperationException("Entity already belongs to another container");
@@ -56,6 +65,7 @@ namespace Spam
             if (!fromLoad)
                 _new.Add(item);
             item.Container = (IEntityContainer<K>)this;
+            item.Attach(_context);
             _storage[item.Key] = item;
         }
 

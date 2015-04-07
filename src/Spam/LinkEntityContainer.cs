@@ -6,30 +6,20 @@ using System.Linq;
 
 namespace Spam
 {
-	public class LinkEntityContainer<E1, E2, K1, K2> : ICollection<Tuple<K1, K2>> where E1 : Entity<K1> where E2 : Entity<K2>
+	public class LinkEntityContainer<E1, E2, K1, K2> : IEnumerable<Tuple<K1, K2>> where E1 : Entity<K1> where E2 : Entity<K2>
 	{
 		HashSet<Tuple<K1, K2>> _storage = new HashSet<Tuple<K1, K2>>(new LinkEntityCompare<K1, K2>());
 		HashSet<Tuple<K1, K2>> _changed = new HashSet<Tuple<K1, K2>>(new LinkEntityCompare<K1, K2>());
 		HashSet<Tuple<K1, K2>> _new = new HashSet<Tuple<K1, K2>>(new LinkEntityCompare<K1, K2>());
 		HashSet<Tuple<K1, K2>> _deleted = new HashSet<Tuple<K1, K2>>(new LinkEntityCompare<K1, K2>());
 
-		ObservableHashSet<E1> _collection1 = new ObservableHashSet<E1>(EntityContainer<E1, K1>.GetDefaultHashComparer<K1>());
-		ObservableHashSet<E2> _collection2 = new ObservableHashSet<E2>(EntityContainer<E2, K2>.GetDefaultHashComparer<K2>());
-
 		public LinkEntityContainer()
 		{
-			_collection1.CollectionChanged += _collection1_CollectionChanged;
-			_collection2.CollectionChanged += _collection2_CollectionChanged;
 		}
 
 		public int Count => _storage.Count;
 
 		public bool IsReadOnly => false;
-
-		public void Add(Tuple<K1, K2> item)
-		{
-			Add(item, false);
-		}
 
 		internal void Add(Tuple<K1, K2> item, bool fromLoad)
 		{
@@ -86,16 +76,5 @@ namespace Spam
 			_new.Clear();
 			_deleted.Clear();
 		}
-
-		private void _collection2_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-		{
-			throw new NotImplementedException();
-		}
-
-		private void _collection1_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-		{
-			throw new NotImplementedException();
-		}
-
 	}
 }

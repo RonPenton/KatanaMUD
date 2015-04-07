@@ -22,15 +22,13 @@ namespace KatanaMUD
 
 
 
-            var actor = new Actor();
+            var actor = c.Actors.New();
             actor.Name = "Inigo";
             actor.Surname = "Montoya";
             actor.RaceTemplate = c.Races.First();
             actor.CharacterPoints = 100;
             actor.Stats.FireResist = 5;
             actor.Stats.ManaRegen = 20;
-
-            c.Actors.Add(actor);
 
             c.SaveChanges();
 

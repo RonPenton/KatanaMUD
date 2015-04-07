@@ -9,10 +9,17 @@ namespace KatanaMUD.Models.Test
     {
         public GameEntities(string connectionString)
             : base(connectionString)
-        { }
+        {
+            Races = new EntityContainer<RaceTemplate, int>(this);
+            Actors = new EntityContainer<Actor, Guid>(this);
+        }
 
-        public EntityContainer<RaceTemplate, int> Races { get; } = new EntityContainer<RaceTemplate, int>();
-        public EntityContainer<Actor, Guid> Actors { get; } = new EntityContainer<Actor, Guid>();
+        public EntityContainer<RaceTemplate, int> Races { get; private set; } 
+        public EntityContainer<Actor, Guid> Actors { get; private set; }
+
+        internal LinkEntityContainer<ClassTemplate, RaceTemplate, int, int> ClassTemplatesRaceTemplates = new LinkEntityContainer<ClassTemplate, RaceTemplate, int, int>();
+
+
 
         protected override void LoadMetaData()
         {

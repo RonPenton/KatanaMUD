@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Spam
 {
-    public class ParentChildRelationshipContainer<P, C, K> : ICollection<C> where C : Entity<K> where P : class
+    public class ParentChildRelationshipContainer<P, C, K> : ICollection<C> where C : Entity<K>, new() where P : class where K : struct
     {
         HashSet<C> _container = new HashSet<C>(EntityContainer<C, K>.GetDefaultHashComparer<K>());
         P _parent;

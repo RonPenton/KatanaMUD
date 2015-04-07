@@ -99,5 +99,9 @@ namespace KatanaMUD.Models.Test
             c.CommandText = @"DELETE FROM [Actor] WHERE [Id] = @Id";
             c.Parameters.AddWithValue("@Id", e.Id);
         }
+
+        public override void Attach(EntityContext context)
+        {
+        }
     }
 }
