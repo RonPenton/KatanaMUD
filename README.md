@@ -13,15 +13,16 @@ Due to requiring Websockets, The MUD will not run (in its current state) on any 
 * *Basic Proof-Of-Concept using Websockets*
 * **Design Membership system**
 * **Design Login/Socket Management System**
-* Design messaging system (Typescript code-gen of message classes?)
-* Design world module
+* **Design messaging system (Typescript code-gen of message classes?)**
+* **MajorMUD Data Importer Tool from Nightmare Redux data**
+* **Design ORM Layer**
+* Design world/map module
 * Design communication module
 * Design Admin/Log Module (All admin commands will be publicly logged, to promote honesty in operation)
 * Design item module
 * Design combat module
 * Design spell module
 * Design quest/event module
-* (?) MajorMUD Data Importer Tool from Nightmare Redux data
 * Web-based content editor.
 * (?) Design Customization Module, to allow for altering the game without the need for rebooting/resetting.
 * (?) Look into expanding the features of the game. Factions, Auctions, etc.
