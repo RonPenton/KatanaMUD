@@ -16,4 +16,14 @@ namespace Spam
         public Action<SqlCommand, IEntity> GenerateUpdateCommand { get; set; }
         public Action<SqlCommand, IEntity> GenerateDeleteCommand { get; set; }
     }
+
+    public class LinkEntityMetadata
+    {
+        public List<EntityRelationship> Relationships { get; } = new List<EntityRelationship>();
+
+        public Action<SqlCommand, IEntity> GenerateInsertCommand { get; set; }
+        public Action<SqlCommand, IEntity> GenerateUpdateCommand { get; set; }
+        public Action<SqlCommand, IEntity> GenerateDeleteCommand { get; set; }
+    }
+
 }

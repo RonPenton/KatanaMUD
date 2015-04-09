@@ -11,7 +11,6 @@ namespace KatanaMUD.Models.Test
 		public override int Key
 		{
 			get { return Id; }
-			set { Id = value; }
 		}
 
         private GameEntities Context => (GameEntities)__context;
@@ -49,6 +48,7 @@ namespace KatanaMUD.Models.Test
 
         private static void AddSqlParameters(SqlCommand c, RaceTemplate e)
         {
+            c.Parameters.Clear();
             c.Parameters.AddWithValue("@Id", e.Id);
             c.Parameters.AddWithValue("@Name", e.Name);
             c.Parameters.AddWithValue("@Description", e.Description);
@@ -72,6 +72,7 @@ namespace KatanaMUD.Models.Test
         public static void GenerateDeleteCommand(SqlCommand c, RaceTemplate e)
         {
             c.CommandText = @"DELETE FROM [RaceTemplate] WHERE [Id] = @Id";
+            c.Parameters.Clear();
             c.Parameters.AddWithValue("@Id", e.Id);
         }
 

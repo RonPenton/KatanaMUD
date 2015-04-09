@@ -1,6 +1,5 @@
-﻿using System;
-using Spam;
-using KatanaMUD;
+﻿using Spam;
+using System;
 using System.Data.SqlClient;
 
 namespace KatanaMUD.Models.Test
@@ -16,10 +15,7 @@ namespace KatanaMUD.Models.Test
 
         public EntityContainer<RaceTemplate, int> Races { get; private set; } 
         public EntityContainer<Actor, Guid> Actors { get; private set; }
-
-        internal LinkEntityContainer<ClassTemplate, RaceTemplate, int, int> ClassTemplatesRaceTemplates = new LinkEntityContainer<ClassTemplate, RaceTemplate, int, int>();
-
-
+        internal LinkEntityContainer<ClassTemplate, RaceTemplate, int, int> ClassTemplatesRaceTemplates = new LinkEntityContainer<ClassTemplate, RaceTemplate, int, int>("ClassTemplateRaceTemplate", "ClassTemplateId", "RaceTemplateId");
 
         protected override void LoadMetaData()
         {
@@ -37,12 +33,15 @@ namespace KatanaMUD.Models.Test
             meta.GenerateUpdateCommand = (SqlCommand c, IEntity e) => Actor.GenerateUpdateCommand(c, (Actor)e);
             meta.GenerateDeleteCommand = (SqlCommand c, IEntity e) => Actor.GenerateDeleteCommand(c, (Actor)e);
             EntityTypes.Add(meta);
+
+            this.LinkTypes.Add(ClassTemplatesRaceTemplates);
         }
 
         protected override void LoadAllData(SqlConnection connection)
 		{
             LoadData(connection, Races, "RaceTemplate", RaceTemplate.Load);
             LoadData(connection, Actors, "Actor", Actor.Load);
+            ClassTemplatesRaceTemplates.Load(connection);
         }
     }
 }

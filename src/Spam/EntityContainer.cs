@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Spam
 {
-    public class EntityContainer<T, K> : IEnumerable<T>, IEntityContainer<K>, IEntityContainer where T : Entity<K>, new() where K : struct
+    public class EntityContainer<T, K> : IEnumerable<T>, IEntityContainer<K>, IEntityContainer where T : Entity<K>, new()
     {
         EntityContext _context;
         Dictionary<K, T> _storage = new Dictionary<K, T>();
@@ -30,12 +30,17 @@ namespace Spam
 
         public ICollection<T> Values => _storage.Values;
 
-        public T New(Nullable<K> key = null)
+        public T New()
+        {
+            return New(default(K));
+        }
+
+        public T New(K key)
         {
             T item = new T();
-            if(key != null)
+            if(!key.Equals(default(K)))
             {
-                item.Key = key.Value;
+                item.Key = key;
             }
 
             Add(item, false);
@@ -45,9 +50,12 @@ namespace Spam
         internal void Add(T item, bool fromLoad)
         {
             // Set the key if it's not already set.
-            if (item.Key.Equals(default(K)) && _keyGenerator != null)
+            if (item.Key.Equals(default(K)))
             {
-                item.Key = _keyGenerator.NewKey();
+                if (_keyGenerator != null)
+                    item.Key = _keyGenerator.NewKey();
+                else
+                    throw new InvalidOperationException("No Key Generator, must specify a key.");
             }
 
             if (_storage.ContainsKey(item.Key))
@@ -143,6 +151,10 @@ namespace Spam
             else if (typeof(Key) == typeof(long))
             {
                 return (KeyGenerator<Key>)new LongKeyGenerator();
+            }
+            else if(typeof(Key) == typeof(string))
+            {
+                return null;
             }
 
             throw new InvalidOperationException("Type of key not supported: " + typeof(Key).Name);

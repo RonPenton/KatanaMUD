@@ -6,11 +6,7 @@ namespace KatanaMUD.Models.Test
 {
     public class Actor : Entity<Guid>
     {
-        public override Guid Key
-        {
-            get { return Id; }
-            set { Id = value; }
-        }
+        public override Guid Key => Id;
 
         private Guid _id;
         private string _name;
@@ -35,12 +31,13 @@ namespace KatanaMUD.Models.Test
         public int CharacterPoints { get { return _characterPoints; } set { _characterPoints = value; this.Changed(); } }
         public dynamic Stats { get; private set; }
 
-        public RaceTemplate RaceTemplate {
+        public RaceTemplate RaceTemplate
+        {
             get { return _raceTemplate; }
             set
             {
-                ChangeParent(value, ref _raceTemplate, 
-                    (RaceTemplate parent, Actor child) => parent.Actors.Remove(child), 
+                ChangeParent(value, ref _raceTemplate,
+                    (RaceTemplate parent, Actor child) => parent.Actors.Remove(child),
                     (RaceTemplate parent, Actor child) => parent.Actors.Add(child));
             }
         }
@@ -71,6 +68,7 @@ namespace KatanaMUD.Models.Test
 
         private static void AddSqlParameters(SqlCommand c, Actor e)
         {
+            c.Parameters.Clear();
             c.Parameters.AddWithValue("@Id", e.Id);
             c.Parameters.AddWithValue("@Name", e.Name);
             c.Parameters.AddWithValue("@Surname", e.Surname);
@@ -97,6 +95,7 @@ namespace KatanaMUD.Models.Test
         public static void GenerateDeleteCommand(SqlCommand c, Actor e)
         {
             c.CommandText = @"DELETE FROM [Actor] WHERE [Id] = @Id";
+            c.Parameters.Clear();
             c.Parameters.AddWithValue("@Id", e.Id);
         }
     }

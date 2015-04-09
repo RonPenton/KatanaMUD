@@ -18,6 +18,7 @@ namespace Spam
         private string _connectionString;
 
         protected List<EntityMetadata> EntityTypes { get; } = new List<EntityMetadata>();
+        protected List<ILinkEntityContainer> LinkTypes { get; } = new List<ILinkEntityContainer>();
 
         public EntityContext(string connectionString)
         {
@@ -38,7 +39,7 @@ namespace Spam
         {
         }
 
-        protected void LoadData<T, K>(SqlConnection connection, EntityContainer<T, K> container, string tableName, Func<SqlDataReader, T> creator) where T : Entity<K>, new() where K : struct
+        protected void LoadData<T, K>(SqlConnection connection, EntityContainer<T, K> container, string tableName, Func<SqlDataReader, T> creator) where T : Entity<K>, new()
         {
             // I'm ok with not doing SQL injection protection here. TableName shouldn't ever come from user input, but a code generator.
             // God help me if this assumption ever changes.
@@ -73,6 +74,11 @@ namespace Spam
 
                 try
                 {
+                    // Detele all deleted link entities first. This should be ok because nothing
+                    // should be pointing at the link entities.
+                    LinkTypes.ForEach(x => x.DeleteEntities(command));
+
+                    // Perform inserts, updates, and deletes of regular entities.
                     foreach (var type in EntityTypes)
                     {
                         foreach (var entity in type.Container.NewEntities)
@@ -83,12 +89,14 @@ namespace Spam
                             DeleteEntity(command, entity, type, visited, processed);
                     }
 
+                    // Now insert all link entities, which again should be ok since nothing should be linking to them.
+                    LinkTypes.ForEach(x => x.InsertEntities(command));
+
                     transaction.Commit();
 
-                    foreach (var type in EntityTypes)
-                    {
-                        type.Container.ClearChanges();
-                    }
+                    // Now that it's been committed, clear all changes.
+                    EntityTypes.ForEach(x => x.Container.ClearChanges());
+                    LinkTypes.ForEach(x => x.ClearChanges());
                 }
                 catch (Exception ex)
                 {

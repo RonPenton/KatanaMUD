@@ -49,16 +49,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Actor.cs" />
-    <Compile Include="ArmorType.cs" />
-    <Compile Include="ClassTemplate.cs" />
-    <Compile Include="ClassTemplateArmorType.cs" />
-    <Compile Include="ClassTemplateWeaponType.cs" />
-    <Compile Include="GameContext.cs" />
+    <Compile Include="GameEntities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RaceTemplate.cs" />
-    <Compile Include="User.cs" />
-    <Compile Include="WeaponType.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

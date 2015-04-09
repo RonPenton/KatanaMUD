@@ -1,7 +1,6 @@
 ﻿use [KatanaMUD]
 
 
-use [KatanaMUD]
 select o.name as [Table], 
 		c.name as [Column], 
 		c.column_id,
@@ -11,12 +10,14 @@ select o.name as [Table],
 		c.scale as [Scale],
 		c.is_nullable as [Nullable],
 		c.is_identity as [Identity],
-		c.is_computed as [Computed]
+		c.is_computed as [Computed],
+		i.is_primary_key as [Primary]
 from sys.objects o inner join sys.columns c on o.object_id = c.object_id
 inner join sys.types st on c.user_type_id = st.user_type_id
-where o.type_desc = 'USER_TABLE'
+left join sys.index_columns ic on ic.object_id = o.object_id and ic.column_id = c.column_id
+left join sys.indexes i on i.object_id = ic.object_id
+where o.type_desc = 'USER_TABLE' and o.name != 'sysdiagrams'
 order by o.name, c.column_id
-
 
 SELECT  i.name AS IndexName,
         OBJECT_NAME(ic.OBJECT_ID) AS TableName,
@@ -24,7 +25,7 @@ SELECT  i.name AS IndexName,
 FROM    sys.indexes AS i INNER JOIN 
         sys.index_columns AS ic ON  i.OBJECT_ID = ic.OBJECT_ID
                                 AND i.index_id = ic.index_id
-WHERE   i.is_primary_key = 1
+WHERE   i.is_primary_key = 1 and OBJECT_NAME(ic.OBJECT_ID) != 'sysdiagrams'
 
 SELECT  obj.name AS FK_NAME,
     sch.name AS [schema_name],

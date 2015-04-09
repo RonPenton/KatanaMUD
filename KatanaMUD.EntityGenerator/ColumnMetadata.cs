@@ -9,16 +9,20 @@ namespace KatanaMUD.EntityGenerator
 {
     public class ColumnMetadata
     {
-        string Table { get; set; }
-        string Column { get; set; }
-        int Order { get; set; }
-        string DataType { get; set; }
-        int Length { get; set; }
-        int Precision { get; set; }
-        int Scale { get; set; }
-        bool Nullable { get; set; }
-        bool Identity { get; set; }
-        bool Computed { get; set; }
+        public string Table { get; set; }
+        public string Column { get; set; }
+        public int Order { get; set; }
+        public string DataType { get; set; }
+        public int Length { get; set; }
+        public int Precision { get; set; }
+        public int Scale { get; set; }
+        public bool Nullable { get; set; }
+        public bool Identity { get; set; }
+        public bool Computed { get; set; }
+        public bool PrimaryKey { get; set; }
+
+        public string ForeignKeyTable { get; set; }
+        public string ForeignKeyColumn { get; set; }
 
         public ColumnMetadata(SqlDataReader reader)
         {
@@ -32,6 +36,58 @@ namespace KatanaMUD.EntityGenerator
             Nullable = reader.GetBoolean(7);
             Identity = reader.GetBoolean(8);
             Computed = reader.GetBoolean(9);
+
+            var primary = reader.GetSqlBoolean(10);
+            if (primary.IsNull || primary.IsFalse)
+                PrimaryKey = false;
+            else
+                PrimaryKey = true;
+
+            ForeignKeyTable = reader.GetSafeString(11);
+            ForeignKeyColumn = reader.GetSafeString(12);
+        }
+
+        public string TypeName
+        {
+            get
+            {
+                if (this.Nullable)
+                {
+                    switch (this.DataType)
+                    {
+                        case "uniqueidentifier": return "Guid?";
+                        case "nvarchar": return "String";
+                        case "int": return "Int32?";
+                        case "datetimeoffset": case "datetime": return "DateTime?";
+                        case "bit": return "Boolean?";
+                        case "bigint": return "Int64?";
+                    }
+                }
+
+                switch (this.DataType)
+                {
+                    case "uniqueidentifier": return "Guid";
+                    case "nvarchar": return "String";
+                    case "int": return "Int32";
+                    case "datetimeoffset": case "datetime": return "DateTime";
+                    case "bit": return "Boolean";
+                    case "bigint": return "Int64";
+                }
+
+                throw new InvalidOperationException("Datatype not supported: " + this.DataType);
+            }
         }
     }
+
+    public static class SqlHelpers
+    {
+        public static string GetSafeString(this SqlDataReader reader, int index)
+        {
+            var val = reader.GetSqlString(index);
+            if (val.IsNull)
+                return null;
+            return val.Value;
+        }
+    }
+
 }
