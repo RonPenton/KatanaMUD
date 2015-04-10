@@ -13,8 +13,8 @@ namespace KatanaMUD
 {
     public class Game
     {
-        public static ConcurrentQueue<MessageBase> Messages = new ConcurrentQueue<MessageBase>();
-        public static List<WebSocket> Sockets = new List<WebSocket>();
+        public static ConnectionManager Connections { get; } = new ConnectionManager();
+        public static ConcurrentQueue<Tuple<Connection, MessageBase>> MessageQueue { get; } = new ConcurrentQueue<Tuple<Connection, MessageBase>>();
 
         public static GameEntities Data { get; private set; }
 
@@ -22,20 +22,6 @@ namespace KatanaMUD
         {
             Data = new GameEntities("Server=localhost;Database=KatanaMUD;integrated security=True;");
             Data.LoadFromDatabase();
-
-
-
-            //var actor = c.Actors.New();
-            //actor.Name = "Inigo";
-            //actor.Surname = "Montoya";
-            //actor.RaceTemplate = c.Races.First();
-            //actor.CharacterPoints = 100;
-            //actor.Stats.FireResist = 5;
-            //actor.Stats.ManaRegen = 20;
-
-            //c.SaveChanges();
-
-
 
             DateTime lastTime = DateTime.UtcNow;
             var pingTime = lastTime;
@@ -47,40 +33,18 @@ namespace KatanaMUD
                 {
                     var newTime = DateTime.UtcNow;
 
-                    MessageBase message;
-                    if (Messages.TryDequeue(out message))
+                    Tuple<Connection, MessageBase> message;
+                    if (MessageQueue.TryDequeue(out message))
                     {
-                        if(message is PingMessage)
+                        if(message.Item2 is PingMessage)
                         {
-                            var ping = new PongMessage() { SendTime = ((PingMessage)message).SendTime };
-                            var pingstring = MessageSerializer.SerializeMessage(ping);
-                            var bytes = Encoding.UTF8.GetBytes(pingstring);
-                            var segment = new ArraySegment<byte>(bytes);
-                            foreach (var socket in Sockets)
-                            {
-                                await socket.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
-                            }
+                            var pong = new PongMessage() { SendTime = ((PingMessage)message.Item2).SendTime };
+                            message.Item1.SendMessage(pong);
                         }
                     }
 
-
-                    //if(newTime - pingTime > TimeSpan.FromSeconds(3))
-                    //{
-                    //    var ping = new PingMessage() { SendTime = newTime };
-                    //    var pingstring = MessageSerializer.SerializeMessage(ping);
-                    //    var bytes = Encoding.UTF8.GetBytes(pingstring);
-                    //    var segment = new ArraySegment<byte>(bytes);
-                    //    foreach (var socket in Sockets)
-                    //    {
-                    //        await socket.SendAsync(segment, WebSocketMessageType.Text, true, CancellationToken.None);
-                    //    }
-                    //    pingTime = newTime;
-                    //}
-
                     lastTime = newTime;
-
-
-                    Thread.Sleep(10);
+                    Thread.Sleep(100);
                 }
             }
             catch(Exception ex)
@@ -88,7 +52,6 @@ namespace KatanaMUD
                 Console.WriteLine(ex.ToString());
                 throw;
             }
-
         }
     }
 }

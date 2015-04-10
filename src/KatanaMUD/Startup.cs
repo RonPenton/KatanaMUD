@@ -12,6 +12,7 @@ using KatanaMUD.Models;
 using Microsoft.AspNet.Security.Cookies;
 using Microsoft.AspNet.StaticFiles;
 using KatanaMUD.Messages;
+using System.Linq;
 
 namespace KatanaMUD
 {
@@ -33,13 +34,6 @@ namespace KatanaMUD
 			services.AddDataProtection();
 			services.AddAuthorization();
 			services.AddMvc();
-
-			services.AddEntityFramework(Configuration)
-				.AddSqlServer()
-				.AddDbContext<EF7Context>();
-
-			//var builder = services.AddIdentity<User, Role>(Configuration);
-			//builder.Services.Add(IdentityEntityFrameworkServices.GetDefaultServices(builder.UserType, builder.RoleType, typeof(GameContext)));
 		}
 
 		public void Configure(IApplicationBuilder app)
@@ -59,27 +53,42 @@ namespace KatanaMUD
 			{
 				if (context.IsWebSocketRequest)
 				{
-					WebSocket webSocket = await context.AcceptWebSocketAsync(context.WebSocketRequestedProtocols[0]);
-
-                    Console.WriteLine("Incoming connection: " + context.Request.Host.Value);
-
-                    // TODO: obviously refactor sending messages to be more streamlined.
-                    var serverMessage = new ServerMessage() { Contents = "Welcome to KatanaMUD. A MUD on the Web. Because I'm apparently insane. Dear lord." };
-                    var message = Encoding.UTF8.GetBytes(MessageSerializer.SerializeMessage(serverMessage));
-                    await webSocket.SendAsync(new ArraySegment<byte>(message, 0, message.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+					var socket = await context.AcceptWebSocketAsync(context.WebSocketRequestedProtocols[0]);
+                    //Console.WriteLine("Incoming connection: " + context.Request.Host.Value);
 
                     if (!context.User?.Identity.IsAuthenticated ?? true)
                     {
-                        Console.WriteLine("Connection Aborted: Not Authorized.");
+                        //Console.WriteLine("Connection Aborted: Not Authorized.");
                         var rejection = new LoginRejected() { RejectionMessage = "User is not authenticated" };
-                        message = Encoding.UTF8.GetBytes(MessageSerializer.SerializeMessage(rejection));
-                        await webSocket.SendAsync(new ArraySegment<byte>(message, 0, message.Length), WebSocketMessageType.Text, true, CancellationToken.None);
-                        await webSocket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "User is not authenticated", CancellationToken.None);
+                        Connection.SendMessage(socket, rejection);
+                        await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "User is not authenticated", CancellationToken.None);
                         return;
                     }
 
-                    Game.Sockets.Add(webSocket);
-                    await EchoWebSocket(webSocket, context);
+                    var user = Game.Data.Users.SingleOrDefault(x => x.Id.Equals(context.User.Identity.Name, StringComparison.InvariantCultureIgnoreCase));
+                    var actor = user?.Actors.FirstOrDefault();
+
+                    if (actor == null)
+                    {
+                        var rejection = new LoginRejected() { RejectionMessage = "User has no character.", NoCharacter = true };
+                        Connection.SendMessage(socket, rejection);
+                        await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "User has no character", CancellationToken.None);
+                        return;
+                    }
+
+                    if(Game.Connections.IsLoggedIn(user))
+                    {
+                        var rejection = new LoginRejected() { RejectionMessage = "User is already logged in." };
+                        Connection.SendMessage(socket, rejection);
+                        await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "User is already logged in", CancellationToken.None);
+                        return;
+                    }
+
+                    var connection = new Connection(socket, user, actor);
+                    Game.Connections.Add(connection);
+                    connection.SendMessage(new ServerMessage() { Contents = "Welcome to KatanaMUD. A MUD on the Web. Because I'm apparently insane. Dear lord." });
+
+                    await HandleSocketCommunication(connection);
 				}
 				else
 				{
@@ -95,22 +104,21 @@ namespace KatanaMUD
 			});
 		}
 
-		private async Task EchoWebSocket(WebSocket webSocket, HttpContext context)
+		private async Task HandleSocketCommunication(Connection connection)
 		{
 			byte[] buffer = new byte[1024];
-			WebSocketReceiveResult received = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+			WebSocketReceiveResult received = await connection.Socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
-			while (!webSocket.CloseStatus.HasValue)
+			while (!connection.Socket.CloseStatus.HasValue)
 			{
                 var message = MessageSerializer.DeserializeMessage(Encoding.UTF8.GetString(buffer, 0, received.Count));
-				Game.Messages.Enqueue(message);
+                Game.MessageQueue.Enqueue(Tuple.Create(connection, message));
 
-				await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, received.Count), received.MessageType, received.EndOfMessage, CancellationToken.None);
-				received = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+				received = await connection.Socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 			}
 
-			await webSocket.CloseAsync(webSocket.CloseStatus.Value, webSocket.CloseStatusDescription, CancellationToken.None);
+            Game.Connections.Remove(connection);
+			await connection.Socket.CloseAsync(connection.Socket.CloseStatus.Value, connection.Socket.CloseStatusDescription, CancellationToken.None);
 		}
-
 	}
 }

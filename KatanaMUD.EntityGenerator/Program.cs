@@ -12,7 +12,7 @@ namespace KatanaMUD.EntityGenerator
     {
         static string className = "GameEntities";
         static string namespaceName = "KatanaMUD.Models";
-        static string location = "..\\..\\..\\src\\KatanaMUD.Models\\";
+        static string location = "..\\..\\..\\src\\KatanaMUD\\Models\\";
 
 
         static void Main(string[] args)
@@ -94,7 +94,7 @@ using System.Data.SqlClient;
 
 namespace {0}
 {{
-    public class {1} : Spam.EntityContext
+    public partial class {1} : Spam.EntityContext
     {{
         public {1}(string connectionString) : base(connectionString)
         {{
@@ -183,7 +183,7 @@ using System.Linq;
 namespace {0}
 {{
 ", namespaceName);
-                builder.AppendFormat("    public class {0} : Entity<{1}>\r\n    {{\r\n", table.Name, table.PrimaryKey.TypeName);
+                builder.AppendFormat("    public partial class {0} : Entity<{1}>\r\n    {{\r\n", table.Name, table.PrimaryKey.TypeName);
                 builder.AppendFormat("        public override {0} Key {{ get {{ return {1}; }} set {{ {1} = value; }} }}\r\n", table.PrimaryKey.TypeName, table.PrimaryKey.Column);
                 builder.AppendFormat("        private {0} Context => ({0})__context;\r\n", className);
 

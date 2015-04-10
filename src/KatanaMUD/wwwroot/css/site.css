@@ -64,4 +64,5 @@ form div label {
 }
 .EditStats .statrow input[type='text'] {
   width: 50px;
+  text-align: center;
 }

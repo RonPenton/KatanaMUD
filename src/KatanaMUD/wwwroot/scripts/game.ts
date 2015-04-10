@@ -1,10 +1,27 @@
 ﻿/// <reference path="jquery.d.ts" />
 
 module KMud {
+
+    export interface Func0<R> { (): R; }
+    export interface Func1<P, R> { (parameter: P): R; }
+    export interface Func2<P1, P2, R> { (parameter1: P1, parameter2: P2): R; }
+    export interface Func3<P1, P2, P3, R> { (parameter1: P1, parameter2: P2, parameter3: P3): R; }
+    export interface Func4<P1, P2, P3, P4, R> { (parameter1: P1, parameter2: P2, parameter3: P3, parameter4: P4): R; }
+    export interface Action0 { (): void; }
+    export interface Action1<P> { (parameter: P): void; }
+    export interface Action2<P1, P2> { (parameter1: P1, parameter2: P2): void; }
+    export interface Action3<P1, P2, P3> { (parameter1: P1, parameter2: P2, parameter3: P3): void; }
+    export interface Action4<P1, P2, P3, P4> { (parameter1: P1, parameter2: P2, parameter3: P3, parameter4: P4): void; }
+
+    export interface Dictionary<T> { [index: string]: T }
+
+
+
     export class Game {
         private input: HTMLInputElement;
         private lastCommands: string[] = [];
         private currentCommand: number = -1;
+        private commandHandlers: { [index: string]: Action1<MessageBase> } = {};
 
         constructor() {
             this.input = <HTMLInputElement>document.getElementById("InputBox");
@@ -43,6 +60,8 @@ module KMud {
                 if (window.getSelection().toString().length == 0)
                     $("#InputBox").focus();
             });
+
+            this.registerHandlers();
         }
 
         private processCommand(command: string) {
@@ -82,13 +101,25 @@ module KMud {
         private onmessage(e: Event) {
             var message: MessageBase = JSON.parse((<any>e).data);
 
-            if (message.MessageName == LoginRejected.ClassName) {
-                this.addOutput(document.getElementById("Output"),(<LoginRejected>message).RejectionMessage, "error-text");
+            var handler = this.commandHandlers[message.MessageName];
+            if (handler != null) {
+                handler(message);
             }
-            if (message.MessageName == ServerMessage.ClassName) {
-                this.addOutput(document.getElementById("Output"),(<ServerMessage>message).Contents);
+        }
+
+        private registerHandlers() {
+            this.commandHandlers[LoginRejected.ClassName] = (message: LoginRejected) => {
+                this.addOutput(document.getElementById("Output"), message.RejectionMessage, "error-text");
+                if (message.NoCharacter == true) {
+                    window.location.replace("/Home/ChooseRace");
+                }
             }
-            if (message.MessageName == PongMessage.ClassName) {
+
+            this.commandHandlers[ServerMessage.ClassName] = (message: ServerMessage) => {
+                this.addOutput(document.getElementById("Output"), message.Contents);
+            }
+
+            this.commandHandlers[PongMessage.ClassName] = (message: PongMessage) => {
                 var latency = new Date().getMilliseconds() - new Date((<any>message).SendTime).getMilliseconds();
                 this.addOutput(document.getElementById("Output"), "Ping: Latency " + latency + "ms", "system-text");
             }

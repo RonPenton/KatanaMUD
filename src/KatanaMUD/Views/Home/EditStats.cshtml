@@ -6,6 +6,8 @@
     bool isNew = (bool)ViewBag.IsNew;
 }
 
+<script src="~/scripts/statedit.js"></script>
+
 <h3>Edit Stats</h3>
 
 @using (Html.BeginForm("EditStats", "Home", FormMethod.Post, htmlAttributes: new { @class = "form-horizontal" }))

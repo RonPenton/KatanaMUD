@@ -2,6 +2,7 @@ module KMud {
     export class LoginRejected extends MessageBase {
         constructor() { super('LoginRejected'); }
         public RejectionMessage: string;
+        public NoCharacter: boolean;
         public static ClassName: string = 'LoginRejected';
     }
     export class PingMessage extends MessageBase {
