@@ -6,11 +6,11 @@ using System.Linq;
 
 namespace KatanaMUD.Models
 {
-    public class WeaponType : Entity<String>
+    public class WeaponType : Entity<Int32>
     {
-        public override String Key { get { return WepId; } set { WepId = value; } }
+        public override Int32 Key { get { return Id; } set { Id = value; } }
         private GameEntities Context => (GameEntities)__context;
-        private String _WepId;
+        private Int32 _Id;
         private String _Name;
 
         public WeaponType()
@@ -20,39 +20,39 @@ namespace KatanaMUD.Models
 			ClassTemplates.ItemsRemoved += ClassTemplates_ItemsRemoved;
         }
 
-        public String WepId { get { return _WepId; } set { _WepId = value; this.Changed(); } }
+        public Int32 Id { get { return _Id; } set { _Id = value; this.Changed(); } }
         public String Name { get { return _Name; } set { _Name = value; this.Changed(); } }
         public ObservableHashSet<ClassTemplate> ClassTemplates { get; private set; }
         public static WeaponType Load(SqlDataReader reader)
         {
             var entity = new WeaponType();
-            entity._WepId = reader.GetString(0);
+            entity._Id = reader.GetInt32(0);
             entity._Name = reader.GetString(1);
             return entity;
         }
 
         public override void LoadRelationships()
         {
-            ClassTemplates.AddRange(Context.ClassTemplateWeaponTypes.Where(x => x.Item2 == this.WepId).Select(x => Context.ClassTemplates.Single(y => y.Id == x.Item1)), true);
+            ClassTemplates.AddRange(Context.ClassTemplateWeaponTypes.Where(x => x.Item2 == this.Id).Select(x => Context.ClassTemplates.Single(y => y.Id == x.Item1)), true);
         }
 
         private static void AddSqlParameters(SqlCommand c, WeaponType e)
         {
             c.Parameters.Clear();
-            c.Parameters.AddWithValue("@WepId", e.WepId);
+            c.Parameters.AddWithValue("@Id", e.Id);
             c.Parameters.AddWithValue("@Name", e.Name);
         }
 
         public static void GenerateInsertCommand(SqlCommand c, WeaponType e)
         {
-            c.CommandText = @"INSERT INTO [WeaponType]([WepId], [Name]
-                              VALUES (@WepId, @Name)";
+            c.CommandText = @"INSERT INTO [WeaponType]([Id], [Name]
+                              VALUES (@Id, @Name)";
             AddSqlParameters(c, e);
         }
 
         public static void GenerateUpdateCommand(SqlCommand c, WeaponType e)
         {
-            c.CommandText = @"UPDATE [WeaponType] SET [WepId] = @WepId, [Name] = @Name WHERE [Id] = @Id";
+            c.CommandText = @"UPDATE [WeaponType] SET [Id] = @Id, [Name] = @Name WHERE [Id] = @Id";
             AddSqlParameters(c, e);
         }
 
@@ -60,7 +60,7 @@ namespace KatanaMUD.Models
         {
             c.CommandText = @"DELETE FROM[WeaponType] WHERE[Id] = @Id";
             c.Parameters.Clear();
-            c.Parameters.AddWithValue("@Id", e.WepId);
+            c.Parameters.AddWithValue("@Id", e.Id);
         }
 		private void ClassTemplates_ItemsAdded(object sender, CollectionChangedEventArgs<ClassTemplate> e)
         {

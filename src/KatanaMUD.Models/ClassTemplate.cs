@@ -51,7 +51,7 @@ namespace KatanaMUD.Models
         public override void LoadRelationships()
         {
             ArmorTypes.AddRange(Context.ClassTemplateArmorTypes.Where(x => x.Item1 == this.Id).Select(x => Context.ArmorTypes.Single(y => y.Id == x.Item2)), true);
-            WeaponTypes.AddRange(Context.ClassTemplateWeaponTypes.Where(x => x.Item1 == this.Id).Select(x => Context.WeaponTypes.Single(y => y.WepId == x.Item2)), true);
+            WeaponTypes.AddRange(Context.ClassTemplateWeaponTypes.Where(x => x.Item1 == this.Id).Select(x => Context.WeaponTypes.Single(y => y.Id == x.Item2)), true);
             RaceTemplates.AddRange(Context.RaceClassRestrictions.Where(x => x.Item2 == this.Id).Select(x => Context.RaceTemplates.Single(y => y.Id == x.Item1)), true);
         }
 

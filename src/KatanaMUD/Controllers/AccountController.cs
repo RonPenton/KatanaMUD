@@ -36,64 +36,51 @@ namespace KatanaMUD.Controllers
 			return View();
 		}
 
-		[HttpPost]
-		public IActionResult Register(RegisterModel model)
-		{
-			using (var context = new EF7Context())
-			{
-				var user = context.Users.SingleOrDefault(x => x.Id == model.Username);
-				if (user != null)
-					return View(model: "Username Taken");
+        [HttpPost]
+        public IActionResult Register(RegisterModel model)
+        {
+            var user = Game.Data.Users.SingleOrDefault(x => x.Id == model.Username);
+            if (user != null)
+                return View(model: "Username Taken");
 
-				if (model.ConfirmPassword != model.Password)
-					return View(model: "Passwords do not match");
+            if (model.ConfirmPassword != model.Password)
+                return View(model: "Passwords do not match");
 
-				var hash = HashString(model.Password);
-				user = new EF7User()
-				{
-					Id = model.Username,
-					PasswordHash = hash
-				};
+            var hash = HashString(model.Password);
+            user = Game.Data.Users.New(model.Username);
+            user.PasswordHash = hash;
 
-				context.Users.Add(user);
-				context.SaveChanges();
+            var claim = new Claim(ClaimTypes.Name, "Mithrandir");
+            var identity = new ClaimsIdentity(new List<Claim>() { claim }, CookieAuthenticationDefaults.AuthenticationType);
+            Context.Response.SignIn(identity);
 
-				var claim = new Claim(ClaimTypes.Name, "Mithrandir");
-				var identity = new ClaimsIdentity(new List<Claim>() { claim }, CookieAuthenticationDefaults.AuthenticationType);
-				Context.Response.SignIn(identity);
+            return RedirectToAction("Index", controllerName: "Home");
+        }
 
-				return RedirectToAction("Index", controllerName: "Home");
-			}
-		}
+        [HttpPost]
+        public IActionResult Login(LoginModel model)
+        {
+            var user = Game.Data.Users.SingleOrDefault(x => x.Id == model.Username);
+            if (user == null || user.LockoutEnd > DateTimeOffset.Now)
+                return View(model: "Login Failed");
 
-		[HttpPost]
-		public IActionResult Login(LoginModel model)
-		{
-			using (var context = new EF7Context())
-			{
-				var user = context.Users.SingleOrDefault(x => x.Id == model.Username);
-				if (user == null || user.LockoutEnd > DateTimeOffset.Now)
-					return View(model: "Login Failed");
+            var hash = HashString(model.Password);
+            if (hash == user.PasswordHash)
+            {
+                var claim = new Claim(ClaimTypes.Name, "Mithrandir");
+                var identity = new ClaimsIdentity(new List<Claim>() { claim }, CookieAuthenticationDefaults.AuthenticationType);
+                Context.Response.SignIn(identity);
 
-				var hash = HashString(model.Password);
-				if (hash == user.PasswordHash)
-				{
-					var claim = new Claim(ClaimTypes.Name, "Mithrandir");
-					var identity = new ClaimsIdentity(new List<Claim>() { claim }, CookieAuthenticationDefaults.AuthenticationType);
-					Context.Response.SignIn(identity);
+                return RedirectToAction("Index", controllerName: "Home");
+            }
 
-					return RedirectToAction("Index", controllerName: "Home");
-				}
-
-				user.AccessFailedCount++;
-				if (user.AccessFailedCount > 10)
-				{
-					user.LockoutEnd = DateTimeOffset.Now.AddDays(1);
-				}
-				context.SaveChanges();
-				return View(model: "Login Failed");
-			}
-		}
+            user.AccessFailedCount++;
+            if (user.AccessFailedCount > 10)
+            {
+                user.LockoutEnd = DateTime.Now.AddDays(1);
+            }
+            return View(model: "Login Failed");
+        }
 
 		[HttpPost]
 		public IActionResult Logout()

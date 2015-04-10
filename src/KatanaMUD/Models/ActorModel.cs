@@ -4,9 +4,9 @@ namespace KatanaMUD.Models
 {
     public class ActorModel
     {
-        public string Name;
-        public string Surname;
-        public int ClassTemplateId;
-        public int RaceTemplateId;
+        public string Name { get; set; }
+        public string Surname { get; set; }
+        public int ClassTemplateId { get; set; }
+        public int RaceTemplateId { get; set; }
     }
 }

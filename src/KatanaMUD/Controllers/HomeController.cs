@@ -50,6 +50,7 @@ namespace KatanaMUD.Controllers
 
             var dbActor = new Actor();
 
+            dbActor.Name = Context.User.Identity.Name;
             dbActor.CharacterPoints = 100;    // TODO: From settings?
             dbActor.RaceTemplate = KatanaMUD.Game.Data.RaceTemplates.Single(x => x.Id == actor.RaceTemplateId);
             dbActor.ClassTemplate = KatanaMUD.Game.Data.ClassTemplates.Single(x => x.Id == actor.ClassTemplateId);
