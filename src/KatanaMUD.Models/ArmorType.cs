@@ -2,6 +2,7 @@ using Spam;
 using System;
 using System.Data.SqlClient;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace KatanaMUD.Models
 {
@@ -30,6 +31,11 @@ namespace KatanaMUD.Models
             return entity;
         }
 
+        public override void LoadRelationships()
+        {
+            ClassTemplates.AddRange(Context.ClassTemplateArmorTypes.Where(x => x.Item2 == this.Id).Select(x => Context.ClassTemplates.Single(y => y.Id == x.Item1)), true);
+        }
+
         private static void AddSqlParameters(SqlCommand c, ArmorType e)
         {
             c.Parameters.Clear();
@@ -46,7 +52,8 @@ namespace KatanaMUD.Models
 
         public static void GenerateUpdateCommand(SqlCommand c, ArmorType e)
         {
-            c.CommandText = @"UPDATE [ArmorType] [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata                              WHERE [Id] = @Id";             AddSqlParameters(c, e);
+            c.CommandText = @"UPDATE [ArmorType] SET [Id] = @Id, [Name] = @Name WHERE [Id] = @Id";
+            AddSqlParameters(c, e);
         }
 
         public static void GenerateDeleteCommand(SqlCommand c, ArmorType e)

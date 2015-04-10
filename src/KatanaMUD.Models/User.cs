@@ -2,6 +2,7 @@ using Spam;
 using System;
 using System.Data.SqlClient;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace KatanaMUD.Models
 {
@@ -37,6 +38,10 @@ namespace KatanaMUD.Models
             return entity;
         }
 
+        public override void LoadRelationships()
+        {
+        }
+
         private static void AddSqlParameters(SqlCommand c, User e)
         {
             c.Parameters.Clear();
@@ -56,7 +61,8 @@ namespace KatanaMUD.Models
 
         public static void GenerateUpdateCommand(SqlCommand c, User e)
         {
-            c.CommandText = @"UPDATE [User] [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata                              WHERE [Id] = @Id";             AddSqlParameters(c, e);
+            c.CommandText = @"UPDATE [User] SET [Id] = @Id, [AccessFailedCount] = @AccessFailedCount, [LockoutEnd] = @LockoutEnd, [PasswordHash] = @PasswordHash, [IsConfirmed] = @IsConfirmed WHERE [Id] = @Id";
+            AddSqlParameters(c, e);
         }
 
         public static void GenerateDeleteCommand(SqlCommand c, User e)

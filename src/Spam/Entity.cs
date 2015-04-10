@@ -56,5 +56,7 @@ namespace Spam
         {
             __context = context;
         }
+
+        public abstract void LoadRelationships();
     }
 }

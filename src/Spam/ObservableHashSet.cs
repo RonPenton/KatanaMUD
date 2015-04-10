@@ -46,20 +46,20 @@ namespace Spam
 
 		public bool IsReadOnly => false;
 
-		public void AddRange(IEnumerable<T> items)
-		{
-			List<T> added = new List<T>();
-			foreach (var item in items)
-			{
-				if (_container.Add(item))
-				{
-					added.Add(item);
-				}
-			}
+        public void AddRange(IEnumerable<T> items, bool skipNotify = false)
+        {
+            List<T> added = new List<T>();
+            foreach (var item in items)
+            {
+                if (_container.Add(item) && !skipNotify)
+                {
+                    added.Add(item);
+                }
+            }
 
-			if (added.Any())
-				NotifyAdd(added.ToArray());
-		}
+            if (!skipNotify && added.Any())
+                NotifyAdd(added.ToArray());
+        }
 	
 		public void Add(T item, bool skipNotify = false)
 		{

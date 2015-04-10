@@ -6,10 +6,10 @@ namespace KatanaMUD.Models
     using System.ComponentModel.DataAnnotations.Schema;
 
     [Table("User")]
-    public partial class User
+    public partial class EF7User
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public User()
+        public EF7User()
         {
             Actors = new HashSet<Actor>();
         }

@@ -13,7 +13,7 @@ namespace KatanaMUD.Models
             ClassTemplates = new EntityContainer<ClassTemplate, Int32>(this);
             RaceTemplates = new EntityContainer<RaceTemplate, Int32>(this);
             Users = new EntityContainer<User, String>(this);
-            WeaponTypes = new EntityContainer<WeaponType, Int32>(this);
+            WeaponTypes = new EntityContainer<WeaponType, String>(this);
         }
 
         public EntityContainer<Actor, Guid> Actors { get; private set; }
@@ -21,9 +21,9 @@ namespace KatanaMUD.Models
         public EntityContainer<ClassTemplate, Int32> ClassTemplates { get; private set; }
         public EntityContainer<RaceTemplate, Int32> RaceTemplates { get; private set; }
         public EntityContainer<User, String> Users { get; private set; }
-        public EntityContainer<WeaponType, Int32> WeaponTypes { get; private set; }
+        public EntityContainer<WeaponType, String> WeaponTypes { get; private set; }
         internal LinkEntityContainer<ClassTemplate, ArmorType, Int32, Int32> ClassTemplateArmorTypes = new LinkEntityContainer<ClassTemplate, ArmorType, Int32, Int32>("ClassTemplateArmorType", "ClassTemplateId", "ArmorTypeId");
-        internal LinkEntityContainer<ClassTemplate, WeaponType, Int32, Int32> ClassTemplateWeaponTypes = new LinkEntityContainer<ClassTemplate, WeaponType, Int32, Int32>("ClassTemplateWeaponType", "ClassTemplateId", "WeaponTypeId");
+        internal LinkEntityContainer<ClassTemplate, WeaponType, Int32, String> ClassTemplateWeaponTypes = new LinkEntityContainer<ClassTemplate, WeaponType, Int32, String>("ClassTemplateWeaponType", "ClassTemplateId", "WeaponTypeId");
         internal LinkEntityContainer<RaceTemplate, ClassTemplate, Int32, Int32> RaceClassRestrictions = new LinkEntityContainer<RaceTemplate, ClassTemplate, Int32, Int32>("RaceClassRestriction", "RaceTemplateId", "ClassTemplateId");
         protected override void LoadMetaData()
         {

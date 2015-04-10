@@ -9,6 +9,7 @@ namespace Spam
         IEnumerable<IEntity> DeletededEntities { get; }
 
         void ClearChanges();
+        void LoadRelationships();
     }
 
     public interface IEntityContainer<K> : IEntityContainer

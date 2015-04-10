@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
-using KatanaMUD.Models.Test;
 using System.Linq;
+using KatanaMUD.Models;
 
 namespace KatanaMUD
 {
@@ -16,21 +16,24 @@ namespace KatanaMUD
         public static ConcurrentQueue<MessageBase> Messages = new ConcurrentQueue<MessageBase>();
         public static List<WebSocket> Sockets = new List<WebSocket>();
 
+        public static GameEntities Data { get; private set; }
+
         async public static void Run()
         {
-            var c = new GameEntities("Server=localhost;Database=KatanaMUD;integrated security=True;");
+            Data = new GameEntities("Server=localhost;Database=KatanaMUD;integrated security=True;");
+            Data.LoadFromDatabase();
 
 
 
-            var actor = c.Actors.New();
-            actor.Name = "Inigo";
-            actor.Surname = "Montoya";
-            actor.RaceTemplate = c.Races.First();
-            actor.CharacterPoints = 100;
-            actor.Stats.FireResist = 5;
-            actor.Stats.ManaRegen = 20;
+            //var actor = c.Actors.New();
+            //actor.Name = "Inigo";
+            //actor.Surname = "Montoya";
+            //actor.RaceTemplate = c.Races.First();
+            //actor.CharacterPoints = 100;
+            //actor.Stats.FireResist = 5;
+            //actor.Stats.ManaRegen = 20;
 
-            c.SaveChanges();
+            //c.SaveChanges();
 
 
 

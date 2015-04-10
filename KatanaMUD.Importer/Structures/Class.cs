@@ -11,7 +11,7 @@ namespace KatanaMUD.Importer.Structures
 	[StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
 	public struct ClassBuffer
 	{
-		short Number;
+		public short Number;
 		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 29)]
 		char[] Name;
 		byte nothing1;
@@ -35,15 +35,17 @@ namespace KatanaMUD.Importer.Structures
 		short nothing7;
 		int TitleText;
 
-		public ClassTemplate ToClass()
+		public ClassTemplate ToClass(ClassTemplate cls)
 		{
-			return new ClassTemplate()
-			{
-				Id = Number,
-				Name = new string(Name).Replace("\0", "").Trim(),
-				HpMin = MinHp,
-				HpMax = MaxHp + MinHp
-			};
+            if (cls == null)
+                cls = new ClassTemplate();
+
+            cls.Id = Number;
+            cls.Name = new string(Name).Replace("\0", "").Trim();
+            cls.Stats.HpMin = MinHp;
+            cls.Stats.HpRange = MaxHp;
+
+            return cls;
 		}
 	}
 }

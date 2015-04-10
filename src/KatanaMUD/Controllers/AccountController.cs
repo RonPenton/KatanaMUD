@@ -39,7 +39,7 @@ namespace KatanaMUD.Controllers
 		[HttpPost]
 		public IActionResult Register(RegisterModel model)
 		{
-			using (var context = new GameContext())
+			using (var context = new EF7Context())
 			{
 				var user = context.Users.SingleOrDefault(x => x.Id == model.Username);
 				if (user != null)
@@ -49,7 +49,7 @@ namespace KatanaMUD.Controllers
 					return View(model: "Passwords do not match");
 
 				var hash = HashString(model.Password);
-				user = new User()
+				user = new EF7User()
 				{
 					Id = model.Username,
 					PasswordHash = hash
@@ -69,7 +69,7 @@ namespace KatanaMUD.Controllers
 		[HttpPost]
 		public IActionResult Login(LoginModel model)
 		{
-			using (var context = new GameContext())
+			using (var context = new EF7Context())
 			{
 				var user = context.Users.SingleOrDefault(x => x.Id == model.Username);
 				if (user == null || user.LockoutEnd > DateTimeOffset.Now)

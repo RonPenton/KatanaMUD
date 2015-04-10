@@ -23,13 +23,15 @@ namespace KatanaMUD.Importer
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
-			var races = Btrieve.GetAllRaces(new FileInfo(@"C:\Users\spsadmin\Documents\MMUDDats\wccrace2.dat").FullName);
-			var classes = Btrieve.GetAllClasses(new FileInfo(@"C:\Users\spsadmin\Documents\MMUDDats\wccclas2.dat").FullName);
+            var context = new GameEntities("Server=localhost;Database=KatanaMUD;integrated security=True;");
+            context.LoadFromDatabase();
 
-            var context = new GameContext();
+            var races = Btrieve.GetAllRaces(new FileInfo(@"C:\Users\spsadmin\Documents\MMUDDats\wccrace2.dat").FullName, context.RaceTemplates);
+			var classes = Btrieve.GetAllClasses(new FileInfo(@"C:\Users\spsadmin\Documents\MMUDDats\wccclas2.dat").FullName, context.ClassTemplates);
 
-            context.RaceTemplates.AddRange(races);
-            context.ClassTemplates.AddRange(classes);
+
+            //context.RaceTemplates.AddRange(races, true);
+            //context.ClassTemplates.AddRange(classes, true);
             context.SaveChanges();
 		}
 	}

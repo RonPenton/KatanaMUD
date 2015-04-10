@@ -36,7 +36,7 @@ namespace KatanaMUD
 
 			services.AddEntityFramework(Configuration)
 				.AddSqlServer()
-				.AddDbContext<GameContext>();
+				.AddDbContext<EF7Context>();
 
 			//var builder = services.AddIdentity<User, Role>(Configuration);
 			//builder.Services.Add(IdentityEntityFrameworkServices.GetDefaultServices(builder.UserType, builder.RoleType, typeof(GameContext)));

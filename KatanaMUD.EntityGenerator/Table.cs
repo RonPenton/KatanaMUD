@@ -13,6 +13,7 @@ namespace KatanaMUD.EntityGenerator
             Name = name;
             LinkEntities = new List<Table>();
             Children = new List<Table>();
+            Relationships = new List<Relationship>();
         }
 
         public string Name { get; set; }
@@ -36,6 +37,6 @@ namespace KatanaMUD.EntityGenerator
 
         public List<Table> Children { get; set; }
         public List<Table> LinkEntities { get; set; }
-        public IEnumerable<ColumnMetadata> Relationships => Columns.Where(x => x.ForeignKeyTable != null);
+        public List<Relationship> Relationships { get; set; }
     }
 }

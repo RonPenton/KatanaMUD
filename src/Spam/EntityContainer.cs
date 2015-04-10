@@ -47,6 +47,12 @@ namespace Spam
             return item;
         }
 
+        public void AddRange(IEnumerable<T> items, bool fromLoad)
+        {
+            foreach (var item in items)
+                Add(item, fromLoad);
+        }
+
         internal void Add(T item, bool fromLoad)
         {
             // Set the key if it's not already set.
@@ -191,6 +197,12 @@ namespace Spam
             _changed.Clear();
             _new.Clear();
             _deleted.Clear();
+        }
+
+        public void LoadRelationships()
+        {
+            foreach (var entity in this._storage.Values)
+                entity.LoadRelationships();
         }
     }
 

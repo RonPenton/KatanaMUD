@@ -23,6 +23,12 @@ namespace Spam
 
         public bool IsReadOnly => false;
 
+        public void AddRange(IEnumerable<C> items)
+        {
+            foreach (var item in items)
+                Add(item);
+        }
+
         public void Add(C item)
         {
             if (item == null)

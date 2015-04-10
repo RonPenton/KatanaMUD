@@ -1,6 +1,7 @@
 ﻿using KatanaMUD.Messages;
 using KatanaMUD.Models;
 using Microsoft.AspNet.Mvc;
+using Spam;
 using System;
 using System.Data.SqlClient;
 using System.Linq;
@@ -27,40 +28,34 @@ namespace KatanaMUD.Controllers
         [HttpGet]
         public IActionResult ChooseRace()
         {
-            var actor = new Actor() { Name = Context.User.Identity.Name };
-            var context = new GameContext();
-            ViewBag.Races = context.RaceTemplates.ToList();
+            var actor = new ActorModel() { Name = Context.User.Identity.Name };
+            ViewBag.Races = KatanaMUD.Game.Data.RaceTemplates.ToList();
             return View(actor);
         }
 
         [Authorize]
         [HttpPost]
-        public IActionResult ChooseRace(Actor actor)
+        public IActionResult ChooseRace(ActorModel actor)
         {
-            var context = new GameContext();
-            ViewBag.Classes = context.ClassTemplates.ToList();
+            ViewBag.Classes = KatanaMUD.Game.Data.ClassTemplates.ToList();
 
             return View("ChooseClass", actor);
         }
 
         [Authorize]
         [HttpPost]
-        public IActionResult ChooseClass(Actor actor)
+        public IActionResult ChooseClass(ActorModel actor)
         {
             ViewBag.IsNew = true;
-            var context = new GameContext();
-            actor.CharacterPoints = 100;    // TODO: From settings?
-            actor.RaceTemplate = context.RaceTemplates.Single(x => x.Id == actor.RaceTemplateId);
-            actor.ClassTemplate = context.ClassTemplates.Single(x => x.Id == actor.ClassTemplateId);
-            actor.Agility = actor.RaceTemplate.Agility;
-            actor.Charm = actor.RaceTemplate.Charm;
-            actor.Health = actor.RaceTemplate.Health;
-            actor.Intelligence = actor.RaceTemplate.Intelligence;
-            actor.Strength = actor.RaceTemplate.Strength;
-            actor.Wisdom = actor.RaceTemplate.Wisdom;
-            actor.Name = Context.User.Identity.Name;
 
-            return View("EditStats", actor);
+            var dbActor = new Actor();
+
+            dbActor.CharacterPoints = 100;    // TODO: From settings?
+            dbActor.RaceTemplate = KatanaMUD.Game.Data.RaceTemplates.Single(x => x.Id == actor.RaceTemplateId);
+            dbActor.ClassTemplate = KatanaMUD.Game.Data.ClassTemplates.Single(x => x.Id == actor.ClassTemplateId);
+            JsonContainer.Merge(dbActor.Stats, dbActor.RaceTemplate.Stats, dbActor.ClassTemplate.Stats);
+
+            return View("EditStats", dbActor);
         }
 
         [Authorize]
@@ -68,40 +63,6 @@ namespace KatanaMUD.Controllers
         {
             var actor = new Actor() { Name = Context.User.Identity.Name };
             return View(actor);
-        }
-
-
-        public IActionResult SQLTest()
-        {
-            string connectionString = "Data Source=(local);Initial Catalog=KatanaMUD;Integrated Security=true";
-
-            string queryString = "SELECT [Id],[Name],[Hp],[Strength],[Agility],[Wisdom],[Intelligence],[Health]" +
-                                ",[Charm],[StrengthCap],[AgilityCap],[WisdomCap],[IntelligenceCap],[HealthCap],[CharmCap],[Description]" +
-                                " FROM[KatanaMUD].[dbo].[RaceTemplate]";
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                SqlCommand command = new SqlCommand(queryString, connection);
-                //command.Parameters.AddWithValue("@pricePoint", paramValue);
-
-                // set to the console window. 
-                try
-                {
-                    connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-
-                        while (reader.Read())
-                        {
-
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                }
-            }
-            return null;
         }
     }
 }

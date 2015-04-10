@@ -2,6 +2,7 @@ using Spam;
 using System;
 using System.Data.SqlClient;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace KatanaMUD.Models
 {
@@ -81,6 +82,13 @@ namespace KatanaMUD.Models
             return entity;
         }
 
+        public override void LoadRelationships()
+        {
+            User = Context.Users.SingleOrDefault(x => x.Id == _UserId);
+            ClassTemplate = Context.ClassTemplates.SingleOrDefault(x => x.Id == _ClassTemplateId);
+            RaceTemplate = Context.RaceTemplates.SingleOrDefault(x => x.Id == _RaceTemplateId);
+        }
+
         private static void AddSqlParameters(SqlCommand c, Actor e)
         {
             c.Parameters.Clear();
@@ -105,7 +113,8 @@ namespace KatanaMUD.Models
 
         public static void GenerateUpdateCommand(SqlCommand c, Actor e)
         {
-            c.CommandText = @"UPDATE [Actor] [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata                              WHERE [Id] = @Id";             AddSqlParameters(c, e);
+            c.CommandText = @"UPDATE [Actor] SET [Id] = @Id, [Name] = @Name, [Surname] = @Surname, [ActorType] = @ActorType, [UserId] = @UserId, [RoomId] = @RoomId, [ClassTemplateId] = @ClassTemplateId, [RaceTemplateId] = @RaceTemplateId, [CharacterPoints] = @CharacterPoints, [JSONStats] = @JSONStats WHERE [Id] = @Id";
+            AddSqlParameters(c, e);
         }
 
         public static void GenerateDeleteCommand(SqlCommand c, Actor e)

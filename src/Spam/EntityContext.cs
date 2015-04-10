@@ -15,7 +15,7 @@ namespace Spam
     /// </summary>
     public abstract class EntityContext
     {
-        private string _connectionString;
+        protected string _connectionString;
 
         protected List<EntityMetadata> EntityTypes { get; } = new List<EntityMetadata>();
         protected List<ILinkEntityContainer> LinkTypes { get; } = new List<ILinkEntityContainer>();
@@ -23,7 +23,10 @@ namespace Spam
         public EntityContext(string connectionString)
         {
             _connectionString = connectionString;
+        }
 
+        public void LoadFromDatabase()
+        {
             using (var connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
@@ -37,13 +40,15 @@ namespace Spam
 
         protected void AttachRelationships()
         {
+            foreach (var entityType in EntityTypes)
+                entityType.Container.LoadRelationships();
         }
 
         protected void LoadData<T, K>(SqlConnection connection, EntityContainer<T, K> container, string tableName, Func<SqlDataReader, T> creator) where T : Entity<K>, new()
         {
             // I'm ok with not doing SQL injection protection here. TableName shouldn't ever come from user input, but a code generator.
             // God help me if this assumption ever changes.
-            var command = new SqlCommand("SELECT * from " + tableName, connection);
+            var command = new SqlCommand(String.Format("SELECT * from [{0}]", tableName), connection);
             using (var reader = command.ExecuteReader())
             {
                 while (reader.Read())

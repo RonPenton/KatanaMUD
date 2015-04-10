@@ -20,12 +20,12 @@ namespace KatanaMUD.Importer
 			ushort keyLength, ushort keyNum);
 
 
-		public static List<RaceTemplate> GetAllRaces(string fileName)
+		public static List<RaceTemplate> GetAllRaces(string fileName, IEnumerable<RaceTemplate> races)
 		{
 			var dataBuffer = new RaceBuffer();
 			var list = new List<RaceBuffer>();
 			Func<RaceBuffer> newFunc = () => new RaceBuffer();
-			Func<RaceBuffer, RaceTemplate> convert = x => x.ToRace();
+			Func<RaceBuffer, RaceTemplate> convert = x => x.ToRace(races.SingleOrDefault(y => y.Id == x.Number));
 
 			// Yes, yes. Copied Code. How horrible. There's really no good alternative to DllImport-interfacing code though. Dynamic doesn't work,
 			// templates don't work, etc. So. Given that the MajorMUD database format will never change in the future (it's been dead 10 years!),
@@ -71,12 +71,12 @@ namespace KatanaMUD.Importer
 			ref int dataLength,
 			[MarshalAs(UnmanagedType.LPArray, SizeConst = 255)] char[] keyBffer,
 			ushort keyLength, ushort keyNum);
-		public static List<ClassTemplate> GetAllClasses(string fileName)
+		public static List<ClassTemplate> GetAllClasses(string fileName, IEnumerable<ClassTemplate> classes)
 		{
 			var dataBuffer = new ClassBuffer();
 			var list = new List<ClassBuffer>();
 			Func<ClassBuffer> newFunc = () => new ClassBuffer();
-			Func<ClassBuffer, ClassTemplate> convert = x => x.ToClass();
+			Func<ClassBuffer, ClassTemplate> convert = x => x.ToClass(classes.SingleOrDefault(y => y.Id == x.Number));
 
 			// Yes, yes. Copied Code. How horrible. There's really no good alternative to DllImport-interfacing code though. Dynamic doesn't work,
 			// templates don't work, etc. So. Given that the MajorMUD database format will never change in the future (it's been dead 10 years!),

@@ -83,6 +83,7 @@ namespace KatanaMUD.EntityGenerator
                 if (parent == null || child == null)
                     continue;
                 parent.Children.Add(child);
+                child.Relationships.Add(new Relationship() { Column = column, ParentTable = parent });
             }
 
             StringBuilder context = new StringBuilder();
@@ -130,7 +131,7 @@ namespace {0}
 
                 foreach (var relationship in table.Relationships)
                 {
-                    context.AppendFormat("            meta.Relationships.Add(new EntityRelationship((IEntity e) => (({0})e).{1}));\r\n", table.Name, relationship.ForeignKeyTable);
+                    context.AppendFormat("            meta.Relationships.Add(new EntityRelationship((IEntity e) => (({0})e).{1}));\r\n", table.Name, relationship.Column.ForeignKeyTable);
                 }
 
                 context.AppendFormat(@"            meta.GenerateInsertCommand = (SqlCommand c, IEntity e) => {0}.GenerateInsertCommand(c, ({0})e);
@@ -177,6 +178,7 @@ namespace {0}
 using System;
 using System.Data.SqlClient;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace {0}
 {{
@@ -192,8 +194,8 @@ namespace {0}
 
                 foreach (var relationship in table.Relationships)
                 {
-                    builder.AppendFormat("        private {0} _{1};\r\n", relationship.TypeName, relationship.Column);
-                    builder.AppendFormat("        private {0} _{0};\r\n", relationship.ForeignKeyTable);
+                    builder.AppendFormat("        private {0} _{1};\r\n", relationship.Column.TypeName, relationship.Column.Column);
+                    builder.AppendFormat("        private {0} _{0};\r\n", relationship.Column.ForeignKeyTable);
                 }
 
                 builder.AppendFormat("\r\n        public {0}()\r\n        {{\r\n", table.Name);
@@ -228,10 +230,10 @@ namespace {0}
                     builder.AppendFormat("        public dynamic {0} {{ get; private set; }}\r\n", column.Column.Substring(4));
                 }
 
-                foreach (var column in table.Relationships)
+                foreach (var relationship in table.Relationships)
                 {
-                    builder.AppendFormat("        public {0} {0} {{\r\n", column.ForeignKeyTable);
-                    builder.AppendFormat("            get {{ return _{0}; }}\r\n", column.ForeignKeyTable);
+                    builder.AppendFormat("        public {0} {0} {{\r\n", relationship.Column.ForeignKeyTable);
+                    builder.AppendFormat("            get {{ return _{0}; }}\r\n", relationship.Column.ForeignKeyTable);
                     builder.AppendFormat(@"            set
             {{
                 ChangeParent(value, ref _{0}, 
@@ -240,12 +242,13 @@ namespace {0}
             }}
         }}
 
-", column.ForeignKeyTable, table.Name, table.PluralName);
+", relationship.Column.ForeignKeyTable, table.Name, table.PluralName);
                 }
 
                 foreach(var child in table.Children)
                 {
-                    builder.AppendFormat("        public ICollection<{0}> {1} {{ get; private set; }}\r\n", child.Name, child.PluralName);
+                    builder.AppendFormat("        public ICollection<{0}> {1} {{ get; private set; }}\r\n",
+                        child.Name, child.PluralName);
                 }
                 foreach(var link in table.LinkEntities)
                 {
@@ -282,6 +285,39 @@ namespace {0}
 
                 builder.AppendFormat(@"            return entity;
         }}
+
+        public override void LoadRelationships()
+        {{
+", table.Name);
+
+                foreach(var relationship in table.Relationships)
+                {
+                    builder.AppendFormat("            {0} = Context.{1}.Single{3}(x => x.Id == _{2});\r\n",
+                        relationship.Column.ForeignKeyTable, relationship.ParentTable.PluralName, relationship.Column.Column,
+                        relationship.Column.Nullable ? "OrDefault" : "");
+                }
+
+                foreach (var link in table.LinkEntities)
+                {
+                    var firstItem = "Item2";
+                    var secondItem = "Item1";
+                    var first = link.FirstLink;
+                    var second = link.SecondLink;
+                    if(second.Name == table.Name)
+                    {
+                        firstItem = "Item1";
+                        secondItem = "Item2";
+                        first = link.SecondLink;
+                        second = link.FirstLink;
+                    }
+
+                    builder.AppendFormat("            {0}.AddRange(Context.{1}.Where(x => x.{2} == this.{3}).Select(x => Context.{0}.Single(y => y.{5} == x.{4})), true);\r\n",
+                        second.PluralName, link.PluralName, secondItem, table.PrimaryKey.Column, firstItem, second.PrimaryKey.Column);
+                }
+
+
+
+                builder.AppendFormat(@"        }}
 
         private static void AddSqlParameters(SqlCommand c, {0} e)
         {{
@@ -320,10 +356,10 @@ namespace {0}
                 builder.AppendFormat(@"
         public static void GenerateUpdateCommand(SqlCommand c, {0} e)
         {{
-            c.CommandText = @""UPDATE [{0}] ", table.Name);
+            c.CommandText = @""UPDATE [{0}] SET ", table.Name);
 
-                builder.Append(String.Join(", ", table.Columns.Select(x => "[" + x + "] @" + x)));
-                builder.Append("                              WHERE [Id] = @Id\"; ");
+                builder.Append(String.Join(", ", table.Columns.Select(x => "[" + x.Column + "] = @" + x.Column)));
+                builder.Append(" WHERE [Id] = @Id\";\r\n");
 
                 builder.AppendFormat(@"            AddSqlParameters(c, e);
         }}
@@ -332,9 +368,9 @@ namespace {0}
         {{
             c.CommandText = @""DELETE FROM[{0}] WHERE[Id] = @Id"";
             c.Parameters.Clear();
-            c.Parameters.AddWithValue(""@Id"", e.Id);
+            c.Parameters.AddWithValue(""@Id"", e.{1});
         }}
-", table.Name);
+", table.Name, table.PrimaryKey.Column);
 
                 foreach (var link in table.LinkEntities)
                 {

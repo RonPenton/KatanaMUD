@@ -2,6 +2,7 @@ using Spam;
 using System;
 using System.Data.SqlClient;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace KatanaMUD.Models
 {
@@ -11,12 +12,11 @@ namespace KatanaMUD.Models
         private GameEntities Context => (GameEntities)__context;
         private Int32 _Id;
         private String _Name;
-        private Int32 _HpMin;
-        private Int32 _HpMax;
         private String _Description;
 
         public ClassTemplate()
         {
+            Stats = new JsonContainer(this);
             Actors = new ParentChildRelationshipContainer<ClassTemplate, Actor, Guid>(this, child => child.ClassTemplate, (child, parent) => child.ClassTemplate= parent);
             ArmorTypes = new ObservableHashSet<ArmorType>();
 			ArmorTypes.ItemsAdded += ArmorTypes_ItemsAdded;
@@ -31,9 +31,8 @@ namespace KatanaMUD.Models
 
         public Int32 Id { get { return _Id; } set { _Id = value; this.Changed(); } }
         public String Name { get { return _Name; } set { _Name = value; this.Changed(); } }
-        public Int32 HpMin { get { return _HpMin; } set { _HpMin = value; this.Changed(); } }
-        public Int32 HpMax { get { return _HpMax; } set { _HpMax = value; this.Changed(); } }
         public String Description { get { return _Description; } set { _Description = value; this.Changed(); } }
+        public dynamic Stats { get; private set; }
         public ICollection<Actor> Actors { get; private set; }
         public ObservableHashSet<ArmorType> ArmorTypes { get; private set; }
         public ObservableHashSet<WeaponType> WeaponTypes { get; private set; }
@@ -43,10 +42,17 @@ namespace KatanaMUD.Models
             var entity = new ClassTemplate();
             entity._Id = reader.GetInt32(0);
             entity._Name = reader.GetString(1);
-            entity._HpMin = reader.GetInt32(2);
-            entity._HpMax = reader.GetInt32(3);
-            entity._Description = reader.GetSafeString(4);
+            entity._Description = reader.GetSafeString(2);
+            entity.Stats = new JsonContainer(entity);
+            entity.Stats.FromJson(reader.GetSafeString(3));
             return entity;
+        }
+
+        public override void LoadRelationships()
+        {
+            ArmorTypes.AddRange(Context.ClassTemplateArmorTypes.Where(x => x.Item1 == this.Id).Select(x => Context.ArmorTypes.Single(y => y.Id == x.Item2)), true);
+            WeaponTypes.AddRange(Context.ClassTemplateWeaponTypes.Where(x => x.Item1 == this.Id).Select(x => Context.WeaponTypes.Single(y => y.WepId == x.Item2)), true);
+            RaceTemplates.AddRange(Context.RaceClassRestrictions.Where(x => x.Item2 == this.Id).Select(x => Context.RaceTemplates.Single(y => y.Id == x.Item1)), true);
         }
 
         private static void AddSqlParameters(SqlCommand c, ClassTemplate e)
@@ -54,21 +60,21 @@ namespace KatanaMUD.Models
             c.Parameters.Clear();
             c.Parameters.AddWithValue("@Id", e.Id);
             c.Parameters.AddWithValue("@Name", e.Name);
-            c.Parameters.AddWithValue("@HpMin", e.HpMin);
-            c.Parameters.AddWithValue("@HpMax", e.HpMax);
             c.Parameters.AddWithValue("@Description", e.Description);
+            c.Parameters.AddWithValue("@JSONStats", e.Stats.ToJson());
         }
 
         public static void GenerateInsertCommand(SqlCommand c, ClassTemplate e)
         {
-            c.CommandText = @"INSERT INTO [ClassTemplate]([Id], [Name], [HpMin], [HpMax], [Description]
-                              VALUES (@Id, @Name, @HpMin, @HpMax, @Description)";
+            c.CommandText = @"INSERT INTO [ClassTemplate]([Id], [Name], [Description], [JSONStats]
+                              VALUES (@Id, @Name, @Description, @JSONStats)";
             AddSqlParameters(c, e);
         }
 
         public static void GenerateUpdateCommand(SqlCommand c, ClassTemplate e)
         {
-            c.CommandText = @"UPDATE [ClassTemplate] [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata, [KatanaMUD.EntityGenerator.ColumnMetadata] @KatanaMUD.EntityGenerator.ColumnMetadata                              WHERE [Id] = @Id";             AddSqlParameters(c, e);
+            c.CommandText = @"UPDATE [ClassTemplate] SET [Id] = @Id, [Name] = @Name, [Description] = @Description, [JSONStats] = @JSONStats WHERE [Id] = @Id";
+            AddSqlParameters(c, e);
         }
 
         public static void GenerateDeleteCommand(SqlCommand c, ClassTemplate e)
