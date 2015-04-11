@@ -18,41 +18,86 @@ var KMud;
             while (up(input)) {
             }
         });
+        $(".edit").focus(function (evt) {
+            var row = new Row($(evt.target).closest("div"));
+            row.input[0].previousValue = row.val();
+        }).change(function (evt) {
+            var row = new Row($(evt.target).closest("div"));
+            var start = row.input[0].previousValue;
+            var end = row.val();
+            var points = row.cpsCost(start, end);
+            if (points == NaN || points > cps()) {
+                row.val(start);
+            }
+            cps(points);
+        });
     });
     function down(input) {
         var row = input.closest("div");
-        var input = row.find("input[type='text']");
-        var current = parseInt(row.find(".current").val());
-        var val = parseInt(input.val()) - 1;
-        if (val < current)
+        var stats = new Row(row);
+        if (stats.val() < stats.current)
             return false;
-        var points = cpsPerPoint(row, val + 1);
-        input.val(val.toString());
-        $("#cps").val(String(parseInt($("#cps").val()) + points));
+        var newVal = stats.val() - 1;
+        var points = stats.cpsPerPoint(newVal + 1);
+        stats.val(newVal);
+        cps(points);
         return true;
     }
     function up(input) {
         var row = input.closest("div");
-        var input = row.find("input[type='text']");
-        var val = parseInt(input.val()) + 1;
-        var points = cpsPerPoint(row, val);
-        var cps = $("#cps").val();
-        if (points > cps)
+        var stats = new Row(row);
+        var newVal = stats.val() + 1;
+        var points = stats.cpsPerPoint(newVal);
+        if (points > cps() || newVal > stats.max)
             return false;
-        input.val(val.toString());
-        $("#cps").val(String(parseInt($("#cps").val()) - points));
+        stats.val(newVal);
+        cps(-points);
         return true;
     }
-    function cpsPerPoint(row, point) {
-        var initial = parseInt(row.find(".initial").val());
-        var difference = point - initial;
-        if (difference < 0)
-            throw new Error();
-        // 0 -> 0
-        // 1-10 -> 1
-        // 11-20 -> 2
-        // 21->30 -> 3
-        // etc
-        return Math.floor((difference + 9) / 10);
+    function cps(val) {
+        if (val !== undefined) {
+            $("#cps").val(String(parseInt($("#cps").val()) + val));
+        }
+        return parseInt($("#cps").val());
     }
+    var Row = (function () {
+        function Row(row) {
+            this.initial = parseInt(row.find(".initial").val());
+            this.current = parseInt(row.find(".current").val());
+            this.max = parseInt(row.find(".max").val());
+            this.input = row.find("input[type='text']");
+        }
+        Row.prototype.val = function (points) {
+            if (points !== undefined) {
+                this.input.val(String(points));
+            }
+            return parseInt(this.input.val());
+        };
+        Row.prototype.cpsPerPoint = function (point) {
+            var difference = point - this.initial;
+            if (difference < 0)
+                throw new Error();
+            // 0 -> 0
+            // 1-10 -> 1
+            // 11-20 -> 2
+            // 21->30 -> 3
+            // etc
+            return Math.floor((difference + 9) / 10);
+        };
+        Row.prototype.cpsCost = function (start, end) {
+            if (end < this.current || end > this.max)
+                return NaN;
+            var cost = 0;
+            while (end < start) {
+                cost -= this.cpsPerPoint(start);
+                start--;
+            }
+            while (end > start) {
+                cost += this.cpsPerPoint(start + 1);
+                start++;
+            }
+            return cost;
+        };
+        return Row;
+    })();
 })(KMud || (KMud = {}));
