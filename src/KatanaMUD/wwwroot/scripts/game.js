@@ -37,7 +37,6 @@ var KMud;
                     }
                 }
             });
-            ;
             $(window).mouseup(function (x) {
                 if (window.getSelection().toString().length == 0)
                     $("#InputBox").focus();

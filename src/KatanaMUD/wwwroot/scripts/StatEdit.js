@@ -28,14 +28,21 @@ var KMud;
             var points = row.cpsCost(start, end);
             if (points == NaN || points > cps()) {
                 row.val(start);
+                return;
             }
-            cps(points);
+            cps(-points);
+        }).click(function (evt) {
+            $(evt.target).select();
         });
+        if ($("#Name").is(":disabled"))
+            $("#Strength").select();
+        else
+            $("#Name").select();
     });
     function down(input) {
         var row = input.closest("div");
         var stats = new Row(row);
-        if (stats.val() < stats.current)
+        if (stats.val() == stats.current)
             return false;
         var newVal = stats.val() - 1;
         var points = stats.cpsPerPoint(newVal + 1);
@@ -64,7 +71,7 @@ var KMud;
         function Row(row) {
             this.initial = parseInt(row.find(".initial").val());
             this.current = parseInt(row.find(".current").val());
-            this.max = parseInt(row.find(".max").val());
+            this.max = parseInt(row.find(".maxval").val());
             this.input = row.find("input[type='text']");
         }
         Row.prototype.val = function (points) {

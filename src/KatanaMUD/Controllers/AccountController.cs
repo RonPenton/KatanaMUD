@@ -39,7 +39,7 @@ namespace KatanaMUD.Controllers
         [HttpPost]
         public IActionResult Register(RegisterModel model)
         {
-            var user = Game.Data.Users.SingleOrDefault(x => x.Id == model.Username);
+            var user = Game.Data.Users.SingleOrDefault(x => x.Id.Equals(model.Username, StringComparison.InvariantCultureIgnoreCase));
             if (user != null)
                 return View(model: "Username Taken");
 
@@ -60,7 +60,7 @@ namespace KatanaMUD.Controllers
         [HttpPost]
         public IActionResult Login(LoginModel model)
         {
-            var user = Game.Data.Users.SingleOrDefault(x => x.Id == model.Username);
+            var user = Game.Data.Users.SingleOrDefault(x => x.Id.Equals(model.Username, StringComparison.InvariantCultureIgnoreCase));
             if (user == null || user.LockoutEnd > DateTimeOffset.Now)
                 return View(model: "Login Failed");
 

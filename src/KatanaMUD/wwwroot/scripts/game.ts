@@ -55,7 +55,7 @@ module KMud {
                     }
                 }
 
-            });;
+            });
             $(window).mouseup(x => {
                 if (window.getSelection().toString().length == 0)
                     $("#InputBox").focus();

@@ -21,7 +21,7 @@
         else
         {
             @Html.HiddenFor(x => x.Name);
-            <input type="text" disabled value="@Model.Surname" />
+            <input type="text" disabled value="@Model.Name" />
         }
     </div>
     <div>
@@ -30,10 +30,12 @@
     </div>
     <div>
         <label for="Race">Race</label>
+        <input type="hidden" name="RaceTemplateId" value="@Model.RaceTemplate.Id" />
         <input type="text" disabled value="@Model.RaceTemplate.Name" />
     </div>
     <div>
         <label for="Class">Class</label>
+        <input type="hidden" name="ClassTemplateId" value="@Model.ClassTemplate.Id" />
         <input type="text" disabled value="@Model.ClassTemplate.Name" />
     </div>
     <div>
@@ -48,12 +50,13 @@
                 <label>@label</label>
                 <input type="hidden" class="initial" value="@initial" />
                 <input type="hidden" class="current" value="@current" />
+                <input type="hidden" class="maxval" value="@max" />
                 <label class="range">@String.Format("{0}-{1}", initial, max)</label>
-                <input type="button" class="reset" value="Reset" />
-                <input type="button" class="down" value="-" />
-                <input type="text" class="edit" value="@current" />
-                <input type="button" class="up" value="+" />
-                <input type="button" class="max" value="Max" />
+                <input type="button" class="reset" value="Reset" tabindex="-100" />
+                <input type="button" class="down" value="-" tabindex="-100" />
+                <input type="text" class="edit" value="@current" name="@label" id="@label" />
+                <input type="button" class="up" value="+" tabindex="-100" />
+                <input type="button" class="max" value="Max" tabindex="-100" />
             </div>
     }
 
@@ -65,4 +68,5 @@
         @EditControl(Model.RaceTemplate.Stats.Health, Model.RaceTemplate.Stats.HealthCap, Model.Stats.Health, "Health")
         @EditControl(Model.RaceTemplate.Stats.Charm, Model.RaceTemplate.Stats.CharmCap, Model.Stats.Charm, "Charm")
     </div>
+    <input type="submit" value="Next" />
 }

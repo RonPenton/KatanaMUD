@@ -53,7 +53,7 @@ namespace Spam
                 Add(item, fromLoad);
         }
 
-        internal void Add(T item, bool fromLoad)
+        public void Add(T item, bool fromLoad = false)
         {
             // Set the key if it's not already set.
             if (item.Key.Equals(default(K)))

@@ -10,6 +10,13 @@ namespace Spam
         IEntity _owner;
         Dictionary<string, object> _dictionary = new Dictionary<string, object>();
 
+        public object this[string key] {
+            get
+            {
+                return _dictionary[key];
+            }
+        }
+
         public JsonContainer(IEntity owner)
         {
             this._owner = owner;
