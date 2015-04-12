@@ -14,10 +14,11 @@ namespace KatanaMUD.Models
         private String _Name;
         private String _Surname;
         private Int32 _ActorType;
-        private Int32 _RoomId;
         private Int32 _CharacterPoints;
         private String _UserId;
         private User _User;
+        private Int32 _RoomId;
+        private Room _Room;
         private Int32? _ClassTemplateId;
         private ClassTemplate _ClassTemplate;
         private Int32? _RaceTemplateId;
@@ -32,7 +33,6 @@ namespace KatanaMUD.Models
         public String Name { get { return _Name; } set { _Name = value; this.Changed(); } }
         public String Surname { get { return _Surname; } set { _Surname = value; this.Changed(); } }
         public Int32 ActorType { get { return _ActorType; } set { _ActorType = value; this.Changed(); } }
-        public Int32 RoomId { get { return _RoomId; } set { _RoomId = value; this.Changed(); } }
         public Int32 CharacterPoints { get { return _CharacterPoints; } set { _CharacterPoints = value; this.Changed(); } }
         public dynamic Stats { get; private set; }
         public User User {
@@ -42,6 +42,16 @@ namespace KatanaMUD.Models
                 ChangeParent(value, ref _User, 
                     (User parent, Actor child) => parent.Actors.Remove(child), 
                     (User parent, Actor child) => parent.Actors.Add(child));
+            }
+        }
+
+        public Room Room {
+            get { return _Room; }
+            set
+            {
+                ChangeParent(value, ref _Room, 
+                    (Room parent, Actor child) => parent.Actors.Remove(child), 
+                    (Room parent, Actor child) => parent.Actors.Add(child));
             }
         }
 
@@ -85,6 +95,7 @@ namespace KatanaMUD.Models
         public override void LoadRelationships()
         {
             User = Context.Users.SingleOrDefault(x => x.Id == _UserId);
+            Room = Context.Rooms.Single(x => x.Id == _RoomId);
             ClassTemplate = Context.ClassTemplates.SingleOrDefault(x => x.Id == _ClassTemplateId);
             RaceTemplate = Context.RaceTemplates.SingleOrDefault(x => x.Id == _RaceTemplateId);
         }
@@ -97,7 +108,7 @@ namespace KatanaMUD.Models
             c.Parameters.AddWithValue("@Surname", e.Surname);
             c.Parameters.AddWithValue("@ActorType", e.ActorType);
             c.Parameters.AddWithValue("@UserId", e.User?.Id);
-            c.Parameters.AddWithValue("@RoomId", e.RoomId);
+            c.Parameters.AddWithValue("@RoomId", e.Room?.Id);
             c.Parameters.AddWithValue("@ClassTemplateId", e.ClassTemplate?.Id);
             c.Parameters.AddWithValue("@RaceTemplateId", e.RaceTemplate?.Id);
             c.Parameters.AddWithValue("@CharacterPoints", e.CharacterPoints);

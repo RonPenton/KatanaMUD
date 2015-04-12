@@ -11,7 +11,8 @@ namespace KatanaMUD.Importer
 {
 	public static class Btrieve
 	{
-		[DllImport("WBTRV32.dll", CharSet = CharSet.Ansi)]
+        // ***************************************************************************************************************************
+        [DllImport("WBTRV32.dll", CharSet = CharSet.Ansi)]
 		public static extern short BTRCALL(ushort operation,
 			[MarshalAs(UnmanagedType.LPArray, SizeConst = 128)] byte[] posBlk,
 			[MarshalAs(UnmanagedType.Struct, SizeConst = 255)] ref RaceBuffer databuffer,
@@ -64,6 +65,7 @@ namespace KatanaMUD.Importer
 			return list.Select(x => convert(x)).ToList();
 		}
 
+        // ***************************************************************************************************************************
 		[DllImport("WBTRV32.dll", CharSet = CharSet.Ansi)]
 		public static extern short BTRCALL(ushort operation,
 			[MarshalAs(UnmanagedType.LPArray, SizeConst = 128)] byte[] posBlk,
@@ -115,7 +117,59 @@ namespace KatanaMUD.Importer
 			return list.Select(x => convert(x)).ToList();
 		}
 
-		public static string ErrorCode(int nStatus)
+        // ***************************************************************************************************************************
+        [DllImport("WBTRV32.dll", CharSet = CharSet.Ansi)]
+        public static extern short BTRCALL(ushort operation,
+            [MarshalAs(UnmanagedType.LPArray, SizeConst = 128)] byte[] posBlk,
+            [MarshalAs(UnmanagedType.Struct, SizeConst = 255)] ref RoomBuffer databuffer,
+            ref int dataLength,
+            [MarshalAs(UnmanagedType.LPArray, SizeConst = 255)] char[] keyBffer,
+            ushort keyLength, ushort keyNum);
+        public static List<RoomBuffer> GetAllRooms(string fileName)
+        {
+            var dataBuffer = new RoomBuffer();
+            var list = new List<RoomBuffer>();
+            Func<RoomBuffer> newFunc = () => new RoomBuffer();
+
+            // Yes, yes. Copied Code. How horrible. There's really no good alternative to DllImport-interfacing code though. Dynamic doesn't work,
+            // templates don't work, etc. So. Given that the MajorMUD database format will never change in the future (it's been dead 10 years!),
+            // I'm ok with copied code. Huzzah.
+            byte[] posBlock = new byte[128];
+            char[] keyBuffer = fileName.ToCharArray();
+            int bufferLength = 1544; //System.Runtime.InteropServices.Marshal.SizeOf(dataBuffer);
+
+            int status = Btrieve.BTRCALL(Btrieve.BOPEN, posBlock, ref dataBuffer, ref bufferLength, keyBuffer, (ushort)keyBuffer.Length, 0);
+
+            if (status == 0)
+            {
+                status = Btrieve.BTRCALL(Btrieve.BGETFIRST, posBlock, ref dataBuffer, ref bufferLength, keyBuffer, (ushort)keyBuffer.Length, 0);
+                if (status == 0)
+                    list.Add(dataBuffer);
+                else
+                    throw new InvalidOperationException(ErrorCode(status));
+
+                // Get subsequent records
+                while (status == 0) // BReturnCodes.END_OF_FILE or an error will occur
+                {
+                    dataBuffer = newFunc();
+                    status = Btrieve.BTRCALL(Btrieve.BGETNEXT, posBlock, ref dataBuffer, ref bufferLength, keyBuffer, (ushort)keyBuffer.Length, 0);
+
+                    if (status == 0)
+                        list.Add(dataBuffer);
+                    else if (status != 9)
+                        throw new InvalidOperationException(ErrorCode(status));
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException(ErrorCode(status));
+            }
+
+            return list;
+        }
+
+        // ***************************************************************************************************************************
+        public static string ErrorCode(int nStatus)
 		{
 			string BtrieveErrorCode = null;
 			switch (nStatus)

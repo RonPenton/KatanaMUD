@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using CSharp;
 using KatanaMUD.Models;
+using System.Text.RegularExpressions;
 
 namespace KatanaMUD.Importer
 {
@@ -26,13 +27,19 @@ namespace KatanaMUD.Importer
             var context = new GameEntities("Server=localhost;Database=KatanaMUD;integrated security=True;");
             context.LoadFromDatabase();
 
-            var races = Btrieve.GetAllRaces(new FileInfo(@"C:\Users\spsadmin\Documents\MMUDDats\wccrace2.dat").FullName, context.RaceTemplates);
-			var classes = Btrieve.GetAllClasses(new FileInfo(@"C:\Users\spsadmin\Documents\MMUDDats\wccclas2.dat").FullName, context.ClassTemplates);
+            //var races = Btrieve.GetAllRaces(new FileInfo(@"C:\Users\spsadmin\Documents\MMUDDats\wccrace2.dat").FullName, context.RaceTemplates);
+            //var classes = Btrieve.GetAllClasses(new FileInfo(@"C:\Users\spsadmin\Documents\MMUDDats\wccclas2.dat").FullName, context.ClassTemplates);
+
+
+            var rooms = Btrieve.GetAllRooms(new FileInfo(@"C:\CleanP\wccmp002.dat").FullName);
+
+            Regex r = new Regex("\\s+");
+            var descriptions = rooms.Select(x => r.Replace(x.Description, " ")).Distinct(StringComparer.InvariantCultureIgnoreCase).OrderBy(x => x).ToList();
 
 
             //context.RaceTemplates.AddRange(races, true);
             //context.ClassTemplates.AddRange(classes, true);
-            context.SaveChanges();
+            //context.SaveChanges();
 		}
 	}
 }

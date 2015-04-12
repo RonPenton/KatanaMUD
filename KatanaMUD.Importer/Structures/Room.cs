@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KatanaMUD.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -15,9 +16,21 @@ namespace KatanaMUD.Importer.Structures
 		public char[] Ignore00;
 		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 53)]
 		public char[] Name;
-		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 497)]
-		public char[] RoomDescription;
-		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 13)]
+		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 71)]
+		public char[] RoomDescription1;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 71)]
+        public char[] RoomDescription2;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 71)]
+        public char[] RoomDescription3;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 71)]
+        public char[] RoomDescription4;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 71)]
+        public char[] RoomDescription5;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 71)]
+        public char[] RoomDescription6;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 71)]
+        public char[] RoomDescription7;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 13)]
 		public char[] AnsiMap;
 		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
 		public int[] RoomExit;
@@ -87,5 +100,66 @@ namespace KatanaMUD.Importer.Structures
 		public short unknown70;
 		public byte NumMons;
 		public byte unknown71;
-	}
+
+        public string Description
+        {
+            get
+            {
+                return (Clean(RoomDescription1) +
+                    Clean(RoomDescription2) +
+                    Clean(RoomDescription3) +
+                    Clean(RoomDescription4) +
+                    Clean(RoomDescription5) +
+                    Clean(RoomDescription6) +
+                    Clean(RoomDescription7)).Trim();
+            }
+        }
+
+        private string Clean(char[] input)
+        {
+            return new String(input.TakeWhile(x => x != '\0').ToArray()) + " ";
+        }
+
+        public Room ToRoom(Room room)
+        {
+            if (room == null)
+            {
+                room = new Room();
+            }
+
+            room.Id = GetRoomNumber(MapNumber, RoomNumber);
+            room.Name = new string(Name).Replace("\0", "").Trim();
+
+            SetRoom(0, room, (x, y) => x.NorthExit = y);
+            SetRoom(1, room, (x, y) => x.SouthExit = y);
+            SetRoom(2, room, (x, y) => x.EastExit = y);
+            SetRoom(3, room, (x, y) => x.WestExit = y);
+            SetRoom(4, room, (x, y) => x.NorthEastExit = y);
+            SetRoom(5, room, (x, y) => x.NorthWestExit = y);
+            SetRoom(6, room, (x, y) => x.SouthEastExit = y);
+            SetRoom(7, room, (x, y) => x.SouthWestExit = y);
+            SetRoom(8, room, (x, y) => x.UpExit = y);
+            SetRoom(9, room, (x, y) => x.DownExit = y);
+
+            return room;
+        }
+
+        private void SetRoom(int exitIndex, Room room, Action<Room, int> setter)
+        {
+            if (this.RoomTypes[exitIndex] == 0 && this.RoomExit[exitIndex] != 0)
+            {
+                setter(room, GetRoomNumber(MapNumber, RoomExit[exitIndex]));
+            }
+            if (this.RoomTypes[exitIndex] == 8 && this.RoomExit[exitIndex] != 0)
+            {
+                setter(room, GetRoomNumber(this.Para1[exitIndex], this.RoomExit[exitIndex]));
+            }
+        }
+
+
+        public static int GetRoomNumber(int mapNumber, int roomNumber)
+        {
+            return mapNumber * 10000 + roomNumber;
+        }
+    }
 }
