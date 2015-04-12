@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace KatanaMUD.Importer.Structures
@@ -101,17 +102,23 @@ namespace KatanaMUD.Importer.Structures
 		public byte NumMons;
 		public byte unknown71;
 
+        public override string ToString()
+        {
+            return String.Format("({0},{1}) {2}", MapNumber, RoomNumber, new String(Name).Trim());
+        }
+
         public string Description
         {
             get
             {
-                return (Clean(RoomDescription1) +
+                Regex r = new Regex("\\s+");
+                return r.Replace((Clean(RoomDescription1) +
                     Clean(RoomDescription2) +
                     Clean(RoomDescription3) +
                     Clean(RoomDescription4) +
                     Clean(RoomDescription5) +
                     Clean(RoomDescription6) +
-                    Clean(RoomDescription7)).Trim();
+                    Clean(RoomDescription7)).Trim(), " ");
             }
         }
 
@@ -128,7 +135,7 @@ namespace KatanaMUD.Importer.Structures
             }
 
             room.Id = GetRoomNumber(MapNumber, RoomNumber);
-            room.Name = new string(Name).Replace("\0", "").Trim();
+            room.Name = new string(Name.TakeWhile(x => x!= '\0').ToArray()).Trim();
 
             SetRoom(0, room, (x, y) => x.NorthExit = y);
             SetRoom(1, room, (x, y) => x.SouthExit = y);
@@ -159,7 +166,7 @@ namespace KatanaMUD.Importer.Structures
 
         public static int GetRoomNumber(int mapNumber, int roomNumber)
         {
-            return mapNumber * 10000 + roomNumber;
+            return mapNumber * 100000 + roomNumber;
         }
     }
 }

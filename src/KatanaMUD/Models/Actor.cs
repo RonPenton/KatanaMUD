@@ -103,21 +103,21 @@ namespace KatanaMUD.Models
         private static void AddSqlParameters(SqlCommand c, Actor e)
         {
             c.Parameters.Clear();
-            c.Parameters.AddWithValue("@Id", e.Id);
-            c.Parameters.AddWithValue("@Name", e.Name);
-            c.Parameters.AddWithValue("@Surname", e.Surname);
-            c.Parameters.AddWithValue("@ActorType", e.ActorType);
-            c.Parameters.AddWithValue("@UserId", e.User?.Id);
-            c.Parameters.AddWithValue("@RoomId", e.Room?.Id);
-            c.Parameters.AddWithValue("@ClassTemplateId", e.ClassTemplate?.Id);
-            c.Parameters.AddWithValue("@RaceTemplateId", e.RaceTemplate?.Id);
-            c.Parameters.AddWithValue("@CharacterPoints", e.CharacterPoints);
+            c.Parameters.AddWithValue("@Id", (object)e.Id ?? DBNull.Value);
+            c.Parameters.AddWithValue("@Name", (object)e.Name ?? DBNull.Value);
+            c.Parameters.AddWithValue("@Surname", (object)e.Surname ?? DBNull.Value);
+            c.Parameters.AddWithValue("@ActorType", (object)e.ActorType ?? DBNull.Value);
+            c.Parameters.AddWithValue("@UserId", (object)e.User?.Id ?? DBNull.Value);
+            c.Parameters.AddWithValue("@RoomId", (object)e.Room?.Id ?? DBNull.Value);
+            c.Parameters.AddWithValue("@ClassTemplateId", (object)e.ClassTemplate?.Id ?? DBNull.Value);
+            c.Parameters.AddWithValue("@RaceTemplateId", (object)e.RaceTemplate?.Id ?? DBNull.Value);
+            c.Parameters.AddWithValue("@CharacterPoints", (object)e.CharacterPoints ?? DBNull.Value);
             c.Parameters.AddWithValue("@JSONStats", e.Stats.ToJson());
         }
 
         public static void GenerateInsertCommand(SqlCommand c, Actor e)
         {
-            c.CommandText = @"INSERT INTO [Actor]([Id], [Name], [Surname], [ActorType], [UserId], [RoomId], [ClassTemplateId], [RaceTemplateId], [CharacterPoints], [JSONStats]
+            c.CommandText = @"INSERT INTO [Actor]([Id], [Name], [Surname], [ActorType], [UserId], [RoomId], [ClassTemplateId], [RaceTemplateId], [CharacterPoints], [JSONStats])
                               VALUES (@Id, @Name, @Surname, @ActorType, @UserId, @RoomId, @ClassTemplateId, @RaceTemplateId, @CharacterPoints, @JSONStats)";
             AddSqlParameters(c, e);
         }

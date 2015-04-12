@@ -48,15 +48,15 @@ namespace KatanaMUD.Models
         private static void AddSqlParameters(SqlCommand c, RaceTemplate e)
         {
             c.Parameters.Clear();
-            c.Parameters.AddWithValue("@Id", e.Id);
-            c.Parameters.AddWithValue("@Name", e.Name);
-            c.Parameters.AddWithValue("@Description", e.Description);
+            c.Parameters.AddWithValue("@Id", (object)e.Id ?? DBNull.Value);
+            c.Parameters.AddWithValue("@Name", (object)e.Name ?? DBNull.Value);
+            c.Parameters.AddWithValue("@Description", (object)e.Description ?? DBNull.Value);
             c.Parameters.AddWithValue("@JSONStats", e.Stats.ToJson());
         }
 
         public static void GenerateInsertCommand(SqlCommand c, RaceTemplate e)
         {
-            c.CommandText = @"INSERT INTO [RaceTemplate]([Id], [Name], [Description], [JSONStats]
+            c.CommandText = @"INSERT INTO [RaceTemplate]([Id], [Name], [Description], [JSONStats])
                               VALUES (@Id, @Name, @Description, @JSONStats)";
             AddSqlParameters(c, e);
         }

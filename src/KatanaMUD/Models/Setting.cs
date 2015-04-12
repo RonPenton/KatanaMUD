@@ -34,13 +34,13 @@ namespace KatanaMUD.Models
         private static void AddSqlParameters(SqlCommand c, Setting e)
         {
             c.Parameters.Clear();
-            c.Parameters.AddWithValue("@Id", e.Id);
-            c.Parameters.AddWithValue("@Value", e.Value);
+            c.Parameters.AddWithValue("@Id", (object)e.Id ?? DBNull.Value);
+            c.Parameters.AddWithValue("@Value", (object)e.Value ?? DBNull.Value);
         }
 
         public static void GenerateInsertCommand(SqlCommand c, Setting e)
         {
-            c.CommandText = @"INSERT INTO [Setting]([Id], [Value]
+            c.CommandText = @"INSERT INTO [Setting]([Id], [Value])
                               VALUES (@Id, @Value)";
             AddSqlParameters(c, e);
         }

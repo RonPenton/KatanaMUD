@@ -22,7 +22,7 @@ namespace KatanaMUD.Models
         private Int32? _SouthWestExit;
         private Int32? _UpExit;
         private Int32? _DownExit;
-        private Int32 _RegionId;
+        private Int32? _RegionId;
         private Region _Region;
         private Int32 _TextBlockId;
         private TextBlock _TextBlock;
@@ -69,7 +69,7 @@ namespace KatanaMUD.Models
         {
             var entity = new Room();
             entity._Id = reader.GetInt32(0);
-            entity._RegionId = reader.GetInt32(1);
+            entity._RegionId = reader.GetSafeInt32(1);
             entity._Name = reader.GetString(2);
             entity._TextBlockId = reader.GetInt32(3);
             entity._NorthExit = reader.GetSafeInt32(4);
@@ -87,32 +87,32 @@ namespace KatanaMUD.Models
 
         public override void LoadRelationships()
         {
-            Region = Context.Regions.Single(x => x.Id == _RegionId);
+            Region = Context.Regions.SingleOrDefault(x => x.Id == _RegionId);
             TextBlock = Context.TextBlocks.Single(x => x.Id == _TextBlockId);
         }
 
         private static void AddSqlParameters(SqlCommand c, Room e)
         {
             c.Parameters.Clear();
-            c.Parameters.AddWithValue("@Id", e.Id);
-            c.Parameters.AddWithValue("@RegionId", e.Region?.Id);
-            c.Parameters.AddWithValue("@Name", e.Name);
-            c.Parameters.AddWithValue("@TextBlockId", e.TextBlock?.Id);
-            c.Parameters.AddWithValue("@NorthExit", e.NorthExit);
-            c.Parameters.AddWithValue("@SouthExit", e.SouthExit);
-            c.Parameters.AddWithValue("@EastExit", e.EastExit);
-            c.Parameters.AddWithValue("@WestExit", e.WestExit);
-            c.Parameters.AddWithValue("@NorthEastExit", e.NorthEastExit);
-            c.Parameters.AddWithValue("@NorthWestExit", e.NorthWestExit);
-            c.Parameters.AddWithValue("@SouthEastExit", e.SouthEastExit);
-            c.Parameters.AddWithValue("@SouthWestExit", e.SouthWestExit);
-            c.Parameters.AddWithValue("@UpExit", e.UpExit);
-            c.Parameters.AddWithValue("@DownExit", e.DownExit);
+            c.Parameters.AddWithValue("@Id", (object)e.Id ?? DBNull.Value);
+            c.Parameters.AddWithValue("@RegionId", (object)e.Region?.Id ?? DBNull.Value);
+            c.Parameters.AddWithValue("@Name", (object)e.Name ?? DBNull.Value);
+            c.Parameters.AddWithValue("@TextBlockId", (object)e.TextBlock?.Id ?? DBNull.Value);
+            c.Parameters.AddWithValue("@NorthExit", (object)e.NorthExit ?? DBNull.Value);
+            c.Parameters.AddWithValue("@SouthExit", (object)e.SouthExit ?? DBNull.Value);
+            c.Parameters.AddWithValue("@EastExit", (object)e.EastExit ?? DBNull.Value);
+            c.Parameters.AddWithValue("@WestExit", (object)e.WestExit ?? DBNull.Value);
+            c.Parameters.AddWithValue("@NorthEastExit", (object)e.NorthEastExit ?? DBNull.Value);
+            c.Parameters.AddWithValue("@NorthWestExit", (object)e.NorthWestExit ?? DBNull.Value);
+            c.Parameters.AddWithValue("@SouthEastExit", (object)e.SouthEastExit ?? DBNull.Value);
+            c.Parameters.AddWithValue("@SouthWestExit", (object)e.SouthWestExit ?? DBNull.Value);
+            c.Parameters.AddWithValue("@UpExit", (object)e.UpExit ?? DBNull.Value);
+            c.Parameters.AddWithValue("@DownExit", (object)e.DownExit ?? DBNull.Value);
         }
 
         public static void GenerateInsertCommand(SqlCommand c, Room e)
         {
-            c.CommandText = @"INSERT INTO [Room]([Id], [RegionId], [Name], [TextBlockId], [NorthExit], [SouthExit], [EastExit], [WestExit], [NorthEastExit], [NorthWestExit], [SouthEastExit], [SouthWestExit], [UpExit], [DownExit]
+            c.CommandText = @"INSERT INTO [Room]([Id], [RegionId], [Name], [TextBlockId], [NorthExit], [SouthExit], [EastExit], [WestExit], [NorthEastExit], [NorthWestExit], [SouthEastExit], [SouthWestExit], [UpExit], [DownExit])
                               VALUES (@Id, @RegionId, @Name, @TextBlockId, @NorthExit, @SouthExit, @EastExit, @WestExit, @NorthEastExit, @NorthWestExit, @SouthEastExit, @SouthWestExit, @UpExit, @DownExit)";
             AddSqlParameters(c, e);
         }

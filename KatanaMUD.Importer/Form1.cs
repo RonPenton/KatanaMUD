@@ -34,12 +34,25 @@ namespace KatanaMUD.Importer
             var rooms = Btrieve.GetAllRooms(new FileInfo(@"C:\CleanP\wccmp002.dat").FullName);
 
             Regex r = new Regex("\\s+");
-            var descriptions = rooms.Select(x => r.Replace(x.Description, " ")).Distinct(StringComparer.InvariantCultureIgnoreCase).OrderBy(x => x).ToList();
+            var descriptions = rooms.GroupBy(x => x.Description).ToList();//.OrderBy(x => x.Key).ToList();
+
+            foreach (var group in descriptions)
+            {
+                var textBlock = context.TextBlocks.New();
+                textBlock.Text = group.Key;
+
+                foreach (var room in group)
+                {
+                    var dbRoom = room.ToRoom(null);
+                    dbRoom.TextBlock = textBlock;
+                    context.Rooms.Add(dbRoom, false);
+                }
+            }
 
 
             //context.RaceTemplates.AddRange(races, true);
             //context.ClassTemplates.AddRange(classes, true);
-            //context.SaveChanges();
+            context.SaveChanges();
 		}
 	}
 }

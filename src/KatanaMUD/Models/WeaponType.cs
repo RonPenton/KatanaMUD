@@ -39,13 +39,13 @@ namespace KatanaMUD.Models
         private static void AddSqlParameters(SqlCommand c, WeaponType e)
         {
             c.Parameters.Clear();
-            c.Parameters.AddWithValue("@Id", e.Id);
-            c.Parameters.AddWithValue("@Name", e.Name);
+            c.Parameters.AddWithValue("@Id", (object)e.Id ?? DBNull.Value);
+            c.Parameters.AddWithValue("@Name", (object)e.Name ?? DBNull.Value);
         }
 
         public static void GenerateInsertCommand(SqlCommand c, WeaponType e)
         {
-            c.CommandText = @"INSERT INTO [WeaponType]([Id], [Name]
+            c.CommandText = @"INSERT INTO [WeaponType]([Id], [Name])
                               VALUES (@Id, @Name)";
             AddSqlParameters(c, e);
         }

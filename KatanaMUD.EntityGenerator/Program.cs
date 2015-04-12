@@ -332,11 +332,11 @@ namespace {0}
                     }
                     else if (column.ForeignKeyTable != null)
                     {
-                        builder.AppendFormat("            c.Parameters.AddWithValue(\"@{0}\", e.{1}?.Id);\r\n", column.Column, column.ForeignKeyTable);
+                        builder.AppendFormat("            c.Parameters.AddWithValue(\"@{0}\", (object)e.{1}?.Id ?? DBNull.Value);\r\n", column.Column, column.ForeignKeyTable);
                     }
                     else
                     {
-                        builder.AppendFormat("            c.Parameters.AddWithValue(\"@{0}\", e.{0});\r\n", column.Column);
+                        builder.AppendFormat("            c.Parameters.AddWithValue(\"@{0}\", (object)e.{0} ?? DBNull.Value);\r\n", column.Column);
                     }
                 }
 
@@ -346,7 +346,7 @@ namespace {0}
         {{
             c.CommandText = @""INSERT INTO [{0}](", table.Name);
 
-                builder.Append(String.Join(", ", table.Columns.Select(x => "[" + x.Column + "]")) + "\r\n");
+                builder.Append(String.Join(", ", table.Columns.Select(x => "[" + x.Column + "]")) + ")\r\n");
                 builder.Append("                              VALUES (");
                 builder.Append(String.Join(", ", table.Columns.Select(x => "@" + x.Column)));
                 builder.Append(@")"";

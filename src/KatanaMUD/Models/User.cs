@@ -45,16 +45,16 @@ namespace KatanaMUD.Models
         private static void AddSqlParameters(SqlCommand c, User e)
         {
             c.Parameters.Clear();
-            c.Parameters.AddWithValue("@Id", e.Id);
-            c.Parameters.AddWithValue("@AccessFailedCount", e.AccessFailedCount);
-            c.Parameters.AddWithValue("@LockoutEnd", e.LockoutEnd);
-            c.Parameters.AddWithValue("@PasswordHash", e.PasswordHash);
-            c.Parameters.AddWithValue("@IsConfirmed", e.IsConfirmed);
+            c.Parameters.AddWithValue("@Id", (object)e.Id ?? DBNull.Value);
+            c.Parameters.AddWithValue("@AccessFailedCount", (object)e.AccessFailedCount ?? DBNull.Value);
+            c.Parameters.AddWithValue("@LockoutEnd", (object)e.LockoutEnd ?? DBNull.Value);
+            c.Parameters.AddWithValue("@PasswordHash", (object)e.PasswordHash ?? DBNull.Value);
+            c.Parameters.AddWithValue("@IsConfirmed", (object)e.IsConfirmed ?? DBNull.Value);
         }
 
         public static void GenerateInsertCommand(SqlCommand c, User e)
         {
-            c.CommandText = @"INSERT INTO [User]([Id], [AccessFailedCount], [LockoutEnd], [PasswordHash], [IsConfirmed]
+            c.CommandText = @"INSERT INTO [User]([Id], [AccessFailedCount], [LockoutEnd], [PasswordHash], [IsConfirmed])
                               VALUES (@Id, @AccessFailedCount, @LockoutEnd, @PasswordHash, @IsConfirmed)";
             AddSqlParameters(c, e);
         }
