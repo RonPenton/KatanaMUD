@@ -1,6 +1,6 @@
 ﻿USE [KatanaMUD]
 GO
-/****** Object:  Table [dbo].[Actor]    Script Date: 4/10/2015 7:59:26 AM ******/
+/****** Object:  Table [dbo].[Actor]    Script Date: 4/13/2015 8:45:56 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -23,7 +23,7 @@ CREATE TABLE [dbo].[Actor](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[ArmorType]    Script Date: 4/10/2015 7:59:26 AM ******/
+/****** Object:  Table [dbo].[ArmorType]    Script Date: 4/13/2015 8:45:56 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -38,7 +38,7 @@ CREATE TABLE [dbo].[ArmorType](
 ) ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[ClassTemplate]    Script Date: 4/10/2015 7:59:26 AM ******/
+/****** Object:  Table [dbo].[ClassTemplate]    Script Date: 4/13/2015 8:45:56 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -55,7 +55,7 @@ CREATE TABLE [dbo].[ClassTemplate](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[ClassTemplateArmorType]    Script Date: 4/10/2015 7:59:26 AM ******/
+/****** Object:  Table [dbo].[ClassTemplateArmorType]    Script Date: 4/13/2015 8:45:56 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -71,7 +71,7 @@ CREATE TABLE [dbo].[ClassTemplateArmorType](
 ) ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[ClassTemplateWeaponType]    Script Date: 4/10/2015 7:59:26 AM ******/
+/****** Object:  Table [dbo].[ClassTemplateWeaponType]    Script Date: 4/13/2015 8:45:56 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -87,7 +87,7 @@ CREATE TABLE [dbo].[ClassTemplateWeaponType](
 ) ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[RaceClassRestriction]    Script Date: 4/10/2015 7:59:26 AM ******/
+/****** Object:  Table [dbo].[RaceClassRestriction]    Script Date: 4/13/2015 8:45:56 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -103,7 +103,7 @@ CREATE TABLE [dbo].[RaceClassRestriction](
 ) ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[RaceTemplate]    Script Date: 4/10/2015 7:59:26 AM ******/
+/****** Object:  Table [dbo].[RaceTemplate]    Script Date: 4/13/2015 8:45:56 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -120,7 +120,79 @@ CREATE TABLE [dbo].[RaceTemplate](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[User]    Script Date: 4/10/2015 7:59:26 AM ******/
+/****** Object:  Table [dbo].[Region]    Script Date: 4/13/2015 8:45:56 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Region](
+	[Id] [int] NOT NULL,
+	[Name] [nvarchar](50) NOT NULL,
+ CONSTRAINT [PK_Region] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Room]    Script Date: 4/13/2015 8:45:56 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Room](
+	[Id] [int] NOT NULL,
+	[RegionId] [int] NULL,
+	[Name] [nvarchar](60) NOT NULL,
+	[TextBlockId] [int] NOT NULL,
+	[NorthExit] [int] NULL,
+	[SouthExit] [int] NULL,
+	[EastExit] [int] NULL,
+	[WestExit] [int] NULL,
+	[NorthEastExit] [int] NULL,
+	[NorthWestExit] [int] NULL,
+	[SouthEastExit] [int] NULL,
+	[SouthWestExit] [int] NULL,
+	[UpExit] [int] NULL,
+	[DownExit] [int] NULL,
+ CONSTRAINT [PK_Room] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[Setting]    Script Date: 4/13/2015 8:45:56 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Setting](
+	[Id] [nvarchar](50) NOT NULL,
+	[Value] [nvarchar](max) NOT NULL,
+ CONSTRAINT [PK_Setting] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[TextBlock]    Script Date: 4/13/2015 8:45:56 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[TextBlock](
+	[Id] [int] NOT NULL,
+	[Text] [nvarchar](max) NOT NULL,
+ CONSTRAINT [PK_TextBlock] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[User]    Script Date: 4/13/2015 8:45:56 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -138,7 +210,7 @@ CREATE TABLE [dbo].[User](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 
 GO
-/****** Object:  Table [dbo].[WeaponType]    Script Date: 4/10/2015 7:59:26 AM ******/
+/****** Object:  Table [dbo].[WeaponType]    Script Date: 4/13/2015 8:45:56 AM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -162,6 +234,11 @@ ALTER TABLE [dbo].[Actor]  WITH CHECK ADD  CONSTRAINT [FK_Actor_RaceTemplate] FO
 REFERENCES [dbo].[RaceTemplate] ([Id])
 GO
 ALTER TABLE [dbo].[Actor] CHECK CONSTRAINT [FK_Actor_RaceTemplate]
+GO
+ALTER TABLE [dbo].[Actor]  WITH CHECK ADD  CONSTRAINT [FK_Actor_Room] FOREIGN KEY([RoomId])
+REFERENCES [dbo].[Room] ([Id])
+GO
+ALTER TABLE [dbo].[Actor] CHECK CONSTRAINT [FK_Actor_Room]
 GO
 ALTER TABLE [dbo].[Actor]  WITH CHECK ADD  CONSTRAINT [FK_Actor_User] FOREIGN KEY([UserId])
 REFERENCES [dbo].[User] ([Id])
@@ -197,4 +274,14 @@ ALTER TABLE [dbo].[RaceClassRestriction]  WITH CHECK ADD  CONSTRAINT [FK_RaceCla
 REFERENCES [dbo].[RaceTemplate] ([Id])
 GO
 ALTER TABLE [dbo].[RaceClassRestriction] CHECK CONSTRAINT [FK_RaceClassRestrictions_RaceTemplate]
+GO
+ALTER TABLE [dbo].[Room]  WITH CHECK ADD  CONSTRAINT [FK_Room_Region] FOREIGN KEY([RegionId])
+REFERENCES [dbo].[Region] ([Id])
+GO
+ALTER TABLE [dbo].[Room] CHECK CONSTRAINT [FK_Room_Region]
+GO
+ALTER TABLE [dbo].[Room]  WITH CHECK ADD  CONSTRAINT [FK_Room_TextBlock] FOREIGN KEY([TextBlockId])
+REFERENCES [dbo].[TextBlock] ([Id])
+GO
+ALTER TABLE [dbo].[Room] CHECK CONSTRAINT [FK_Room_TextBlock]
 GO
