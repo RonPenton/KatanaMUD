@@ -49,6 +49,8 @@ namespace KatanaMUD
 				opts.LoginPath = new PathString("/Account/Login");
 			});
 
+			app.UseWebSockets();
+
 			app.Use(async (HttpContext context, Func<Task> next) =>
 			{
 				if (context.IsWebSocketRequest)
@@ -112,7 +114,8 @@ namespace KatanaMUD
 			while (!connection.Socket.CloseStatus.HasValue)
 			{
                 var message = MessageSerializer.DeserializeMessage(Encoding.UTF8.GetString(buffer, 0, received.Count));
-                Game.MessageQueue.Enqueue(Tuple.Create(connection, message));
+				message.MessageTime = DateTime.UtcNow;
+				connection.Messages.Enqueue(message);
 
 				received = await connection.Socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 			}

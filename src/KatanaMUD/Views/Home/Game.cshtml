@@ -16,7 +16,7 @@
     <script>
         window.onload = function () {
             var game = new KMud.Game();
-            game.connect("ws://localhost:5000");
+            game.connect("ws://" + window.location.host);
         }
     </script>
 

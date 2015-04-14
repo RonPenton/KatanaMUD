@@ -24,7 +24,7 @@ namespace KatanaMUD
             get
             {
                 if (_assembly == null)
-                    _assembly = Assembly.Load(new AssemblyName("KatanaMUD.Messages"));
+                    _assembly = Assembly.Load(new AssemblyName("KatanaMUD"));
                 return _assembly;
             }
         }

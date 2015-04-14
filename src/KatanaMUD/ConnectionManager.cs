@@ -3,6 +3,7 @@ using KatanaMUD.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace KatanaMUD
 {
@@ -38,5 +39,13 @@ namespace KatanaMUD
                 _connections.Remove(connection.User);
             }
         }
+
+		public IEnumerable<Connection> GetConnections()
+		{
+			lock(syncRoot)
+			{
+				return _connections.Values.ToList();
+			}
+		}
     }
 }

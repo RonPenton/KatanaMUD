@@ -12,7 +12,7 @@ namespace KatanaMUD.MessageGenerator
 	{
 		static void Main(string[] args)
 		{
-			var dll = Assembly.LoadFrom(@"..\..\..\artifacts\bin\KatanaMUD.Messages\Debug\aspnet50\KatanaMUD.Messages.dll");
+			var dll = Assembly.LoadFrom(@"..\..\..\artifacts\bin\KatanaMUD.Messages\Debug\aspnet50\KatanaMUD.dll");
 
 			var messageType = dll.GetTypes().Single(x => x.Name == "MessageBase");
 			var messages = dll.GetTypes().Where(x => x.IsSubclassOf(messageType));

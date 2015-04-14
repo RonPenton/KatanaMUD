@@ -4,6 +4,7 @@ using System;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
+using System.Collections.Concurrent;
 
 namespace KatanaMUD
 {
@@ -28,6 +29,22 @@ namespace KatanaMUD
         public WebSocket Socket { get; private set; }
         public User User { get; private set; }
         public Actor Actor { get; private set; }
+		public ConcurrentQueue<MessageBase> Messages { get; } = new ConcurrentQueue<MessageBase>();
+
+		/// <summary>
+		/// This method returns whether or not the connection is currently allowed to process a message.
+		/// If not, don't pull any messages off the queue; wait until the next cycle.
+		/// </summary>
+		public bool CanProcessMessage
+		{
+			get
+			{
+				//TODO: Implement:
+				//	1) Rate limiting
+				//	2) Movement limiting
+				return true;
+			}
+		}
 
 
         public async static void SendMessage(WebSocket socket, MessageBase message)

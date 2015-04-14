@@ -91,7 +91,7 @@ var KMud;
                 _this.addOutput(document.getElementById("Output"), message.Contents);
             };
             this.commandHandlers[KMud.PongMessage.ClassName] = function (message) {
-                var latency = new Date().getMilliseconds() - new Date(message.SendTime).getMilliseconds();
+                var latency = new Date().valueOf() - new Date(message.SendTime).valueOf();
                 _this.addOutput(document.getElementById("Output"), "Ping: Latency " + latency + "ms", "system-text");
             };
         };

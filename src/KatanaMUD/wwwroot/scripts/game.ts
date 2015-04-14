@@ -120,7 +120,7 @@ module KMud {
             }
 
             this.commandHandlers[PongMessage.ClassName] = (message: PongMessage) => {
-                var latency = new Date().getMilliseconds() - new Date((<any>message).SendTime).getMilliseconds();
+                var latency = new Date().valueOf() - new Date((<any>message).SendTime).valueOf();
                 this.addOutput(document.getElementById("Output"), "Ping: Latency " + latency + "ms", "system-text");
             }
         }
