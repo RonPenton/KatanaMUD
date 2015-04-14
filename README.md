@@ -44,6 +44,8 @@ This is a preliminary roadmap for the game. Everything is subject to change on m
 
 * Scripting Engine
 * Portals (advanced exit types)
+* Stat System
+* Buff System
 
 ## 0.4
 
@@ -63,6 +65,8 @@ This is a preliminary roadmap for the game. Everything is subject to change on m
 
 * (?) Look into expanding the features of the game. Factions, Auctions, etc.
 * Automation of client (ie: MegaMUD-like features)
+* Balancing of the game
+* New Content
 
 ## Removed (for now)
 
