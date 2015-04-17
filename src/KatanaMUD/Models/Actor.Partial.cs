@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using KatanaMUD.Messages;
+using System.Linq;
 
 namespace KatanaMUD.Models
 {
@@ -31,5 +32,20 @@ namespace KatanaMUD.Models
 			remaining = _messages.Count > 0;
 			return result;
 		}
-	}
+
+
+        /// <summary>
+        /// Call this when a user is to change rooms, independent of party. 
+        /// </summary>
+        /// <param name="room"></param>
+        /// <param name="exitRoom"></param>
+        public void ChangeRooms(Room room, int? exitRoom)
+        {
+            Room newRoom = Game.Data.Rooms.Single(x => x.Id == exitRoom);
+
+            // TODO: notify old room of user exiting. 
+            Room = newRoom;
+            // TODO: notify new room of user entering.
+        }
+    }
 }

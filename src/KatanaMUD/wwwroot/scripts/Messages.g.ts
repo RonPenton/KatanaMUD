@@ -13,6 +13,20 @@ module KMud {
         public NoCharacter: boolean;
         public static ClassName: string = 'LoginRejected';
     }
+    export class LookMessage extends MessageBase {
+        constructor() { super('LookMessage'); }
+        public Direction: Direction;
+        public Actor: number;
+        public Item: number;
+        public YouFigureItOut: string;
+        public static ClassName: string = 'LookMessage';
+    }
+    export class MoveMessage extends MessageBase {
+        constructor() { super('MoveMessage'); }
+        public Direction: Direction;
+        public Portal: number;
+        public static ClassName: string = 'MoveMessage';
+    }
     export class PingMessage extends MessageBase {
         constructor() { super('PingMessage'); }
         public SendTime: Date;
@@ -22,6 +36,18 @@ module KMud {
         constructor() { super('PongMessage'); }
         public SendTime: Date;
         public static ClassName: string = 'PongMessage';
+    }
+    export class RoomDescriptionMessage extends MessageBase {
+        constructor() { super('RoomDescriptionMessage'); }
+        public RoomId: number;
+        public Name: string;
+        public Description: string;
+        public Actors: number[];
+        public VisibleItems: number[];
+        public IsCurrentRoom: boolean;
+        public CannotSee: boolean;
+        public CannotSeeMessage: string;
+        public static ClassName: string = 'RoomDescriptionMessage';
     }
     export class ServerMessage extends MessageBase {
         constructor() { super('ServerMessage'); }
@@ -38,5 +64,17 @@ module KMud {
         Officerpath = 6,
         Chatroom = 7,
         Telepath = 8,
+    }
+    export enum Direction {
+        North = 0,
+        South = 1,
+        East = 2,
+        West = 3,
+        NorthEast = 4,
+        NorthWest = 5,
+        SouthEast = 6,
+        SouthWest = 7,
+        Up = 8,
+        Down = 9,
     }
 }

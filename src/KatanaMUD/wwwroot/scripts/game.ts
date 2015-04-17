@@ -123,6 +123,8 @@ module KMud {
                 var latency = new Date().valueOf() - new Date((<any>message).SendTime).valueOf();
                 this.addOutput(document.getElementById("Output"), "Ping: Latency " + latency + "ms", "system-text");
             }
+
+            this.commandHandlers[RoomDescriptionMessage.ClassName] = (message: RoomDescriptionMessage) => this.showRoomDescription(message);
         }
 
         private addOutput(element: HTMLElement, text: string, css: string = null) {
@@ -141,5 +143,63 @@ module KMud {
                 element.scrollTop = element.scrollHeight;
             }
         }
+
+        private mainOutput(text: string, css: string = null) {
+            this.addOutput(document.getElementById("Output"), text, css);
+        }
+
+        private showRoomDescription(message: RoomDescriptionMessage) {
+            if (message.CannotSee) {
+                this.mainOutput(message.CannotSeeMessage, "cannot-see");
+            }
+            else {
+                this.mainOutput(message.Name, "room-name");
+                if (StringUtilities.notEmpty(message.Description)) {
+                    this.mainOutput(message.Description, "room-desc");
+                }
+
+            }
+        }
     }
+
+    export class StringUtilities {
+        public static notEmpty(s: string): boolean {
+            return !this.isNullOrWhitespace(s);
+        }
+
+        public static isNullOrEmpty(s: string): boolean {
+            return (s === null || s === undefined || s === "");
+        }
+
+        public static isNullOrWhitespace(s: string): boolean {
+            return (s === null || s === undefined || /^\s*$/g.test(s));
+        }
+
+        public static formatString(str: string, args: any[]): string {
+            return str.replace(/{(\d+)}/g, function (match: string, ...i: any[]) {
+                return typeof args[i[0]] != 'undefined' ? args[i[0]] : match;
+            });
+        }
+
+
+        // Referring to the table here:
+        // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/regexp
+        // these characters should be escaped
+        // \ ^ $ * + ? . ( ) | { } [ ]
+        // These characters only have special meaning inside of brackets
+        // they do not need to be escaped, but they MAY be escaped
+        // without any adverse effects (to the best of my knowledge and casual testing)
+        // : ! , = 
+        private static _escapeRegExpCharacters: string[] = [
+            "-", "[", "]",  // order matters for these
+            "/", "{", "}", "(", ")", "*", "+", "?", ".", "\\", "^", "$", "|" // order doesn't matter for any of these
+        ];
+
+        private static _escapeRegExpRegexp: RegExp = new RegExp('[' + StringUtilities._escapeRegExpCharacters.join('\\') + ']', 'g');
+
+        public static escapeRegExp(str: string): string {
+            return str.replace(StringUtilities._escapeRegExpRegexp, "\\$&");
+        }
+    }
+
 }

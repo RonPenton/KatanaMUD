@@ -64,13 +64,37 @@ namespace KatanaMUD.MessageGenerator
 				return Assembly.LoadFrom(file.First());
 			}
 
-			file = Directory.EnumerateFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".kpm", "packages"), name, SearchOption.AllDirectories);
-			if (file.Count() > 0)
-			{
-				return Assembly.LoadFrom(file.First());
-			}
+            try
+            {
+                file = Directory.EnumerateFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".kpm", "packages"), name, SearchOption.AllDirectories);
+                if (file.Count() > 0)
+                {
+                    return Assembly.LoadFrom(file.First());
+                }
+            }
+            catch (Exception) { }
 
-			return null;
+            try
+            {
+                file = Directory.EnumerateFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".dnx", "packages"), name, SearchOption.AllDirectories);
+                if (file.Count() > 0)
+                {
+                    return Assembly.LoadFrom(file.First());
+                }
+            }
+            catch (Exception) { }
+
+            try
+            {
+                file = Directory.EnumerateFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".k", "packages"), name, SearchOption.AllDirectories);
+                if (file.Count() > 0)
+                {
+                    return Assembly.LoadFrom(file.First());
+                }
+            }
+            catch (Exception) { }
+
+            return null;
 		}
 
 		private static bool isArray(Type type)

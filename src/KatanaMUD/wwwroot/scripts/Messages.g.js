@@ -42,6 +42,15 @@ var KMud;
         return PongMessage;
     })(KMud.MessageBase);
     KMud.PongMessage = PongMessage;
+    var RoomDescriptionMessage = (function (_super) {
+        __extends(RoomDescriptionMessage, _super);
+        function RoomDescriptionMessage() {
+            _super.call(this, 'RoomDescriptionMessage');
+        }
+        RoomDescriptionMessage.ClassName = 'RoomDescriptionMessage';
+        return RoomDescriptionMessage;
+    })(KMud.MessageBase);
+    KMud.RoomDescriptionMessage = RoomDescriptionMessage;
     var ServerMessage = (function (_super) {
         __extends(ServerMessage, _super);
         function ServerMessage() {

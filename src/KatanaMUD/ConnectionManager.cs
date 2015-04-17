@@ -33,6 +33,7 @@ namespace KatanaMUD
 
         public void Remove(Connection connection)
         {
+            connection.Actor.MessageHandler = null;
             connection.Actor.Connection = null;
             lock(syncRoot)
             {

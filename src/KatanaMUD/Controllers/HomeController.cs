@@ -152,6 +152,8 @@ namespace KatanaMUD.Controllers
             if(cost == Int32.MinValue)
                 return HttpBadRequest();
 
+            // TODO: Load initial room from a configurable source.
+            dbActor.Room = KatanaMUD.Game.Data.Rooms.First(x => x.Id == 10001);
             TransferStatsToDbActor(dbActor, actor, cost);
             dbActor.User = GetUser();
             KatanaMUD.Game.Data.Actors.Add(dbActor);

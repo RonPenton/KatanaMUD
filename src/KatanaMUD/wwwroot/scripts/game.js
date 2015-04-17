@@ -94,6 +94,7 @@ var KMud;
                 var latency = new Date().valueOf() - new Date(message.SendTime).valueOf();
                 _this.addOutput(document.getElementById("Output"), "Ping: Latency " + latency + "ms", "system-text");
             };
+            this.commandHandlers[KMud.RoomDescriptionMessage.ClassName] = function (message) { return _this.showRoomDescription(message); };
         };
         Game.prototype.addOutput = function (element, text, css) {
             if (css === void 0) { css = null; }
@@ -109,7 +110,76 @@ var KMud;
                 element.scrollTop = element.scrollHeight;
             }
         };
+        Game.prototype.mainOutput = function (text, css) {
+            if (css === void 0) { css = null; }
+            this.addOutput(document.getElementById("Output"), text, css);
+        };
+        Game.prototype.showRoomDescription = function (message) {
+            if (message.CannotSee) {
+                this.mainOutput(message.CannotSeeMessage, "cannot-see");
+            }
+            else {
+                this.mainOutput(message.Name, "room-name");
+                if (StringUtilities.notEmpty(message.Description)) {
+                    this.mainOutput(message.Description, "room-desc");
+                }
+            }
+        };
         return Game;
     })();
     KMud.Game = Game;
+    var StringUtilities = (function () {
+        function StringUtilities() {
+        }
+        StringUtilities.notEmpty = function (s) {
+            return !this.isNullOrWhitespace(s);
+        };
+        StringUtilities.isNullOrEmpty = function (s) {
+            return (s === null || s === undefined || s === "");
+        };
+        StringUtilities.isNullOrWhitespace = function (s) {
+            return (s === null || s === undefined || /^\s*$/g.test(s));
+        };
+        StringUtilities.formatString = function (str, args) {
+            return str.replace(/{(\d+)}/g, function (match) {
+                var i = [];
+                for (var _i = 1; _i < arguments.length; _i++) {
+                    i[_i - 1] = arguments[_i];
+                }
+                return typeof args[i[0]] != 'undefined' ? args[i[0]] : match;
+            });
+        };
+        StringUtilities.escapeRegExp = function (str) {
+            return str.replace(StringUtilities._escapeRegExpRegexp, "\\$&");
+        };
+        // Referring to the table here:
+        // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/regexp
+        // these characters should be escaped
+        // \ ^ $ * + ? . ( ) | { } [ ]
+        // These characters only have special meaning inside of brackets
+        // they do not need to be escaped, but they MAY be escaped
+        // without any adverse effects (to the best of my knowledge and casual testing)
+        // : ! , = 
+        StringUtilities._escapeRegExpCharacters = [
+            "-",
+            "[",
+            "]",
+            "/",
+            "{",
+            "}",
+            "(",
+            ")",
+            "*",
+            "+",
+            "?",
+            ".",
+            "\\",
+            "^",
+            "$",
+            "|"
+        ];
+        StringUtilities._escapeRegExpRegexp = new RegExp('[' + StringUtilities._escapeRegExpCharacters.join('\\') + ']', 'g');
+        return StringUtilities;
+    })();
+    KMud.StringUtilities = StringUtilities;
 })(KMud || (KMud = {}));
