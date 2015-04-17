@@ -62,7 +62,7 @@ namespace KatanaMUD
                     {
                         //Console.WriteLine("Connection Aborted: Not Authorized.");
                         var rejection = new LoginRejected() { RejectionMessage = "User is not authenticated" };
-                        Connection.SendMessage(socket, rejection);
+						ConnectionMessageHandler.HandleMessage(socket, rejection);
                         await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "User is not authenticated", CancellationToken.None);
                         return;
                     }
@@ -73,22 +73,22 @@ namespace KatanaMUD
                     if (actor == null)
                     {
                         var rejection = new LoginRejected() { RejectionMessage = "User has no character.", NoCharacter = true };
-                        Connection.SendMessage(socket, rejection);
-                        await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "User has no character", CancellationToken.None);
+						ConnectionMessageHandler.HandleMessage(socket, rejection);
+						await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "User has no character", CancellationToken.None);
                         return;
                     }
 
                     if(Game.Connections.IsLoggedIn(user))
                     {
                         var rejection = new LoginRejected() { RejectionMessage = "User is already logged in." };
-                        Connection.SendMessage(socket, rejection);
-                        await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "User is already logged in", CancellationToken.None);
+						ConnectionMessageHandler.HandleMessage(socket, rejection);
+						await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "User is already logged in", CancellationToken.None);
                         return;
                     }
 
                     var connection = new Connection(socket, user, actor);
                     Game.Connections.Add(connection);
-                    connection.SendMessage(new ServerMessage() { Contents = "Welcome to KatanaMUD. A MUD on the Web. Because I'm apparently insane. Dear lord." });
+					actor.SendMessage(new ServerMessage() { Contents = "Welcome to KatanaMUD. A MUD on the Web. Because I'm apparently insane. Dear lord." });
 
                     await HandleSocketCommunication(connection);
 				}
@@ -114,8 +114,7 @@ namespace KatanaMUD
 			while (!connection.Socket.CloseStatus.HasValue)
 			{
                 var message = MessageSerializer.DeserializeMessage(Encoding.UTF8.GetString(buffer, 0, received.Count));
-				message.MessageTime = DateTime.UtcNow;
-				connection.Messages.Enqueue(message);
+				connection.Actor.AddMessage(message);
 
 				received = await connection.Socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 			}

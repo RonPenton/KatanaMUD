@@ -12,7 +12,9 @@ namespace KatanaMUD.MessageGenerator
 	{
 		static void Main(string[] args)
 		{
-			var dll = Assembly.LoadFrom(@"..\..\..\artifacts\bin\KatanaMUD.Messages\Debug\aspnet50\KatanaMUD.dll");
+			AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+			
+			var dll = Assembly.LoadFrom(@"..\..\..\artifacts\bin\KatanaMUD\Debug\aspnet50\KatanaMUD.dll");
 
 			var messageType = dll.GetTypes().Single(x => x.Name == "MessageBase");
 			var messages = dll.GetTypes().Where(x => x.IsSubclassOf(messageType));
@@ -29,7 +31,7 @@ namespace KatanaMUD.MessageGenerator
                         writer.WriteLine(String.Format("    export class {0} extends MessageBase {{", message.Name));
                         writer.WriteLine(String.Format("        constructor() {{ super('{0}'); }}", message.Name));
 
-                        var properties = message.GetProperties().Where(x => x.Name != "MessageName");
+						var properties = message.GetProperties().Where(x => x.Name != "MessageName" && x.Name != "MessageTime");
                         foreach(var property in properties)
                         {
                             writer.WriteLine(String.Format("        public {1}: {0};", GetPropertyType(property.PropertyType, enumBuilder), property.Name));
@@ -49,7 +51,29 @@ namespace KatanaMUD.MessageGenerator
             }
 		}
 
-        private static bool isArray(Type type)
+		private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+		{
+			// ASP.NET vNEXT assemblies know nothing of the GAC or local loading. Everything is package-based. 
+			// So, search for the assemblies in the artifacts folder, hoping I remembered to turn local builds on,
+			// and if that fails, load from the package cache, hoping they've been restored. 
+			// Everything old is new again, DLL hell, here we come!
+			var name = args.Name.Split(',').First() + ".dll";
+
+			var file = Directory.EnumerateFiles(@"..\..\..\artifacts\bin\", name, SearchOption.AllDirectories);
+			if (file.Count() > 0) {
+				return Assembly.LoadFrom(file.First());
+			}
+
+			file = Directory.EnumerateFiles(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".kpm", "packages"), name, SearchOption.AllDirectories);
+			if (file.Count() > 0)
+			{
+				return Assembly.LoadFrom(file.First());
+			}
+
+			return null;
+		}
+
+		private static bool isArray(Type type)
         {
             if (type.IsArray)
                 return true;

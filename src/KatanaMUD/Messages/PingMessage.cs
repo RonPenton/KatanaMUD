@@ -1,4 +1,5 @@
 ﻿using System;
+using KatanaMUD.Models;
 
 namespace KatanaMUD.Messages
 {
@@ -6,10 +7,10 @@ namespace KatanaMUD.Messages
     {
         public DateTime SendTime { get; set; }
 
-		public override void Process(Connection connection)
+		public override void Process(Actor actor)
 		{
 			var pong = new PongMessage() { SendTime = SendTime };
-			connection.SendMessage(pong);
+			actor.SendMessage(pong);
 		}
 	}
 

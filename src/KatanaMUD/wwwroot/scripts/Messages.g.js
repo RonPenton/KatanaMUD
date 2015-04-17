@@ -6,6 +6,15 @@ var __extends = this.__extends || function (d, b) {
 };
 var KMud;
 (function (KMud) {
+    var CommunicationMessage = (function (_super) {
+        __extends(CommunicationMessage, _super);
+        function CommunicationMessage() {
+            _super.call(this, 'CommunicationMessage');
+        }
+        CommunicationMessage.ClassName = 'CommunicationMessage';
+        return CommunicationMessage;
+    })(KMud.MessageBase);
+    KMud.CommunicationMessage = CommunicationMessage;
     var LoginRejected = (function (_super) {
         __extends(LoginRejected, _super);
         function LoginRejected() {
@@ -42,4 +51,16 @@ var KMud;
         return ServerMessage;
     })(KMud.MessageBase);
     KMud.ServerMessage = ServerMessage;
+    (function (CommunicationType) {
+        CommunicationType[CommunicationType["Gossip"] = 0] = "Gossip";
+        CommunicationType[CommunicationType["Auction"] = 1] = "Auction";
+        CommunicationType[CommunicationType["Say"] = 2] = "Say";
+        CommunicationType[CommunicationType["Yell"] = 3] = "Yell";
+        CommunicationType[CommunicationType["Region"] = 4] = "Region";
+        CommunicationType[CommunicationType["Gangpath"] = 5] = "Gangpath";
+        CommunicationType[CommunicationType["Officerpath"] = 6] = "Officerpath";
+        CommunicationType[CommunicationType["Chatroom"] = 7] = "Chatroom";
+        CommunicationType[CommunicationType["Telepath"] = 8] = "Telepath";
+    })(KMud.CommunicationType || (KMud.CommunicationType = {}));
+    var CommunicationType = KMud.CommunicationType;
 })(KMud || (KMud = {}));
