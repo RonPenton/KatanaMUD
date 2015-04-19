@@ -24,6 +24,24 @@ var KMud;
         return LoginRejected;
     })(KMud.MessageBase);
     KMud.LoginRejected = LoginRejected;
+    var LookMessage = (function (_super) {
+        __extends(LookMessage, _super);
+        function LookMessage() {
+            _super.call(this, 'LookMessage');
+        }
+        LookMessage.ClassName = 'LookMessage';
+        return LookMessage;
+    })(KMud.MessageBase);
+    KMud.LookMessage = LookMessage;
+    var MoveMessage = (function (_super) {
+        __extends(MoveMessage, _super);
+        function MoveMessage() {
+            _super.call(this, 'MoveMessage');
+        }
+        MoveMessage.ClassName = 'MoveMessage';
+        return MoveMessage;
+    })(KMud.MessageBase);
+    KMud.MoveMessage = MoveMessage;
     var PingMessage = (function (_super) {
         __extends(PingMessage, _super);
         function PingMessage() {
@@ -72,4 +90,17 @@ var KMud;
         CommunicationType[CommunicationType["Telepath"] = 8] = "Telepath";
     })(KMud.CommunicationType || (KMud.CommunicationType = {}));
     var CommunicationType = KMud.CommunicationType;
+    (function (Direction) {
+        Direction[Direction["North"] = 0] = "North";
+        Direction[Direction["South"] = 1] = "South";
+        Direction[Direction["East"] = 2] = "East";
+        Direction[Direction["West"] = 3] = "West";
+        Direction[Direction["Northeast"] = 4] = "Northeast";
+        Direction[Direction["Northwest"] = 5] = "Northwest";
+        Direction[Direction["Southeast"] = 6] = "Southeast";
+        Direction[Direction["Southwest"] = 7] = "Southwest";
+        Direction[Direction["Up"] = 8] = "Up";
+        Direction[Direction["Down"] = 9] = "Down";
+    })(KMud.Direction || (KMud.Direction = {}));
+    var Direction = KMud.Direction;
 })(KMud || (KMud = {}));

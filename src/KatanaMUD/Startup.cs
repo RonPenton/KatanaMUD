@@ -89,6 +89,7 @@ namespace KatanaMUD
                     var connection = new Connection(socket, user, actor);
                     Game.Connections.Add(connection);
 					actor.SendMessage(new ServerMessage() { Contents = "Welcome to KatanaMUD. A MUD on the Web. Because I'm apparently insane. Dear lord." });
+					actor.SendRoomDescription(actor.Room);
 
                     await HandleSocketCommunication(connection);
 				}

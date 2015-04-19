@@ -32,10 +32,10 @@ namespace KatanaMUD.Models
             _exits[(int)Direction.South] = r => r.SouthExit;
             _exits[(int)Direction.East] = r => r.EastExit;
             _exits[(int)Direction.West] = r => r.WestExit;
-            _exits[(int)Direction.NorthEast] = r => r.NorthEastExit;
-            _exits[(int)Direction.NorthWest] = r => r.NorthWestExit;
-            _exits[(int)Direction.SouthEast] = r => r.SouthEastExit;
-            _exits[(int)Direction.SouthEast] = r => r.SouthEastExit;
+            _exits[(int)Direction.Northeast] = r => r.NorthEastExit;
+            _exits[(int)Direction.Northwest] = r => r.NorthWestExit;
+            _exits[(int)Direction.Southeast] = r => r.SouthEastExit;
+            _exits[(int)Direction.Southwest] = r => r.SouthWestExit;
             _exits[(int)Direction.Up] = r => r.UpExit;
             _exits[(int)Direction.Down] = r => r.DownExit;
         }
@@ -73,10 +73,10 @@ namespace KatanaMUD.Models
         South = 1,
         East = 2,
         West = 3,
-        NorthEast = 4,
-        NorthWest = 5,
-        SouthEast = 6,
-        SouthWest = 7,
+        Northeast = 4,
+        Northwest = 5,
+        Southeast = 6,
+        Southwest = 7,
         Up = 8,
         Down = 9
     }

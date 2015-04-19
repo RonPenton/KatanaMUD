@@ -10,6 +10,7 @@ body {
 .game-text span {
   padding: 2px 0px;
   display: inline-block;
+  max-width: 80em;
 }
 .error-text {
   background-color: crimson;
@@ -36,6 +37,7 @@ input:focus {
 #InformationArea {
   flex-grow: 0;
   width: 200px;
+  min-width: 200px;
   height: 100%;
   border: solid 1px white;
 }
@@ -60,4 +62,14 @@ input:focus {
 }
 #InputArea #InputBox {
   flex-grow: 1;
+}
+.room-name {
+  color: cyan;
+  font-weight: bold;
+}
+.room-description {
+  color: white;
+}
+.exits {
+  color: green;
 }

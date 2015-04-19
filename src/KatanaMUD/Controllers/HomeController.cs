@@ -153,7 +153,7 @@ namespace KatanaMUD.Controllers
                 return HttpBadRequest();
 
             // TODO: Load initial room from a configurable source.
-            dbActor.Room = KatanaMUD.Game.Data.Rooms.First(x => x.Id == 10001);
+            dbActor.Room = KatanaMUD.Game.Data.Rooms.First(x => x.Id == 100001);
             TransferStatsToDbActor(dbActor, actor, cost);
             dbActor.User = GetUser();
             KatanaMUD.Game.Data.Actors.Add(dbActor);

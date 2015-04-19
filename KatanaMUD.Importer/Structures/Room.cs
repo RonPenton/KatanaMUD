@@ -161,10 +161,17 @@ namespace KatanaMUD.Importer.Structures
             {
                 setter(room, GetRoomNumber(this.Para1[exitIndex], this.RoomExit[exitIndex]));
             }
-        }
+
+			var et = this.RoomTypes[exitIndex];
+
+			if ((et == 19 || et == 1 || et == 2 || et == 3 || et == 4 || et == 5 || et == 6 || et == 7 || et == 9 || et == 10 || et == 11 || et == 13 || et == 14 || et == 15 || et == 16 || et == 17 || et == 18 || et == 20 || et == 21 || et == 22 || et == 23 || et == 24) && this.RoomExit[exitIndex] != 0)
+			{
+				setter(room, GetRoomNumber(MapNumber, this.RoomExit[exitIndex]));
+			}
+		}
 
 
-        public static int GetRoomNumber(int mapNumber, int roomNumber)
+		public static int GetRoomNumber(int mapNumber, int roomNumber)
         {
             return mapNumber * 100000 + roomNumber;
         }

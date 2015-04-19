@@ -44,6 +44,7 @@ module KMud {
         public Description: string;
         public Actors: number[];
         public VisibleItems: number[];
+        public Exits: number[];
         public IsCurrentRoom: boolean;
         public CannotSee: boolean;
         public CannotSeeMessage: string;
@@ -70,10 +71,10 @@ module KMud {
         South = 1,
         East = 2,
         West = 3,
-        NorthEast = 4,
-        NorthWest = 5,
-        SouthEast = 6,
-        SouthWest = 7,
+        Northeast = 4,
+        Northwest = 5,
+        Southeast = 6,
+        Southwest = 7,
         Up = 8,
         Down = 9,
     }

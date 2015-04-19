@@ -12,8 +12,9 @@
 .game-text {
 
     span {
-        padding: 2px 0px;
-        display:inline-block;
+		padding: 2px 0px;
+		display:inline-block;
+		max-width: 80em;
     }
 }
 
@@ -47,6 +48,7 @@ input {
 #InformationArea {
     flex-grow: 0;
     width: 200px;
+	min-width: 200px;
     height: 100%;
     border: solid 1px white;
 }
@@ -75,4 +77,17 @@ input {
     #InputBox {
         flex-grow: 1;
     }
+}
+
+.room-name {
+	color: cyan;
+	font-weight: bold;
+}
+
+.room-description {
+	color: white;
+}
+
+.exits {
+	color: green;
 }

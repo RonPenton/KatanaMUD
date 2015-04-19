@@ -1,4 +1,5 @@
 ﻿using System;
+using KatanaMUD.Models;
 
 namespace KatanaMUD.Messages
 {
@@ -9,7 +10,7 @@ namespace KatanaMUD.Messages
         public string Description { get; set; }
         public int[] Actors { get; set; }
         public int[] VisibleItems { get; set; }
-        public int[] Exits { get; set; }
+        public int?[] Exits { get; set; }
         public bool IsCurrentRoom { get; set; }
         /// <summary>
         /// Used to determine if the user is unable to see their surroundings.
@@ -20,5 +21,14 @@ namespace KatanaMUD.Messages
         /// blank, and the CannotSeeMessage should be shown instead.
         /// </summary>
         public string CannotSeeMessage { get; set; }
-    }
+
+		internal void SetExits(Room room)
+		{
+			Exits = new int?[10];
+			foreach (var direction in Directions.Enumerate())
+			{
+				Exits[(int)direction] = room.GetExit(direction)?.ExitRoom;
+			}
+		}
+	}
 }

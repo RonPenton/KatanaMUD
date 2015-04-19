@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using CSharp;
 using KatanaMUD.Models;
 using System.Text.RegularExpressions;
+using KatanaMUD.Importer.Structures;
 
 namespace KatanaMUD.Importer
 {
@@ -33,26 +34,30 @@ namespace KatanaMUD.Importer
 
             var rooms = Btrieve.GetAllRooms(new FileInfo(@"C:\CleanP\wccmp002.dat").FullName);
 
-            Regex r = new Regex("\\s+");
-            var descriptions = rooms.GroupBy(x => x.Description).ToList();//.OrderBy(x => x.Key).ToList();
+			//Regex r = new Regex("\\s+");
+			//var descriptions = rooms.GroupBy(x => x.Description).ToList();//.OrderBy(x => x.Key).ToList();
 
-            foreach (var group in descriptions)
-            {
-                var textBlock = context.TextBlocks.New();
-                textBlock.Text = group.Key;
+			//foreach (var group in descriptions)
+			//{
+			//    var textBlock = context.TextBlocks.New();
+			//    textBlock.Text = group.Key;
 
-                foreach (var room in group)
-                {
-                    var dbRoom = room.ToRoom(null);
-                    dbRoom.TextBlock = textBlock;
-                    context.Rooms.Add(dbRoom, false);
-                }
-            }
+			//    foreach (var room in group)
+			//    {
+			//        var dbRoom = room.ToRoom(null);
+			//        dbRoom.TextBlock = textBlock;
+			//        context.Rooms.Add(dbRoom, false);
+			//    }
+			//}
 
+			foreach (var room in rooms)
+			{
+				var dbRoom = room.ToRoom(context.Rooms.SingleOrDefault(x => x.Id == RoomBuffer.GetRoomNumber(room.MapNumber, room.RoomNumber)));
+			}
 
-            //context.RaceTemplates.AddRange(races, true);
-            //context.ClassTemplates.AddRange(classes, true);
-            context.SaveChanges();
+			//context.RaceTemplates.AddRange(races, true);
+			//context.ClassTemplates.AddRange(classes, true);
+			context.SaveChanges();
 		}
 	}
 }

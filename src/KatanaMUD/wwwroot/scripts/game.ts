@@ -21,7 +21,8 @@ module KMud {
         private input: HTMLInputElement;
         private lastCommands: string[] = [];
         private currentCommand: number = -1;
-        private commandHandlers: { [index: string]: Action1<MessageBase> } = {};
+        private messageHandlers: { [index: string]: Action1<MessageBase> } = {};
+        private commandHandlers: { [index: string]: Action1<string[]> } = {};
 
         constructor() {
             this.input = <HTMLInputElement>document.getElementById("InputBox");
@@ -61,17 +62,17 @@ module KMud {
                     $("#InputBox").focus();
             });
 
-            this.registerHandlers();
+            this.registerMessageHandlers();
+			this.registerCommandHandlers();
         }
 
         private processCommand(command: string) {
             var lower = command.toLocaleLowerCase().trim();
             var words = command.split(/\s+/gi);
-            if (words[0] == "ping") {
-                var message = new PingMessage();
-                message.SendTime = new Date();
-                this._socket.send(JSON.stringify(message));
-            }
+
+			var handler = this.commandHandlers[words[0]];
+			if (handler)
+				handler(words);
         }
 
         private _socket: WebSocket;
@@ -101,31 +102,65 @@ module KMud {
         private onmessage(e: Event) {
             var message: MessageBase = JSON.parse((<any>e).data);
 
-            var handler = this.commandHandlers[message.MessageName];
+            var handler = this.messageHandlers[message.MessageName];
             if (handler != null) {
                 handler(message);
             }
         }
 
-        private registerHandlers() {
-            this.commandHandlers[LoginRejected.ClassName] = (message: LoginRejected) => {
+        private registerMessageHandlers() {
+            this.messageHandlers[LoginRejected.ClassName] = (message: LoginRejected) => {
                 this.addOutput(document.getElementById("Output"), message.RejectionMessage, "error-text");
                 if (message.NoCharacter == true) {
                     window.location.replace("/Home/ChooseRace");
                 }
             }
 
-            this.commandHandlers[ServerMessage.ClassName] = (message: ServerMessage) => {
+            this.messageHandlers[ServerMessage.ClassName] = (message: ServerMessage) => {
                 this.addOutput(document.getElementById("Output"), message.Contents);
             }
 
-            this.commandHandlers[PongMessage.ClassName] = (message: PongMessage) => {
+            this.messageHandlers[PongMessage.ClassName] = (message: PongMessage) => {
                 var latency = new Date().valueOf() - new Date((<any>message).SendTime).valueOf();
                 this.addOutput(document.getElementById("Output"), "Ping: Latency " + latency + "ms", "system-text");
             }
 
-            this.commandHandlers[RoomDescriptionMessage.ClassName] = (message: RoomDescriptionMessage) => this.showRoomDescription(message);
+            this.messageHandlers[RoomDescriptionMessage.ClassName] = (message: RoomDescriptionMessage) => this.showRoomDescription(message);
         }
+
+		private registerCommandHandlers() {
+			this.commandHandlers["ping"] = x => this.ping();
+
+			this.commandHandlers["n"] = this.commandHandlers["north"] = words => this.move(Direction.North);
+			this.commandHandlers["s"] = this.commandHandlers["south"] = words => this.move(Direction.South);
+			this.commandHandlers["e"] = this.commandHandlers["east"] = words => this.move(Direction.East);
+			this.commandHandlers["w"] = this.commandHandlers["west"] = words => this.move(Direction.West);
+			this.commandHandlers["ne"] = this.commandHandlers["northeast"] = words => this.move(Direction.Northeast);
+			this.commandHandlers["nw"] = this.commandHandlers["northwest"] = words => this.move(Direction.Northwest);
+			this.commandHandlers["se"] = this.commandHandlers["southeast"] = words => this.move(Direction.Southeast);
+			this.commandHandlers["sw"] = this.commandHandlers["southwest"] = words => this.move(Direction.Southwest);
+			this.commandHandlers["u"] = this.commandHandlers["up"] = words => this.move(Direction.Up);
+			this.commandHandlers["d"] = this.commandHandlers["down"] = words => this.move(Direction.Down);
+			this.commandHandlers["l"] = this.commandHandlers["look"] = words => this.look(words);
+		}
+
+		private look(words: string[]) {
+			var message = new LookMessage()
+			//TODO: Parse parameters
+			this._socket.send(JSON.stringify(message));
+		}
+
+		private move(direction: Direction) {
+			var message = new MoveMessage()
+			message.Direction = direction;
+			this._socket.send(JSON.stringify(message));
+		}
+
+		private ping() {
+			var message = new PingMessage();
+			message.SendTime = new Date();
+			this._socket.send(JSON.stringify(message));
+		}
 
         private addOutput(element: HTMLElement, text: string, css: string = null) {
 
@@ -158,6 +193,25 @@ module KMud {
                     this.mainOutput(message.Description, "room-desc");
                 }
 
+				
+				var directions = [];
+				for (var val in Direction) {
+					if (!isNaN(val)) {
+						var exit = message.Exits[val];
+						if (exit != null) {
+							directions.push(Direction[val]);
+						}
+					}
+				}
+
+				// TODO: Portals.
+
+				if (directions.length > 0) {
+					this.mainOutput("Obvious exits: " + directions.join(", "), "exits");
+				}
+				else {
+					this.mainOutput("Obvious exits: NONE!!!", "exits");
+				}
             }
         }
     }
