@@ -70,7 +70,7 @@ namespace KatanaMUD.Models
             var entity = new Room();
             entity._Id = reader.GetInt32(0);
             entity._RegionId = reader.GetSafeInt32(1);
-            entity._Name = reader.GetString(2);
+            entity._Name = reader.GetSafeString(2);
             entity._TextBlockId = reader.GetInt32(3);
             entity._NorthExit = reader.GetSafeInt32(4);
             entity._SouthExit = reader.GetSafeInt32(5);

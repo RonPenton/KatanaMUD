@@ -13,6 +13,7 @@ using Microsoft.AspNet.Security.Cookies;
 using Microsoft.AspNet.StaticFiles;
 using KatanaMUD.Messages;
 using System.Linq;
+using Microsoft.AspNet.Http.Interfaces;
 
 namespace KatanaMUD
 {
@@ -56,14 +57,12 @@ namespace KatanaMUD
 				if (context.IsWebSocketRequest)
 				{
 					var socket = await context.AcceptWebSocketAsync(context.WebSocketRequestedProtocols[0]);
-                    //Console.WriteLine("Incoming connection: " + context.Request.Host.Value);
+					var ip = context.GetFeature<IHttpConnectionFeature>()?.RemoteIpAddress?.ToString() ?? "No IP Address";
+					Console.WriteLine("Incoming connection: " + ip);
 
-                    if (!context.User?.Identity.IsAuthenticated ?? true)
+					if (!context.User?.Identity.IsAuthenticated ?? true)
                     {
-                        //Console.WriteLine("Connection Aborted: Not Authorized.");
-                        var rejection = new LoginRejected() { RejectionMessage = "User is not authenticated" };
-						ConnectionMessageHandler.HandleMessage(socket, rejection);
-                        await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "User is not authenticated", CancellationToken.None);
+						RejectConnection(socket, "User is not authenticated", ip);
                         return;
                     }
 
@@ -72,24 +71,16 @@ namespace KatanaMUD
 
                     if (actor == null)
                     {
-                        var rejection = new LoginRejected() { RejectionMessage = "User has no character.", NoCharacter = true };
-						ConnectionMessageHandler.HandleMessage(socket, rejection);
-						await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "User has no character", CancellationToken.None);
+						RejectConnection(socket, "User has no character.", ip);
                         return;
                     }
 
                     if(Game.Connections.IsLoggedIn(user))
                     {
-                        var rejection = new LoginRejected() { RejectionMessage = "User is already logged in." };
-						ConnectionMessageHandler.HandleMessage(socket, rejection);
-						await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "User is already logged in", CancellationToken.None);
-                        return;
+						Game.Connections.Disconnect(user);
                     }
 
-                    var connection = new Connection(socket, user, actor);
-                    Game.Connections.Add(connection);
-					actor.SendMessage(new ServerMessage() { Contents = "Welcome to KatanaMUD. A MUD on the Web. Because I'm apparently insane. Dear lord." });
-					actor.SendRoomDescription(actor.Room);
+					var connection = Game.Connections.Connect(socket, user, actor, ip);
 
                     await HandleSocketCommunication(connection);
 				}
@@ -107,21 +98,40 @@ namespace KatanaMUD
 			});
 		}
 
+		private async void RejectConnection(WebSocket socket, string reason, string ip)
+		{
+			Console.WriteLine(String.Format("Connection Aborted ({0}): {1}.", ip, reason));
+			var rejection = new LoginRejected() { RejectionMessage = reason };
+			ConnectionMessageHandler.HandleMessage(socket, rejection);
+			await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, reason, CancellationToken.None);
+		}
+
 		private async Task HandleSocketCommunication(Connection connection)
 		{
-			byte[] buffer = new byte[1024];
-			WebSocketReceiveResult received = await connection.Socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-
-			while (!connection.Socket.CloseStatus.HasValue)
+			try
 			{
-                var message = MessageSerializer.DeserializeMessage(Encoding.UTF8.GetString(buffer, 0, received.Count));
-				connection.Actor.AddMessage(message);
+				byte[] buffer = new byte[1024];
+				WebSocketReceiveResult received = await connection.Socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
-				received = await connection.Socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+				while (!connection.Socket.CloseStatus.HasValue)
+				{
+					var message = MessageSerializer.DeserializeMessage(Encoding.UTF8.GetString(buffer, 0, received.Count));
+					connection.Actor.AddMessage(message);
+
+					received = await connection.Socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+				}
+
+				Game.Connections.Disconnected(connection);
+
+				//if (connection.Socket.State != WebSocketState..Closed)
+				//{
+					await connection.Socket.CloseAsync(connection.Socket.CloseStatus.Value, connection.Socket.CloseStatusDescription, CancellationToken.None);
+				//}
 			}
-
-            Game.Connections.Remove(connection);
-			await connection.Socket.CloseAsync(connection.Socket.CloseStatus.Value, connection.Socket.CloseStatusDescription, CancellationToken.None);
+			catch (Exception)
+			{
+				Game.Connections.Disconnected(connection);
+			}
 		}
 	}
 }

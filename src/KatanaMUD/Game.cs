@@ -36,6 +36,9 @@ namespace KatanaMUD
 				{
 					var newTime = DateTime.UtcNow;
 
+					// handle connections/disconnections
+					Connections.HandleConnectsAndDisconnects();
+
 					// Grab a snapshot of all active actors (will clear the active list)
 					var actors = ActiveActors.Snapshot();
 
@@ -67,13 +70,13 @@ namespace KatanaMUD
 					lastTime = newTime;
 
 					// Save changes to the database.
-					//if (Data.ForceSave || saveTime < newTime)
-					//{
-					//	Data.ForceSave = false;
-					//	// TODO: Make the save time configurable eventually.
-					//	saveTime = newTime.AddMinutes(1);
-					//	Data.SaveChanges();
-					//} 
+					if (Data.ForceSave || saveTime < newTime)
+					{
+						Data.ForceSave = false;
+						// TODO: Make the save time configurable eventually.
+						saveTime = newTime.AddMinutes(1);
+						Data.SaveChanges();
+					}
 
 					Thread.Sleep(50);
 				}

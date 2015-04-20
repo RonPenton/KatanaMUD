@@ -33,16 +33,7 @@ namespace KatanaMUD.Messages
             }
             else
             {
-                // TODO: Blind, etc.
-                var roomMessage = new RoomDescriptionMessage();
-                roomMessage.RoomId = actor.Room.Id;
-                roomMessage.IsCurrentRoom = true;
-                roomMessage.Description = actor.Room.TextBlock.Text;    //TODO: Settings->Brief
-                roomMessage.Name = actor.Room.Name;
-                //TODO: Actors
-                //TODO: Items
-
-                actor.SendMessage(roomMessage);
+				actor.SendRoomDescription(actor.Room);
             }
         }
     }

@@ -10,20 +10,17 @@ namespace KatanaMUD
 {
 	public class Connection
 	{
-		public Connection(WebSocket socket, User user, Actor actor)
+		public Connection(WebSocket socket, User user, Actor actor, string ip)
 		{
-			if (actor.Connection != null)
-				throw new InvalidOperationException("Connection already attached to actor");
-
 			Socket = socket;
 			User = user;
 			Actor = actor;
-			actor.MessageHandler = new ConnectionMessageHandler(actor);
-			actor.Connection = this;
+			IP = ip;
 		}
 
 		public WebSocket Socket { get; private set; }
 		public User User { get; private set; }
 		public Actor Actor { get; private set; }
+		public string IP { get; private set; }
 	}
 }

@@ -9,6 +9,8 @@ namespace KatanaMUD.Models
 {
 	public partial class Actor
 	{
+		internal bool UnhandledDisconnection { get; set; }
+
 		internal Connection Connection { get; set; }
 
 		private Party _party;
@@ -42,7 +44,12 @@ namespace KatanaMUD.Models
 		public void SendMessage(MessageBase message)
 		{
 			if (MessageHandler != null)
+			{
+				// special case, don't send messages if we're in a disconnected state.
+				if (MessageHandler is ConnectionMessageHandler && UnhandledDisconnection)
+					return;
 				MessageHandler.HandleMessage(message);
+			}
 		}
 
 		private ConcurrentQueue<MessageBase> _messages { get; } = new ConcurrentQueue<MessageBase>();
