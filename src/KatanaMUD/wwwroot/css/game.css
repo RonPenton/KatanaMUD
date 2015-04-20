@@ -73,3 +73,15 @@ input:focus {
 .exits {
   color: green;
 }
+.actors {
+  color: fuchsia;
+}
+.gossip {
+  color: fuchsia;
+}
+.say {
+  color: green;
+}
+.telepath {
+  color: white;
+}

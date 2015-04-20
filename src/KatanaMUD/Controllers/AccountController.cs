@@ -13,28 +13,28 @@ using System.Linq;
 
 namespace KatanaMUD.Controllers
 {
-	public class AccountController : Controller
-	{
-		// GET: /<controller>/
-		public IActionResult Login()
-		{
-			if (Context.User.Identity?.IsAuthenticated ?? false)
-			{
-				return RedirectToAction("Index", controllerName: "Home");
-			}
+    public class AccountController : Controller
+    {
+        // GET: /<controller>/
+        public IActionResult Login()
+        {
+            if (Context.User.Identity?.IsAuthenticated ?? false)
+            {
+                return RedirectToAction("Index", controllerName: "Home");
+            }
 
-			return View();
-		}
+            return View();
+        }
 
-		public IActionResult Register()
-		{
-			if (Context.User.Identity?.IsAuthenticated ?? false)
-			{
-				return RedirectToAction("Index", controllerName: "Home");
-			}
+        public IActionResult Register()
+        {
+            if (Context.User.Identity?.IsAuthenticated ?? false)
+            {
+                return RedirectToAction("Index", controllerName: "Home");
+            }
 
-			return View();
-		}
+            return View();
+        }
 
         [HttpPost]
         public IActionResult Register(RegisterModel model)
@@ -50,7 +50,7 @@ namespace KatanaMUD.Controllers
             user = Game.Data.Users.New(model.Username);
             user.PasswordHash = hash;
 
-            var claim = new Claim(ClaimTypes.Name, "Mithrandir");
+            var claim = new Claim(ClaimTypes.Name, model.Username);
             var identity = new ClaimsIdentity(new List<Claim>() { claim }, CookieAuthenticationDefaults.AuthenticationType);
             Context.Response.SignIn(identity);
 
@@ -67,7 +67,7 @@ namespace KatanaMUD.Controllers
             var hash = HashString(model.Password);
             if (hash == user.PasswordHash)
             {
-                var claim = new Claim(ClaimTypes.Name, "Mithrandir");
+                var claim = new Claim(ClaimTypes.Name, model.Username);
                 var identity = new ClaimsIdentity(new List<Claim>() { claim }, CookieAuthenticationDefaults.AuthenticationType);
                 Context.Response.SignIn(identity);
 
@@ -82,20 +82,20 @@ namespace KatanaMUD.Controllers
             return View(model: "Login Failed");
         }
 
-		[HttpPost]
-		public IActionResult Logout()
-		{
-			Context.Response.SignOut(CookieAuthenticationDefaults.AuthenticationType);
-			return RedirectToAction("Login");
-		}
+        [HttpPost]
+        public IActionResult Logout()
+        {
+            Context.Response.SignOut(CookieAuthenticationDefaults.AuthenticationType);
+            return RedirectToAction("Login");
+        }
 
 
-		private string HashString(string toHash)
-		{
-			var hasher = new HMACSHA512(Encoding.UTF8.GetBytes("KatanaMUDHashKey: 89012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567"));
-			var bytes = Encoding.UTF8.GetBytes(toHash);
-			var hash = hasher.ComputeHash(bytes);
-			return Convert.ToBase64String(hash);
-		}
-	}
+        private string HashString(string toHash)
+        {
+            var hasher = new HMACSHA512(Encoding.UTF8.GetBytes("KatanaMUDHashKey: 89012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567"));
+            var bytes = Encoding.UTF8.GetBytes(toHash);
+            var hash = hasher.ComputeHash(bytes);
+            return Convert.ToBase64String(hash);
+        }
+    }
 }

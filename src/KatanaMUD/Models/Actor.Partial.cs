@@ -94,7 +94,7 @@ namespace KatanaMUD.Models
 				//TODO: VisibleItems = ?
 				//TODO: Actors = ?
 			};
-			message.SetExits(room);
+			message.SetData(room);
 
 			SendMessage(message);
 		}

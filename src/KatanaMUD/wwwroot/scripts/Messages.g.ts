@@ -4,7 +4,8 @@ module KMud {
         public Message: string;
         public Type: CommunicationType;
         public Chatroom: string;
-        public User: number;
+        public ActorName: string;
+        public ActorId: number;
         public static ClassName: string = 'CommunicationMessage';
     }
     export class LoginRejected extends MessageBase {
@@ -42,9 +43,9 @@ module KMud {
         public RoomId: number;
         public Name: string;
         public Description: string;
-        public Actors: number[];
+        public Actors: ActorDescription[];
         public VisibleItems: number[];
-        public Exits: number[];
+        public Exits: ExitDescription[];
         public IsCurrentRoom: boolean;
         public CannotSee: boolean;
         public CannotSeeMessage: string;
@@ -54,6 +55,15 @@ module KMud {
         constructor() { super('ServerMessage'); }
         public Contents: string;
         public static ClassName: string = 'ServerMessage';
+    }
+    export class ActorDescription {
+        public Name: string;
+        public Id: string;
+    }
+    export class ExitDescription {
+        public Direction: Direction;
+        public Name: string;
+        public DestinationRoom: number;
     }
     export enum CommunicationType {
         Gossip = 0,

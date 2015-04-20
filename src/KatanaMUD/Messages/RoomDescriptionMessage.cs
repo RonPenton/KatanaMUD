@@ -1,5 +1,6 @@
 ﻿using System;
 using KatanaMUD.Models;
+using System.Linq;
 
 namespace KatanaMUD.Messages
 {
@@ -8,9 +9,9 @@ namespace KatanaMUD.Messages
         public int? RoomId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public int[] Actors { get; set; }
+        public ActorDescription[] Actors { get; set; }
         public int[] VisibleItems { get; set; }
-        public int?[] Exits { get; set; }
+        public ExitDescription[] Exits { get; set; }
         public bool IsCurrentRoom { get; set; }
         /// <summary>
         /// Used to determine if the user is unable to see their surroundings.
@@ -22,13 +23,40 @@ namespace KatanaMUD.Messages
         /// </summary>
         public string CannotSeeMessage { get; set; }
 
-		internal void SetExits(Room room)
-		{
-			Exits = new int?[10];
-			foreach (var direction in Directions.Enumerate())
-			{
-				Exits[(int)direction] = room.GetExit(direction)?.ExitRoom;
-			}
-		}
-	}
+        internal void SetData(Room room)
+        {
+            var exits = room.GetExits();
+            Exits = exits.Select(x =>
+            {
+                return new ExitDescription()
+                {
+                    Direction = x.Direction,
+                    DestinationRoom = x.ExitRoom,
+                    Name = x.Portal?.GetName(room) ?? x.Direction.ToString()
+                };
+            }).ToArray();
+
+            Actors = room.Actors.Select(x =>
+           {
+               return new ActorDescription()
+               {
+                   Name = x.Name,
+                   Id = x.Id.ToString()
+               };
+           }).ToArray();
+        }
+    }
+
+    public class ExitDescription
+    {
+        public Direction Direction { get; set; }
+        public string Name { get; set; }
+        public int? DestinationRoom { get; set; }
+    }
+
+    public class ActorDescription
+    {
+        public string Name { get; set; }
+        public string Id { get; set; }
+    }
 }

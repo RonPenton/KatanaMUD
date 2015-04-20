@@ -78,6 +78,18 @@ var KMud;
         return ServerMessage;
     })(KMud.MessageBase);
     KMud.ServerMessage = ServerMessage;
+    var ActorDescription = (function () {
+        function ActorDescription() {
+        }
+        return ActorDescription;
+    })();
+    KMud.ActorDescription = ActorDescription;
+    var ExitDescription = (function () {
+        function ExitDescription() {
+        }
+        return ExitDescription;
+    })();
+    KMud.ExitDescription = ExitDescription;
     (function (CommunicationType) {
         CommunicationType[CommunicationType["Gossip"] = 0] = "Gossip";
         CommunicationType[CommunicationType["Auction"] = 1] = "Auction";

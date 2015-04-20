@@ -33,7 +33,14 @@ namespace Spam
                 LoadMetaData();
                 LoadAllData(connection);
                 AttachRelationships();
+                ClearChanges();
             }
+        }
+
+        private void ClearChanges()
+        {
+            foreach (var entityType in EntityTypes)
+                entityType.Container.ClearChanges();
         }
 
         protected abstract void LoadMetaData();

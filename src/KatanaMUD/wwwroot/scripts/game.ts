@@ -22,7 +22,8 @@ module KMud {
         private lastCommands: string[] = [];
         private currentCommand: number = -1;
         private messageHandlers: { [index: string]: Action1<MessageBase> } = {};
-        private commandHandlers: { [index: string]: Action1<string[]> } = {};
+        private commandHandlers: { [index: string]: Action3<string[], string, string> } = {};
+        private symbolCommandHandlers: { [index: string]: Action3<string[], string, string> } = {};
 
         constructor() {
             this.input = <HTMLInputElement>document.getElementById("InputBox");
@@ -63,16 +64,31 @@ module KMud {
             });
 
             this.registerMessageHandlers();
-			this.registerCommandHandlers();
+            this.registerCommandHandlers();
         }
 
         private processCommand(command: string) {
             var lower = command.toLocaleLowerCase().trim();
             var words = command.split(/\s+/gi);
+            var tail = command.substr(words[0].length).trim();
+            var param = words[0].substr(1);
 
-			var handler = this.commandHandlers[words[0]];
-			if (handler)
-				handler(words);
+            var handler = this.commandHandlers[words[0]];
+            if (handler) {
+                handler(words, tail, words.length > 1 ? words[1] : null);
+                return;
+            }
+
+            // Check for character commands; ie "/Mithrandir hey there"
+            var char = words[0].substr(0, 1);
+            var charHandler = this.symbolCommandHandlers[char]
+            if (charHandler != null) {
+                charHandler(words, tail, param);
+                return;
+            }
+
+            // No clue. Say it, don't spray it.
+            this.talk(command, CommunicationType.Say);
         }
 
         private _socket: WebSocket;
@@ -126,41 +142,60 @@ module KMud {
             }
 
             this.messageHandlers[RoomDescriptionMessage.ClassName] = (message: RoomDescriptionMessage) => this.showRoomDescription(message);
+
+            this.messageHandlers[CommunicationMessage.ClassName] = (message: CommunicationMessage) => this.showCommunication(message);
         }
 
-		private registerCommandHandlers() {
-			this.commandHandlers["ping"] = x => this.ping();
+        private registerCommandHandlers() {
+            this.commandHandlers["ping"] = x => this.ping();
 
-			this.commandHandlers["n"] = this.commandHandlers["north"] = words => this.move(Direction.North);
-			this.commandHandlers["s"] = this.commandHandlers["south"] = words => this.move(Direction.South);
-			this.commandHandlers["e"] = this.commandHandlers["east"] = words => this.move(Direction.East);
-			this.commandHandlers["w"] = this.commandHandlers["west"] = words => this.move(Direction.West);
-			this.commandHandlers["ne"] = this.commandHandlers["northeast"] = words => this.move(Direction.Northeast);
-			this.commandHandlers["nw"] = this.commandHandlers["northwest"] = words => this.move(Direction.Northwest);
-			this.commandHandlers["se"] = this.commandHandlers["southeast"] = words => this.move(Direction.Southeast);
-			this.commandHandlers["sw"] = this.commandHandlers["southwest"] = words => this.move(Direction.Southwest);
-			this.commandHandlers["u"] = this.commandHandlers["up"] = words => this.move(Direction.Up);
-			this.commandHandlers["d"] = this.commandHandlers["down"] = words => this.move(Direction.Down);
-			this.commandHandlers["l"] = this.commandHandlers["look"] = words => this.look(words);
-		}
+            this.commandHandlers["n"] = this.commandHandlers["north"] = words => this.move(Direction.North);
+            this.commandHandlers["s"] = this.commandHandlers["south"] = words => this.move(Direction.South);
+            this.commandHandlers["e"] = this.commandHandlers["east"] = words => this.move(Direction.East);
+            this.commandHandlers["w"] = this.commandHandlers["west"] = words => this.move(Direction.West);
+            this.commandHandlers["ne"] = this.commandHandlers["northeast"] = words => this.move(Direction.Northeast);
+            this.commandHandlers["nw"] = this.commandHandlers["northwest"] = words => this.move(Direction.Northwest);
+            this.commandHandlers["se"] = this.commandHandlers["southeast"] = words => this.move(Direction.Southeast);
+            this.commandHandlers["sw"] = this.commandHandlers["southwest"] = words => this.move(Direction.Southwest);
+            this.commandHandlers["u"] = this.commandHandlers["up"] = words => this.move(Direction.Up);
+            this.commandHandlers["d"] = this.commandHandlers["down"] = words => this.move(Direction.Down);
+            this.commandHandlers["l"] = this.commandHandlers["look"] = words => this.look(words);
 
-		private look(words: string[]) {
-			var message = new LookMessage()
-			//TODO: Parse parameters
-			this._socket.send(JSON.stringify(message));
-		}
+            this.commandHandlers["gos"] = this.commandHandlers["gossip"] = (words, tail) => this.talk(tail, CommunicationType.Gossip);
+            this.commandHandlers["say"] = (words, tail) => this.talk(tail, CommunicationType.Say);
+            this.commandHandlers["telepath"] = (words, tail, param) => this.talk(tail, CommunicationType.Telepath, param);
 
-		private move(direction: Direction) {
-			var message = new MoveMessage()
-			message.Direction = direction;
-			this._socket.send(JSON.stringify(message));
-		}
+            this.symbolCommandHandlers["."] = (words, tail) => this.talk(tail, CommunicationType.Gossip);
+            this.symbolCommandHandlers["/"] = (words, tail, param) => this.talk(tail, CommunicationType.Telepath, param);
+        }
 
-		private ping() {
-			var message = new PingMessage();
-			message.SendTime = new Date();
-			this._socket.send(JSON.stringify(message));
-		}
+        private talk(text: string, type: CommunicationType, param?: string) {
+            var message = new CommunicationMessage();
+            message.Message = text;
+            message.Type = type;
+            if (param !== undefined) {
+                message.ActorName = param;
+            }
+            this._socket.send(JSON.stringify(message));
+        }
+
+        private look(words: string[]) {
+            var message = new LookMessage()
+            //TODO: Parse parameters
+            this._socket.send(JSON.stringify(message));
+        }
+
+        private move(direction: Direction) {
+            var message = new MoveMessage()
+            message.Direction = direction;
+            this._socket.send(JSON.stringify(message));
+        }
+
+        private ping() {
+            var message = new PingMessage();
+            message.SendTime = new Date();
+            this._socket.send(JSON.stringify(message));
+        }
 
         private addOutput(element: HTMLElement, text: string, css: string = null) {
 
@@ -193,25 +228,32 @@ module KMud {
                     this.mainOutput(message.Description, "room-desc");
                 }
 
-				
-				var directions = [];
-				for (var val in Direction) {
-					if (!isNaN(val)) {
-						var exit = message.Exits[val];
-						if (exit != null) {
-							directions.push(Direction[val]);
-						}
-					}
-				}
+                if (message.Actors.length > 0) {
+                    this.mainOutput("Also here: " + message.Actors.map(x=> x.Name).join(", ") + ".", "actors");
+                }
 
-				// TODO: Portals.
+                if (message.Exits.length > 0) {
+                    this.mainOutput("Obvious exits: " + message.Exits.map(x=> x.Name).join(", "), "exits");
+                }
+                else {
+                    this.mainOutput("Obvious exits: NONE!!!", "exits");
+                }
+            }
+        }
 
-				if (directions.length > 0) {
-					this.mainOutput("Obvious exits: " + directions.join(", "), "exits");
-				}
-				else {
-					this.mainOutput("Obvious exits: NONE!!!", "exits");
-				}
+        private showCommunication(message: CommunicationMessage) {
+            switch (message.Type) {
+                case CommunicationType.Gossip:
+                    this.mainOutput(message.ActorName + " gossips: " + message.Message, "gossip");
+                    break;
+
+                case CommunicationType.Say:
+                    this.mainOutput(message.ActorName + " says \"" + message.Message + "\"", "say");
+                    break;
+
+                case CommunicationType.Telepath:
+                    this.mainOutput(message.ActorName + " telepaths " + message.Message, "telepath");
+                    break;
             }
         }
     }

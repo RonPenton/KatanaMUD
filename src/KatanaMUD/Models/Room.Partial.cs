@@ -65,6 +65,10 @@ namespace KatanaMUD.Models
     public class Portal
     {
         // TODO: Remove. Simply a placeholder for now.
+        internal string GetName(Room room)
+        {
+            return "PORTAL";
+        }
     }
 
     public enum Direction
