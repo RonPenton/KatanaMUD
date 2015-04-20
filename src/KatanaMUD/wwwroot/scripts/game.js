@@ -127,8 +127,7 @@ var KMud;
             this.commandHandlers["l"] = this.commandHandlers["look"] = function (words) { return _this.look(words); };
             this.commandHandlers["gos"] = this.commandHandlers["gossip"] = function (words, tail) { return _this.talk(tail, 0 /* Gossip */); };
             this.commandHandlers["say"] = function (words, tail) { return _this.talk(tail, 2 /* Say */); };
-            this.commandHandlers["telepath"] = function (words, tail, param) { return _this.talk(tail, 8 /* Telepath */, param); };
-            this.symbolCommandHandlers["."] = function (words, tail) { return _this.talk(tail, 0 /* Gossip */); };
+            this.symbolCommandHandlers["."] = function (words, tail) { return _this.talk(tail, 2 /* Say */); };
             this.symbolCommandHandlers["/"] = function (words, tail, param) { return _this.talk(tail, 8 /* Telepath */, param); };
         };
         Game.prototype.talk = function (text, type, param) {

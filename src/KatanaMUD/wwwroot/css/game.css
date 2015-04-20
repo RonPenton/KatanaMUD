@@ -3,14 +3,15 @@ body {
   overflow: hidden;
   display: flex;
   height: 100vh;
-  font-size: 15px;
+  font-size: 16px;
   font-family: Consolas, Courier New, Courier, monospace;
   color: white;
 }
 .game-text span {
   padding: 2px 0px;
   display: inline-block;
-  max-width: 80em;
+  max-width: 80ch;
+  word-wrap: break-word;
 }
 .error-text {
   background-color: crimson;
@@ -71,7 +72,7 @@ input:focus {
   color: white;
 }
 .exits {
-  color: green;
+  color: #16be16;
 }
 .actors {
   color: fuchsia;
@@ -80,7 +81,7 @@ input:focus {
   color: fuchsia;
 }
 .say {
-  color: green;
+  color: greenyellow;
 }
 .telepath {
   color: white;

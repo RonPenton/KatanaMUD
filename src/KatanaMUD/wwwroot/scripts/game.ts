@@ -163,9 +163,8 @@ module KMud {
 
             this.commandHandlers["gos"] = this.commandHandlers["gossip"] = (words, tail) => this.talk(tail, CommunicationType.Gossip);
             this.commandHandlers["say"] = (words, tail) => this.talk(tail, CommunicationType.Say);
-            this.commandHandlers["telepath"] = (words, tail, param) => this.talk(tail, CommunicationType.Telepath, param);
 
-            this.symbolCommandHandlers["."] = (words, tail) => this.talk(tail, CommunicationType.Gossip);
+            this.symbolCommandHandlers["."] = (words, tail) => this.talk(tail, CommunicationType.Say);
             this.symbolCommandHandlers["/"] = (words, tail, param) => this.talk(tail, CommunicationType.Telepath, param);
         }
 
