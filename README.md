@@ -22,55 +22,55 @@ The Game Loop runs on a single thread. Unfortunately this is probably a necessit
 This is a preliminary roadmap for the game. Everything is subject to change on my whims.
 
 ## 0.1
-* *Basic Proof-Of-Concept using Websockets*
-* *Design Membership system*
-* *Design Login/Socket Management System*
-* *Design messaging system*
-* **MajorMUD Data Importer Tool from Nightmare Redux data**
-* **Design ORM Layer**
-* Basic Map Module (rooms, normal exits)
-* Communication module (talk, gossip, telepaths)
+- [x] Basic Proof-Of-Concept using Websockets
+- [x] Design Membership system
+- [x] Design Login/Socket Management System
+- [x] Design messaging system
+- [x] MajorMUD Data Importer Tool from Nightmare Redux data
+- [x] Design ORM Layer
+- [x] Basic Map Module (rooms, normal exits)
+- [ ] Communication module (talk, gossip, telepaths)
 
 ## 0.2
 
-* Item module
-* Movement Limitation
-* Command/Data Rate Limitations and queuing
-* Admin/Log Module (All admin commands will be publicly logged, to promote honesty in operation)
-* Gangs
-* Communication Enhancements: chatrooms, gangpaths, officerpaths
+- [ ] Item module
+- [ ] Movement Limitation
+- [ ] Command/Data Rate Limitations and queuing
+- [ ] Admin/Log Module (All admin commands will be publicly logged, to promote honesty in operation)
+- [ ] Gangs
+- [ ] Communication Enhancements: chatrooms, gangpaths, officerpaths
 
 ## 0.3
 
-* Scripting Engine
-* Portals (advanced exit types)
-* Stat System
-* Buff System
+- [ ] Scripting Engine
+- [ ] Portals (advanced exit types)
+- [ ] Stat System
+- [ ] Buff System
 
 ## 0.4
 
-* Basic combat module
-* Skill Trees (spells, skills)
+- [ ] Combat
+- [ ] Skill Trees (spells, skills)
 
 ## 0.5
 
-* Import Textblock "scripts" into native format
-* Quest/event module
+- [ ] Import Textblock "scripts" into native format
+- [ ] Quest/event module
 
 ## 0.6 
 
-* Content Editors
+- [ ] Content Editors
 
-## 0.7 and beyond
+## 1.0
 
-* (?) Look into expanding the features of the game. Factions, Auctions, etc.
-* Automation of client (ie: MegaMUD-like features)
-* Balancing of the game
-* New Content
+- [ ] Balancing of the game
+- [ ] Automation of client (ie: MegaMUD-like features)
 
-## Removed (for now)
+## 2.0
 
-* ~~Design multi-tennancy system (to run multiple MUDs on the same server)~~
+- [ ] Factions 
+- [ ] Auctions (?)
+- [ ] New Content
 
 Key: 
 * *italic - Done or mostly done*
