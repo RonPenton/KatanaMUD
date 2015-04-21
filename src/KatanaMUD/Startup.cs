@@ -58,7 +58,7 @@ namespace KatanaMUD
                 {
                     var socket = await context.AcceptWebSocketAsync(context.WebSocketRequestedProtocols[0]);
                     var ip = context.GetFeature<IHttpConnectionFeature>()?.RemoteIpAddress?.ToString() ?? "No IP Address";
-                    Console.WriteLine("Incoming connection: " + ip);
+                    Console.WriteLine(String.Format("[{0}] Incoming connection: {1}", DateTime.Now.ToShortTimeString(), ip));
 
                     if (!context.User?.Identity.IsAuthenticated ?? true)
                     {
@@ -100,7 +100,7 @@ namespace KatanaMUD
 
         private async void RejectConnection(WebSocket socket, string reason, string ip)
         {
-            Console.WriteLine(String.Format("Connection Aborted ({0}): {1}.", ip, reason));
+            Console.WriteLine(String.Format("[{2}] Connection Aborted ({0}): {1}.", ip, reason, DateTime.Now.ToShortTimeString()));
             var rejection = new LoginRejected() { RejectionMessage = reason };
             ConnectionMessageHandler.HandleMessage(socket, rejection);
             await socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, reason, CancellationToken.None);
@@ -113,7 +113,7 @@ namespace KatanaMUD
                 byte[] buffer = new byte[1024];
                 WebSocketReceiveResult received = await connection.Socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
-                while (!connection.Socket.CloseStatus.HasValue)
+                while (!connection.Socket.CloseStatus.HasValue && !connection.Disconnected)
                 {
                     var message = MessageSerializer.DeserializeMessage(Encoding.UTF8.GetString(buffer, 0, received.Count));
                     connection.Actor.AddMessage(message);

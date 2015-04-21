@@ -1,11 +1,18 @@
 module KMud {
+    export class ActorInformationMessage extends MessageBase {
+        constructor() { super('ActorInformationMessage'); }
+        public Name: string;
+        public Id: string;
+        public IsYou: boolean;
+        public static ClassName: string = 'ActorInformationMessage';
+    }
     export class CommunicationMessage extends MessageBase {
         constructor() { super('CommunicationMessage'); }
         public Message: string;
         public Type: CommunicationType;
         public Chatroom: string;
         public ActorName: string;
-        public ActorId: number;
+        public ActorId: string;
         public static ClassName: string = 'CommunicationMessage';
     }
     export class LoginRejected extends MessageBase {

@@ -22,5 +22,6 @@ namespace KatanaMUD
         public User User { get; private set; }
         public Actor Actor { get; private set; }
         public string IP { get; private set; }
+        public bool Disconnected { get; internal set; }
     }
 }
