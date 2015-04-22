@@ -39,7 +39,9 @@ namespace KatanaMUD
             lock (syncRoot)
             {
                 var connection = _connections[user];
-                Console.WriteLine(String.Format("User ({0}/{1}/{2}) Disconnected", connection.User.Id, connection.Actor.Name, connection.IP));
+                if (connection.Disconnected)
+                    return;
+                Console.WriteLine(String.Format("[{3}] User ({0}/{1}/{2}) Disconnected", connection.User.Id, connection.Actor.Name, connection.IP, DateTime.Now.ToShortTimeString()));
                 _connections.Remove(user);
                 _pendingDisconnections.Add(connection);
             }
@@ -47,7 +49,9 @@ namespace KatanaMUD
 
         internal void Disconnected(Connection connection)
         {
-            Console.WriteLine(String.Format("User ({0}/{1}/{2}) Disconnected", connection.User.Id, connection.Actor.Name, connection.IP));
+            if (connection.Disconnected)
+                return;
+            Console.WriteLine(String.Format("[{3}] User ({0}/{1}/{2}) Disconnected", connection.User.Id, connection.Actor.Name, connection.IP, DateTime.Now.ToShortTimeString()));
             connection.Actor.UnhandledDisconnection = true;
             lock (syncRoot)
             {
@@ -58,7 +62,7 @@ namespace KatanaMUD
 
         internal Connection Connect(WebSocket socket, User user, Actor actor, string ip)
         {
-            Console.WriteLine(String.Format("User ({0}/{1}/{2}) Connected", user.Id, actor.Name, ip));
+            Console.WriteLine(String.Format("[{3}] User ({0}/{1}/{2}) Connected", user.Id, actor.Name, ip, DateTime.Now.ToShortTimeString()));
             var connection = new Connection(socket, user, actor, ip);
             lock (syncRoot)
             {
@@ -76,6 +80,7 @@ namespace KatanaMUD
                     connection.Actor.Connection = null;
                     connection.Actor.MessageHandler = null;
                     connection.Actor.UnhandledDisconnection = false;
+                    connection.Disconnected = true;
 
                     //TODO: Notify realm of disconnection.
                 }
@@ -85,6 +90,7 @@ namespace KatanaMUD
                 {
                     connection.Actor.Connection = null;
                     connection.Actor.MessageHandler = null;
+                    connection.Disconnected = true;
                     connection.Socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Disconnected", CancellationToken.None);
 
                     //TODO: Notify realm of disconnection.
@@ -100,6 +106,7 @@ namespace KatanaMUD
 
                     //TODO: Load Server message
                     connection.Actor.SendMessage(new ServerMessage() { Contents = "Welcome to KatanaMUD. A MUD on the Web. Because I'm apparently insane. Dear lord." });
+                    connection.Actor.SendMessage(ActorInformationMessage.CreateFirstPerson(connection.Actor));
                     connection.Actor.SendRoomDescription(connection.Actor.Room);
                 }
                 _newConnections.Clear();

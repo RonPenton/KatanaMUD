@@ -1,5 +1,9 @@
 # KatanaMUD
-A web browser MUD. It originally started life as a clone of MajorMUD, but may end up diverging from that vision significantly in the end. Who knows. We shall see!
+A web browser MUD. It originally started life as a clone of MajorMUD, but may end up diverging from that vision significantly in the end.
+
+Chat with us on Jabbr: https://jabbr.net/#/rooms/KatanaMUD
+
+At the moment, it's just me developing, but I'm open to collaborators. Fork, modify, and make a pull request!
 
 
 #Status

@@ -82,7 +82,7 @@ namespace KatanaMUD
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine(ex.ToString());
+					Console.WriteLine(String.Format("[{0}] Exception: {1}", DateTime.Now.ToShortTimeString(), ex.ToString()));
 				}
 			}
 		}

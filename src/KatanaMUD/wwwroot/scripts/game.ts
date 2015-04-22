@@ -24,6 +24,7 @@ module KMud {
         private messageHandlers: { [index: string]: Action1<MessageBase> } = {};
         private commandHandlers: { [index: string]: Action3<string[], string, string> } = {};
         private symbolCommandHandlers: { [index: string]: Action3<string[], string, string> } = {};
+        private currentPlayer: ActorInformationMessage;
 
         constructor() {
             this.input = <HTMLInputElement>document.getElementById("InputBox");
@@ -83,7 +84,7 @@ module KMud {
             var char = words[0].substr(0, 1);
             var charHandler = this.symbolCommandHandlers[char]
             if (charHandler != null) {
-                charHandler(words, tail, param);
+                charHandler(words, command.substr(1), param);
                 return;
             }
 
@@ -144,6 +145,8 @@ module KMud {
             this.messageHandlers[RoomDescriptionMessage.ClassName] = (message: RoomDescriptionMessage) => this.showRoomDescription(message);
 
             this.messageHandlers[CommunicationMessage.ClassName] = (message: CommunicationMessage) => this.showCommunication(message);
+
+            this.messageHandlers[ActorInformationMessage.ClassName] = (message: ActorInformationMessage) => this.currentPlayer = message;
         }
 
         private registerCommandHandlers() {
@@ -169,6 +172,9 @@ module KMud {
         }
 
         private talk(text: string, type: CommunicationType, param?: string) {
+            if (StringUtilities.isNullOrWhitespace(text))
+                return; // don't bother sending empty messages.
+
             var message = new CommunicationMessage();
             message.Message = text;
             message.Type = type;
@@ -227,8 +233,9 @@ module KMud {
                     this.mainOutput(message.Description, "room-desc");
                 }
 
-                if (message.Actors.length > 0) {
-                    this.mainOutput("Also here: " + message.Actors.map(x=> x.Name).join(", ") + ".", "actors");
+                if (message.Actors.length > 1) {
+                    var actors = message.Actors.filter(x => x.Id != this.currentPlayer.Id)
+                    this.mainOutput("Also here: " + actors.map(x=> x.Name).join(", ") + ".", "actors");
                 }
 
                 if (message.Exits.length > 0) {
@@ -247,7 +254,12 @@ module KMud {
                     break;
 
                 case CommunicationType.Say:
-                    this.mainOutput(message.ActorName + " says \"" + message.Message + "\"", "say");
+                    if (message.ActorId == this.currentPlayer.Id) {
+                        this.mainOutput("You say \"" + message.Message + "\"", "say");
+                    }
+                    else {
+                        this.mainOutput(message.ActorName + " says \"" + message.Message + "\"", "say");
+                    }
                     break;
 
                 case CommunicationType.Telepath:

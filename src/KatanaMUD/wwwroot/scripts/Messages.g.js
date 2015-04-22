@@ -6,6 +6,15 @@ var __extends = this.__extends || function (d, b) {
 };
 var KMud;
 (function (KMud) {
+    var ActorInformationMessage = (function (_super) {
+        __extends(ActorInformationMessage, _super);
+        function ActorInformationMessage() {
+            _super.call(this, 'ActorInformationMessage');
+        }
+        ActorInformationMessage.ClassName = 'ActorInformationMessage';
+        return ActorInformationMessage;
+    })(KMud.MessageBase);
+    KMud.ActorInformationMessage = ActorInformationMessage;
     var CommunicationMessage = (function (_super) {
         __extends(CommunicationMessage, _super);
         function CommunicationMessage() {

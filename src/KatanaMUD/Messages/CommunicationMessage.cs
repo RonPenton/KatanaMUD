@@ -10,10 +10,13 @@ namespace KatanaMUD.Messages
 		public CommunicationType Type { get; set; }
 		public string Chatroom { get; set; }
 		public string ActorName { get; set; }
-        public int ActorId { get; set; }
+        public Guid ActorId { get; set; }
 
 		public override void Process(Actor actor)
 		{
+            if (String.IsNullOrWhiteSpace(Message))
+                return;
+
 			//TODO: process message to remove extranaeous characters/codes.
 			switch (Type)
 			{
@@ -37,6 +40,7 @@ namespace KatanaMUD.Messages
             if (target != null)
             {
                 ActorName = actor.Name;
+                ActorId = actor.Id;
                 target.SendMessage(this);
             }
         }
@@ -45,6 +49,7 @@ namespace KatanaMUD.Messages
         {
             var actors = actor.Room.Actors;
             ActorName = actor.Name;
+            ActorId = actor.Id;
             foreach (var a in actors)
             {
                 a.SendMessage(this);
@@ -55,6 +60,7 @@ namespace KatanaMUD.Messages
 		{
             //TODO: Check if user is allowed to gossip.
             ActorName = actor.Name;
+            ActorId = actor.Id;
             var connections = Game.Connections.GetConnections();
 			foreach (var connection in connections)
 			{
