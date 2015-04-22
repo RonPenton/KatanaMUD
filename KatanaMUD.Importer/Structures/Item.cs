@@ -106,7 +106,12 @@ namespace KatanaMUD.Importer.Structures
 		public short Ignore25;
 
 
+        public override string ToString()
+        {
+            return String.Format("{0} ({1})", new string(Name.TakeWhile(x => x != '\0').ToArray()), Number);
+        }
 
-		public const int RecordSize = 1072;
+
+        public const int RecordSize = 1072;
 	}
 }

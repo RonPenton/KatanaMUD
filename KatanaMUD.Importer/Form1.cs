@@ -32,32 +32,41 @@ namespace KatanaMUD.Importer
             //var classes = Btrieve.GetAllClasses(new FileInfo(@"C:\Users\spsadmin\Documents\MMUDDats\wccclas2.dat").FullName, context.ClassTemplates);
 
 
-            var rooms = Btrieve.GetAllRooms(new FileInfo(@"C:\CleanP\wccmp002.dat").FullName);
+            //var rooms = Btrieve.GetAllRooms(new FileInfo(@"C:\CleanP\wccmp002.dat").FullName);
 
-			//Regex r = new Regex("\\s+");
-			//var descriptions = rooms.GroupBy(x => x.Description).ToList();//.OrderBy(x => x.Key).ToList();
+            //Regex r = new Regex("\\s+");
+            //var descriptions = rooms.GroupBy(x => x.Description).ToList();//.OrderBy(x => x.Key).ToList();
 
-			//foreach (var group in descriptions)
-			//{
-			//    var textBlock = context.TextBlocks.New();
-			//    textBlock.Text = group.Key;
+            //foreach (var group in descriptions)
+            //{
+            //    var textBlock = context.TextBlocks.New();
+            //    textBlock.Text = group.Key;
 
-			//    foreach (var room in group)
-			//    {
-			//        var dbRoom = room.ToRoom(null);
-			//        dbRoom.TextBlock = textBlock;
-			//        context.Rooms.Add(dbRoom, false);
-			//    }
-			//}
+            //    foreach (var room in group)
+            //    {
+            //        var dbRoom = room.ToRoom(null);
+            //        dbRoom.TextBlock = textBlock;
+            //        context.Rooms.Add(dbRoom, false);
+            //    }
+            //}
 
-			foreach (var room in rooms)
-			{
-				var dbRoom = room.ToRoom(context.Rooms.SingleOrDefault(x => x.Id == RoomBuffer.GetRoomNumber(room.MapNumber, room.RoomNumber)));
-			}
+            //foreach (var room in rooms)
+            //{
+            //	var dbRoom = room.ToRoom(context.Rooms.SingleOrDefault(x => x.Id == RoomBuffer.GetRoomNumber(room.MapNumber, room.RoomNumber)));
+            //}
 
-			//context.RaceTemplates.AddRange(races, true);
-			//context.ClassTemplates.AddRange(classes, true);
-			context.SaveChanges();
+
+            var items = Btrieve.GetAllItems(new FileInfo(@"C:\CleanP\wccitem2.dat").FullName);
+
+            var notdrop = items.Where(x => x.NotDroppable != 0).ToList();
+            var retain = items.Where(x => x.RetainAfterUses != 0).ToList();
+            var destroy = items.Where(x => x.DestroyOnDeath != 0).ToList();
+
+
+
+            //context.RaceTemplates.AddRange(races, true);
+            //context.ClassTemplates.AddRange(classes, true);
+            context.SaveChanges();
 		}
 	}
 }
