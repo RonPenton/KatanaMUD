@@ -33,7 +33,7 @@ This is a preliminary roadmap for the game. Everything is subject to change on m
 - [x] MajorMUD Data Importer Tool from Nightmare Redux data
 - [x] Design ORM Layer
 - [x] Basic Map Module (rooms, normal exits)
-- [ ] Communication module (talk, gossip, telepaths)
+- [x] Communication module (talk, gossip, telepaths)
 
 ## 0.2
 
