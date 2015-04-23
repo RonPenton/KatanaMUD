@@ -172,5 +172,14 @@ namespace Spam
 
             return initial;
         }
+
+        public bool GetValue(string name, out object value)
+        {
+            if (_dictionary.TryGetValue(name, out value))
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }

@@ -13,6 +13,8 @@ namespace KatanaMUD.Models
         private Guid _Id;
         private String _CustomName;
         private Boolean _Modified;
+        private Int32? _EquippedSlot;
+        private DateTime? _HiddenTime;
         private Int32 _ItemTemplateId;
         private ItemTemplate _ItemTemplate;
         private Guid? _ActorId;
@@ -28,6 +30,8 @@ namespace KatanaMUD.Models
         public Guid Id { get { return _Id; } set { _Id = value; this.Changed(); } }
         public String CustomName { get { return _CustomName; } set { _CustomName = value; this.Changed(); } }
         public Boolean Modified { get { return _Modified; } set { _Modified = value; this.Changed(); } }
+        public Int32? EquippedSlot { get { return _EquippedSlot; } set { _EquippedSlot = value; this.Changed(); } }
+        public DateTime? HiddenTime { get { return _HiddenTime; } set { _HiddenTime = value; this.Changed(); } }
         public dynamic Stats { get; private set; }
         public ItemTemplate ItemTemplate {
             get { return _ItemTemplate; }
@@ -70,6 +74,8 @@ namespace KatanaMUD.Models
             entity._Modified = reader.GetBoolean(5);
             entity.Stats = new JsonContainer(entity);
             entity.Stats.FromJson(reader.GetSafeString(6));
+            entity._EquippedSlot = reader.GetSafeInt32(7);
+            entity._HiddenTime = reader.GetSafeDateTime(8);
             return entity;
         }
 
@@ -90,18 +96,20 @@ namespace KatanaMUD.Models
             c.Parameters.AddWithValue("@RoomId", (object)e.Room?.Id ?? DBNull.Value);
             c.Parameters.AddWithValue("@Modified", (object)e.Modified ?? DBNull.Value);
             c.Parameters.AddWithValue("@JSONStats", e.Stats.ToJson());
+            c.Parameters.AddWithValue("@EquippedSlot", (object)e.EquippedSlot ?? DBNull.Value);
+            c.Parameters.AddWithValue("@HiddenTime", (object)e.HiddenTime ?? DBNull.Value);
         }
 
         public static void GenerateInsertCommand(SqlCommand c, Item e)
         {
-            c.CommandText = @"INSERT INTO [Item]([Id], [ItemTemplateId], [CustomName], [ActorId], [RoomId], [Modified], [JSONStats])
-                              VALUES (@Id, @ItemTemplateId, @CustomName, @ActorId, @RoomId, @Modified, @JSONStats)";
+            c.CommandText = @"INSERT INTO [Item]([Id], [ItemTemplateId], [CustomName], [ActorId], [RoomId], [Modified], [JSONStats], [EquippedSlot], [HiddenTime])
+                              VALUES (@Id, @ItemTemplateId, @CustomName, @ActorId, @RoomId, @Modified, @JSONStats, @EquippedSlot, @HiddenTime)";
             AddSqlParameters(c, e);
         }
 
         public static void GenerateUpdateCommand(SqlCommand c, Item e)
         {
-            c.CommandText = @"UPDATE [Item] SET [Id] = @Id, [ItemTemplateId] = @ItemTemplateId, [CustomName] = @CustomName, [ActorId] = @ActorId, [RoomId] = @RoomId, [Modified] = @Modified, [JSONStats] = @JSONStats WHERE [Id] = @Id";
+            c.CommandText = @"UPDATE [Item] SET [Id] = @Id, [ItemTemplateId] = @ItemTemplateId, [CustomName] = @CustomName, [ActorId] = @ActorId, [RoomId] = @RoomId, [Modified] = @Modified, [JSONStats] = @JSONStats, [EquippedSlot] = @EquippedSlot, [HiddenTime] = @HiddenTime WHERE [Id] = @Id";
             AddSqlParameters(c, e);
         }
 

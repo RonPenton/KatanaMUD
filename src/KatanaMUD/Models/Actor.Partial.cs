@@ -135,7 +135,7 @@ namespace KatanaMUD.Models
             }
         }
 
-        public long Encumbrance => Items.Sum(x => x.ItemTemplate.Weight);
+        public long Encumbrance => Items.Sum(x => x.Weight);
 
         /// <summary>
         /// Determines if an actor can get an item.
@@ -153,7 +153,7 @@ namespace KatanaMUD.Models
                 return false;
 
             // Check weight.
-            if (Encumbrance + item.ItemTemplate.Weight > MaxEncumbrance)
+            if (Encumbrance + item.Weight > MaxEncumbrance)
                 return false;
 
             //TODO: Ask item if it can be gotten. 

@@ -18,12 +18,6 @@ namespace KatanaMUD.Models
         {
             Stats = new JsonContainer(this);
             Actors = new ParentChildRelationshipContainer<ClassTemplate, Actor, Guid>(this, child => child.ClassTemplate, (child, parent) => child.ClassTemplate= parent);
-            ArmorTypes = new ObservableHashSet<ArmorType>();
-			ArmorTypes.ItemsAdded += ArmorTypes_ItemsAdded;
-			ArmorTypes.ItemsRemoved += ArmorTypes_ItemsRemoved;
-            WeaponTypes = new ObservableHashSet<WeaponType>();
-			WeaponTypes.ItemsAdded += WeaponTypes_ItemsAdded;
-			WeaponTypes.ItemsRemoved += WeaponTypes_ItemsRemoved;
             RaceTemplates = new ObservableHashSet<RaceTemplate>();
 			RaceTemplates.ItemsAdded += RaceTemplates_ItemsAdded;
 			RaceTemplates.ItemsRemoved += RaceTemplates_ItemsRemoved;
@@ -34,8 +28,6 @@ namespace KatanaMUD.Models
         public String Description { get { return _Description; } set { _Description = value; this.Changed(); } }
         public dynamic Stats { get; private set; }
         public ICollection<Actor> Actors { get; private set; }
-        public ObservableHashSet<ArmorType> ArmorTypes { get; private set; }
-        public ObservableHashSet<WeaponType> WeaponTypes { get; private set; }
         public ObservableHashSet<RaceTemplate> RaceTemplates { get; private set; }
         public static ClassTemplate Load(SqlDataReader reader)
         {
@@ -50,8 +42,6 @@ namespace KatanaMUD.Models
 
         public override void LoadRelationships()
         {
-            ArmorTypes.AddRange(Context.ClassTemplateArmorTypes.Where(x => x.Item1 == this.Id).Select(x => Context.ArmorTypes.Single(y => y.Id == x.Item2)), true);
-            WeaponTypes.AddRange(Context.ClassTemplateWeaponTypes.Where(x => x.Item1 == this.Id).Select(x => Context.WeaponTypes.Single(y => y.Id == x.Item2)), true);
             RaceTemplates.AddRange(Context.RaceClassRestrictions.Where(x => x.Item2 == this.Id).Select(x => Context.RaceTemplates.Single(y => y.Id == x.Item1)), true);
         }
 
@@ -83,40 +73,6 @@ namespace KatanaMUD.Models
             c.Parameters.Clear();
             c.Parameters.AddWithValue("@Id", e.Id);
         }
-		private void ArmorTypes_ItemsAdded(object sender, CollectionChangedEventArgs<ArmorType> e)
-        {
-            foreach (var item in e.Items)
-            {
-                item.ClassTemplates.Add(this, true);
-                Context.ClassTemplateArmorTypes.Link(this.Key, item.Key, false);
-            }
-        }
-		private void ArmorTypes_ItemsRemoved(object sender, CollectionChangedEventArgs<ArmorType> e)
-		{
-			foreach (var item in e.Items)
-			{
-				item.ClassTemplates.Remove(this, true);
-				Context.ClassTemplateArmorTypes.Unlink(this.Key, item.Key);
-			}
-		}
-
-		private void WeaponTypes_ItemsAdded(object sender, CollectionChangedEventArgs<WeaponType> e)
-        {
-            foreach (var item in e.Items)
-            {
-                item.ClassTemplates.Add(this, true);
-                Context.ClassTemplateWeaponTypes.Link(this.Key, item.Key, false);
-            }
-        }
-		private void WeaponTypes_ItemsRemoved(object sender, CollectionChangedEventArgs<WeaponType> e)
-		{
-			foreach (var item in e.Items)
-			{
-				item.ClassTemplates.Remove(this, true);
-				Context.ClassTemplateWeaponTypes.Unlink(this.Key, item.Key);
-			}
-		}
-
 		private void RaceTemplates_ItemsAdded(object sender, CollectionChangedEventArgs<RaceTemplate> e)
         {
             foreach (var item in e.Items)
