@@ -9,6 +9,8 @@ At the moment, it's just me developing, but I'm open to collaborators. Fork, mod
 #Status
 The project is just starting development at the moment. A lot of the ideas are very new and in a lot of flux, so things may change rapidly. I'm building it on ASP.NET 5, which is currently in a pre-release beta state, and that may affect what gets developed here as the framework matures.
 
+At some point I will set up a testing server. I need to buy a VPS to do this, because my internet connection is far too slow right now to handle running a game server. I think this will be around the 0.3 milestone. If anyone has a VPS they can lend me in the meantime that would be superb, but don't sweat it if not. 
+
 #Why KatanaMUD? What does that have to do with MajorMUD?
 There's a lot of reasons for KatanaMUD. The MajorMUD community is dying, and there's no "savior" on the horizon. There's a very good port of it out there but they are unfortunately suffering from a glacial pace of development. I wish they'd just open the source already, but it's their choice, and we must respect that. In the meantime, the waning playerbase is clamouring for more content and features, and I feel like I want to at least attempt to offer it to them. MUD's have a long history of being open sourced, and because of that history, KatanaMUD is open sourced as well. The work I put into this game will be freely available to the rest of the world long after I've moved on or croaked. Additionally, this is a tacit admission that a project of this size is more than I can chew at the moment. I will need help at some point. MUD's are complex, and take thousands of hours to complete. Hopefully the community can come together and finish this out.
 
