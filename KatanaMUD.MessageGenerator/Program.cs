@@ -258,9 +258,10 @@ namespace KatanaMUD.MessageGenerator
             if (type == typeof(bool))
                 return "boolean";
             if (type == typeof(int) ||
+                type == typeof(long) ||
                 type == typeof(decimal) ||
                 type == typeof(float) ||
-                type == typeof(double))
+                type == typeof(double)) 
                 return "number";
             if (type == typeof(Object))
                 return "any";

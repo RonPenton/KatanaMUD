@@ -6,11 +6,11 @@ namespace KatanaMUD.Messages
 {
     public abstract class MessageBase
     {
-		public virtual string MessageName => this.GetType().Name;
+        public virtual string MessageName => this.GetType().Name;
 
-		[JsonIgnore]
-		public DateTime MessageTime { get; } = DateTime.UtcNow;
+        [JsonIgnore]
+        public DateTime MessageTime { get; } = DateTime.UtcNow;
 
-		public virtual void Process(Actor actor) { }
-	}
+        public virtual void Process(Actor actor) { }
+    }
 }

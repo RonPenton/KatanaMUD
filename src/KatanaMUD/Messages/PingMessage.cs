@@ -7,12 +7,12 @@ namespace KatanaMUD.Messages
     {
         public DateTime SendTime { get; set; }
 
-		public override void Process(Actor actor)
-		{
-			var pong = new PongMessage() { SendTime = SendTime };
-			actor.SendMessage(pong);
-		}
-	}
+        public override void Process(Actor actor)
+        {
+            var pong = new PongMessage() { SendTime = SendTime };
+            actor.SendMessage(pong);
+        }
+    }
 
     public class PongMessage : MessageBase
     {

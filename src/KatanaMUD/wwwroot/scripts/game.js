@@ -111,6 +111,7 @@ var KMud;
             this.messageHandlers[KMud.RoomDescriptionMessage.ClassName] = function (message) { return _this.showRoomDescription(message); };
             this.messageHandlers[KMud.CommunicationMessage.ClassName] = function (message) { return _this.showCommunication(message); };
             this.messageHandlers[KMud.ActorInformationMessage.ClassName] = function (message) { return _this.currentPlayer = message; };
+            this.messageHandlers[KMud.InventoryListMessage.ClassName] = function (message) { return _this.showInventory(message); };
         };
         Game.prototype.registerCommandHandlers = function () {
             var _this = this;
@@ -126,10 +127,23 @@ var KMud;
             this.commandHandlers["u"] = this.commandHandlers["up"] = function (words) { return _this.move(KMud.Direction.Up); };
             this.commandHandlers["d"] = this.commandHandlers["down"] = function (words) { return _this.move(KMud.Direction.Down); };
             this.commandHandlers["l"] = this.commandHandlers["look"] = function (words) { return _this.look(words); };
+            this.commandHandlers["i"] = this.commandHandlers["inv"] = this.commandHandlers["inventory"] = function (words, tail) { return _this.SendMessage(new KMud.InventoryMessage()); };
+            this.commandHandlers["get"] = function (words, tail) { return _this.get(tail); };
+            this.commandHandlers["drop"] = function (words, tail) { return _this.drop(tail); };
             this.commandHandlers["gos"] = this.commandHandlers["gossip"] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Gossip); };
             this.commandHandlers["say"] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Say); };
             this.symbolCommandHandlers["."] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Say); };
             this.symbolCommandHandlers["/"] = function (words, tail, param) { return _this.talk(tail, KMud.CommunicationType.Telepath, param); };
+        };
+        Game.prototype.get = function (item) {
+            var message = new KMud.GetItemMessage();
+            message.ItemName = item;
+            this.SendMessage(message);
+        };
+        Game.prototype.drop = function (item) {
+            var message = new KMud.DropItemMessage();
+            message.ItemName = item;
+            this.SendMessage(message);
         };
         Game.prototype.talk = function (text, type, param) {
             if (StringUtilities.isNullOrWhitespace(text))
@@ -185,6 +199,10 @@ var KMud;
                 if (StringUtilities.notEmpty(message.Description)) {
                     this.mainOutput(message.Description, "room-desc");
                 }
+                if (message.VisibleItems.length > 1) {
+                    var items = message.VisibleItems.map(function (x) { return x.Name; }).join(", ");
+                    this.mainOutput("You notice " + items + " here.", "items");
+                }
                 if (message.Actors.length > 1) {
                     var actors = message.Actors.filter(function (x) { return x.Id != _this.currentPlayer.Id; });
                     this.mainOutput("Also here: " + actors.map(function (x) { return x.Name; }).join(", ") + ".", "actors");
@@ -214,6 +232,23 @@ var KMud;
                     this.mainOutput(message.ActorName + " telepaths " + message.Message, "telepath");
                     break;
             }
+        };
+        Game.prototype.showInventory = function (message) {
+            var items = message.Items.map(function (x) { return x.Name; }).join(", ");
+            var str = "You are carrying " + items;
+            this.mainOutput(str, "inventory");
+            //TODO: You have no keys.
+            //TODO: Wealth: 500 copper farthings
+            var pct = Math.round((message.Encumbrance / message.MaxEncumbrance) * 100);
+            var category = "Heavy";
+            if (pct <= 66)
+                category = "Medium";
+            else if (pct <= 33)
+                category = "Light";
+            else if (pct <= 15)
+                category = "None";
+            var str = "Encumbrance: " + message.Encumbrance + " / " + message.MaxEncumbrance + " - " + category + "[" + pct + "%]";
+            this.mainOutput(str, "inventory");
         };
         return Game;
     })();

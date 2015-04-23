@@ -15,6 +15,31 @@ module KMud {
         public ActorId: string;
         public static ClassName: string = 'CommunicationMessage';
     }
+    export class InventoryMessage extends MessageBase {
+        constructor() { super('InventoryMessage'); }
+        public static ClassName: string = 'InventoryMessage';
+    }
+    export class InventoryListMessage extends MessageBase {
+        constructor() { super('InventoryListMessage'); }
+        public Items: ItemDescription[];
+        public Encumbrance: number;
+        public MaxEncumbrance: number;
+        public static ClassName: string = 'InventoryListMessage';
+    }
+    export class GetItemMessage extends MessageBase {
+        constructor() { super('GetItemMessage'); }
+        public ItemId: string;
+        public ItemName: string;
+        public Quantity: number;
+        public static ClassName: string = 'GetItemMessage';
+    }
+    export class DropItemMessage extends MessageBase {
+        constructor() { super('DropItemMessage'); }
+        public ItemId: string;
+        public ItemName: string;
+        public Quantity: number;
+        public static ClassName: string = 'DropItemMessage';
+    }
     export class LoginRejected extends MessageBase {
         constructor() { super('LoginRejected'); }
         public RejectionMessage: string;
@@ -51,7 +76,7 @@ module KMud {
         public Name: string;
         public Description: string;
         public Actors: ActorDescription[];
-        public VisibleItems: number[];
+        public VisibleItems: ItemDescription[];
         public Exits: ExitDescription[];
         public IsCurrentRoom: boolean;
         public CannotSee: boolean;
@@ -62,6 +87,11 @@ module KMud {
         constructor() { super('ServerMessage'); }
         public Contents: string;
         public static ClassName: string = 'ServerMessage';
+    }
+    export class ItemDescription {
+        public Name: string;
+        public Id: string;
+        public TemplateId: number;
     }
     export class ActorDescription {
         public Name: string;

@@ -24,6 +24,42 @@ var KMud;
         return CommunicationMessage;
     })(KMud.MessageBase);
     KMud.CommunicationMessage = CommunicationMessage;
+    var InventoryMessage = (function (_super) {
+        __extends(InventoryMessage, _super);
+        function InventoryMessage() {
+            _super.call(this, 'InventoryMessage');
+        }
+        InventoryMessage.ClassName = 'InventoryMessage';
+        return InventoryMessage;
+    })(KMud.MessageBase);
+    KMud.InventoryMessage = InventoryMessage;
+    var InventoryListMessage = (function (_super) {
+        __extends(InventoryListMessage, _super);
+        function InventoryListMessage() {
+            _super.call(this, 'InventoryListMessage');
+        }
+        InventoryListMessage.ClassName = 'InventoryListMessage';
+        return InventoryListMessage;
+    })(KMud.MessageBase);
+    KMud.InventoryListMessage = InventoryListMessage;
+    var GetItemMessage = (function (_super) {
+        __extends(GetItemMessage, _super);
+        function GetItemMessage() {
+            _super.call(this, 'GetItemMessage');
+        }
+        GetItemMessage.ClassName = 'GetItemMessage';
+        return GetItemMessage;
+    })(KMud.MessageBase);
+    KMud.GetItemMessage = GetItemMessage;
+    var DropItemMessage = (function (_super) {
+        __extends(DropItemMessage, _super);
+        function DropItemMessage() {
+            _super.call(this, 'DropItemMessage');
+        }
+        DropItemMessage.ClassName = 'DropItemMessage';
+        return DropItemMessage;
+    })(KMud.MessageBase);
+    KMud.DropItemMessage = DropItemMessage;
     var LoginRejected = (function (_super) {
         __extends(LoginRejected, _super);
         function LoginRejected() {
@@ -87,6 +123,12 @@ var KMud;
         return ServerMessage;
     })(KMud.MessageBase);
     KMud.ServerMessage = ServerMessage;
+    var ItemDescription = (function () {
+        function ItemDescription() {
+        }
+        return ItemDescription;
+    })();
+    KMud.ItemDescription = ItemDescription;
     var ActorDescription = (function () {
         function ActorDescription() {
         }

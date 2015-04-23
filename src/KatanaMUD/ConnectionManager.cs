@@ -105,6 +105,8 @@ namespace KatanaMUD
                     connection.Actor.Connection = connection;
 
                     //TODO: Load Server message
+
+                    connection.Actor.SendMessage(new ServerMessage() { Contents = "Auto-sensing... Just kidding!" });
                     connection.Actor.SendMessage(new ServerMessage() { Contents = "Welcome to KatanaMUD. A MUD on the Web. Because I'm apparently insane. Dear lord." });
                     connection.Actor.SendMessage(ActorInformationMessage.CreateFirstPerson(connection.Actor));
                     connection.Actor.SendRoomDescription(connection.Actor.Room);

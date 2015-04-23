@@ -149,7 +149,7 @@ namespace KatanaMUD.Controllers
 
             var dbActor = GetNewActor(actor);
             var cost = ValidateCPs(dbActor, actor);
-            if(cost == Int32.MinValue)
+            if (cost == Int32.MinValue)
                 return HttpBadRequest();
 
             // TODO: Load initial room from a configurable source.

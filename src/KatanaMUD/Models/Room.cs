@@ -30,6 +30,7 @@ namespace KatanaMUD.Models
         public Room()
         {
             Actors = new ParentChildRelationshipContainer<Room, Actor, Guid>(this, child => child.Room, (child, parent) => child.Room= parent);
+            Items = new ParentChildRelationshipContainer<Room, Item, Guid>(this, child => child.Room, (child, parent) => child.Room= parent);
         }
 
         public Int32 Id { get { return _Id; } set { _Id = value; this.Changed(); } }
@@ -65,6 +66,7 @@ namespace KatanaMUD.Models
         }
 
         public ICollection<Actor> Actors { get; private set; }
+        public ICollection<Item> Items { get; private set; }
         public static Room Load(SqlDataReader reader)
         {
             var entity = new Room();

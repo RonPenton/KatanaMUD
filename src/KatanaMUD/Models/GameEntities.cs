@@ -11,6 +11,8 @@ namespace KatanaMUD.Models
             Actors = new EntityContainer<Actor, Guid>(this);
             ArmorTypes = new EntityContainer<ArmorType, Int32>(this);
             ClassTemplates = new EntityContainer<ClassTemplate, Int32>(this);
+            Items = new EntityContainer<Item, Guid>(this);
+            ItemTemplates = new EntityContainer<ItemTemplate, Int32>(this);
             RaceTemplates = new EntityContainer<RaceTemplate, Int32>(this);
             Regions = new EntityContainer<Region, Int32>(this);
             Rooms = new EntityContainer<Room, Int32>(this);
@@ -23,6 +25,8 @@ namespace KatanaMUD.Models
         public EntityContainer<Actor, Guid> Actors { get; private set; }
         public EntityContainer<ArmorType, Int32> ArmorTypes { get; private set; }
         public EntityContainer<ClassTemplate, Int32> ClassTemplates { get; private set; }
+        public EntityContainer<Item, Guid> Items { get; private set; }
+        public EntityContainer<ItemTemplate, Int32> ItemTemplates { get; private set; }
         public EntityContainer<RaceTemplate, Int32> RaceTemplates { get; private set; }
         public EntityContainer<Region, Int32> Regions { get; private set; }
         public EntityContainer<Room, Int32> Rooms { get; private set; }
@@ -57,6 +61,21 @@ namespace KatanaMUD.Models
             meta.GenerateInsertCommand = (SqlCommand c, IEntity e) => ClassTemplate.GenerateInsertCommand(c, (ClassTemplate)e);
             meta.GenerateUpdateCommand = (SqlCommand c, IEntity e) => ClassTemplate.GenerateUpdateCommand(c, (ClassTemplate)e);
             meta.GenerateDeleteCommand = (SqlCommand c, IEntity e) => ClassTemplate.GenerateDeleteCommand(c, (ClassTemplate)e);
+            EntityTypes.Add(meta);
+
+            meta = new EntityMetadata() { EntityType = typeof(Item), Container = Items };
+            meta.Relationships.Add(new EntityRelationship((IEntity e) => ((Item)e).ItemTemplate));
+            meta.Relationships.Add(new EntityRelationship((IEntity e) => ((Item)e).Actor));
+            meta.Relationships.Add(new EntityRelationship((IEntity e) => ((Item)e).Room));
+            meta.GenerateInsertCommand = (SqlCommand c, IEntity e) => Item.GenerateInsertCommand(c, (Item)e);
+            meta.GenerateUpdateCommand = (SqlCommand c, IEntity e) => Item.GenerateUpdateCommand(c, (Item)e);
+            meta.GenerateDeleteCommand = (SqlCommand c, IEntity e) => Item.GenerateDeleteCommand(c, (Item)e);
+            EntityTypes.Add(meta);
+
+            meta = new EntityMetadata() { EntityType = typeof(ItemTemplate), Container = ItemTemplates };
+            meta.GenerateInsertCommand = (SqlCommand c, IEntity e) => ItemTemplate.GenerateInsertCommand(c, (ItemTemplate)e);
+            meta.GenerateUpdateCommand = (SqlCommand c, IEntity e) => ItemTemplate.GenerateUpdateCommand(c, (ItemTemplate)e);
+            meta.GenerateDeleteCommand = (SqlCommand c, IEntity e) => ItemTemplate.GenerateDeleteCommand(c, (ItemTemplate)e);
             EntityTypes.Add(meta);
 
             meta = new EntityMetadata() { EntityType = typeof(RaceTemplate), Container = RaceTemplates };
@@ -113,6 +132,8 @@ namespace KatanaMUD.Models
             LoadData(connection, Actors, "Actor", Actor.Load);
             LoadData(connection, ArmorTypes, "ArmorType", ArmorType.Load);
             LoadData(connection, ClassTemplates, "ClassTemplate", ClassTemplate.Load);
+            LoadData(connection, Items, "Item", Item.Load);
+            LoadData(connection, ItemTemplates, "ItemTemplate", ItemTemplate.Load);
             LoadData(connection, RaceTemplates, "RaceTemplate", RaceTemplate.Load);
             LoadData(connection, Regions, "Region", Region.Load);
             LoadData(connection, Rooms, "Room", Room.Load);

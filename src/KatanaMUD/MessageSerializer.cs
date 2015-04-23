@@ -38,9 +38,9 @@ namespace KatanaMUD
         {
             JsonTextReader reader = new JsonTextReader(new StringReader(message));
 
-            while(reader.Read())
+            while (reader.Read())
             {
-                if(reader.TokenType == JsonToken.PropertyName && reader.Value.ToString() == nameof(MessageBase.MessageName))
+                if (reader.TokenType == JsonToken.PropertyName && reader.Value.ToString() == nameof(MessageBase.MessageName))
                 {
                     reader.Read();
                     var messageName = reader.Value.ToString();

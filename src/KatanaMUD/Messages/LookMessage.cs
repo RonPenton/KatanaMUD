@@ -33,7 +33,7 @@ namespace KatanaMUD.Messages
             }
             else
             {
-				actor.SendRoomDescription(actor.Room);
+                actor.SendRoomDescription(actor.Room);
             }
         }
     }

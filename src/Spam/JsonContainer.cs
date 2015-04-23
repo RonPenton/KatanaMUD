@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Linq;
 
 namespace Spam
 {
@@ -117,6 +118,59 @@ namespace Spam
 
                 ljson._dictionary[key] = lv;
             }
+        }
+
+        private static T _addLong<T>(object left, object right)
+        {
+            return (T)(object)(Convert.ToInt64(left) + Convert.ToInt64(right));
+        }
+        private static T _addDouble<T>(object left, object right)
+        {
+            return (T)(object)(Convert.ToDouble(left) + Convert.ToDouble(right));
+        }
+        private static T _pctLong<T>(object baseNumber, double percent)
+        {
+            return (T)(object)Convert.ToInt64((Convert.ToInt64(baseNumber) * (1.0 + (percent / 100.0))));
+        }
+        private static T _pctDouble<T>(object baseNumber, double percent)
+        {
+            return (T)(object)(Convert.ToDouble(baseNumber) * (1.0 + (percent / 100.0)));
+        }
+
+        public static T Calculate<T>(IEnumerable<JsonContainer> containers, string name, T initial, bool includePercent = true)
+        {
+            Func<object, object, T> addFunc;
+            Func<object, double, T> pctFunc;
+            if (typeof(T) == typeof(long))
+            {
+                addFunc = _addLong<T>;
+                pctFunc = _pctLong<T>;
+            }
+            else if (typeof(T) == typeof(double))
+            {
+                addFunc = _addDouble<T>;
+                pctFunc = _pctDouble<T>;
+            }
+            else
+            {
+                throw new InvalidOperationException("Cannot Calculate the value of a non-numeric type: " + typeof(T).Name);
+            }
+
+
+            var valid = containers.Where(x => x._dictionary.ContainsKey(name)).ToList();
+
+            foreach (var container in valid)
+            {
+                initial = addFunc(initial, container[name]);
+            }
+
+            if (includePercent)
+            {
+                var pct = Calculate<double>(containers, name + "Pct", 0.0, false);
+                return pctFunc(initial, pct);
+            }
+
+            return initial;
         }
     }
 }

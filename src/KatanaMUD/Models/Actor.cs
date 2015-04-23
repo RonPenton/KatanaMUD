@@ -27,6 +27,7 @@ namespace KatanaMUD.Models
         public Actor()
         {
             Stats = new JsonContainer(this);
+            Items = new ParentChildRelationshipContainer<Actor, Item, Guid>(this, child => child.Actor, (child, parent) => child.Actor= parent);
         }
 
         public Guid Id { get { return _Id; } set { _Id = value; this.Changed(); } }
@@ -75,6 +76,7 @@ namespace KatanaMUD.Models
             }
         }
 
+        public ICollection<Item> Items { get; private set; }
         public static Actor Load(SqlDataReader reader)
         {
             var entity = new Actor();

@@ -86,3 +86,9 @@ input:focus {
 .telepath {
   color: white;
 }
+.inventory {
+  color: white;
+}
+.items {
+  color: cyan;
+}

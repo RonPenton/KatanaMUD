@@ -147,6 +147,8 @@ module KMud {
             this.messageHandlers[CommunicationMessage.ClassName] = (message: CommunicationMessage) => this.showCommunication(message);
 
             this.messageHandlers[ActorInformationMessage.ClassName] = (message: ActorInformationMessage) => this.currentPlayer = message;
+
+            this.messageHandlers[InventoryListMessage.ClassName] = (message: InventoryListMessage) => this.showInventory(message);
         }
 
         private registerCommandHandlers() {
@@ -164,11 +166,28 @@ module KMud {
             this.commandHandlers["d"] = this.commandHandlers["down"] = words => this.move(Direction.Down);
             this.commandHandlers["l"] = this.commandHandlers["look"] = words => this.look(words);
 
+            this.commandHandlers["i"] = this.commandHandlers["inv"] = this.commandHandlers["inventory"] = (words, tail) => this.SendMessage(new InventoryMessage());
+            this.commandHandlers["get"] = (words, tail) => this.get(tail);
+            this.commandHandlers["drop"] = (words, tail) => this.drop(tail);
+
+
             this.commandHandlers["gos"] = this.commandHandlers["gossip"] = (words, tail) => this.talk(tail, CommunicationType.Gossip);
             this.commandHandlers["say"] = (words, tail) => this.talk(tail, CommunicationType.Say);
 
             this.symbolCommandHandlers["."] = (words, tail) => this.talk(tail, CommunicationType.Say);
             this.symbolCommandHandlers["/"] = (words, tail, param) => this.talk(tail, CommunicationType.Telepath, param);
+        }
+
+        private get(item: string) {
+            var message = new GetItemMessage();
+            message.ItemName = item;
+            this.SendMessage(message);
+        }
+
+        private drop(item: string) {
+            var message = new DropItemMessage();
+            message.ItemName = item;
+            this.SendMessage(message);
         }
 
         private talk(text: string, type: CommunicationType, param?: string) {
@@ -233,6 +252,11 @@ module KMud {
                     this.mainOutput(message.Description, "room-desc");
                 }
 
+                if (message.VisibleItems.length > 1) {
+                    var items = message.VisibleItems.map(x => x.Name).join(", ");
+                    this.mainOutput("You notice " + items + " here.", "items");
+                }
+
                 if (message.Actors.length > 1) {
                     var actors = message.Actors.filter(x => x.Id != this.currentPlayer.Id)
                     this.mainOutput("Also here: " + actors.map(x=> x.Name).join(", ") + ".", "actors");
@@ -266,6 +290,27 @@ module KMud {
                     this.mainOutput(message.ActorName + " telepaths " + message.Message, "telepath");
                     break;
             }
+        }
+
+        private showInventory(message: InventoryListMessage) {
+            var items = message.Items.map(x => x.Name).join(", ");
+            var str = "You are carrying " + items;
+            this.mainOutput(str, "inventory");
+
+            //TODO: You have no keys.
+            //TODO: Wealth: 500 copper farthings
+
+            var pct = Math.round((message.Encumbrance / message.MaxEncumbrance) * 100);
+            var category = "Heavy";
+            if (pct <= 66)
+                category = "Medium";
+            else if (pct <= 33)
+                category = "Light";
+            else if (pct <= 15)
+                category = "None";
+
+            var str = "Encumbrance: " + message.Encumbrance + " / " + message.MaxEncumbrance + " - " + category + "[" + pct + "%]";
+            this.mainOutput(str, "inventory");
         }
     }
 
