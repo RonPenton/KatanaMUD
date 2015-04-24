@@ -1,4 +1,34 @@
-﻿module Kmud {
+﻿module KMud {
+
+    export interface Func0<R> { (): R; }
+    export interface Func1<P, R> { (parameter: P): R; }
+    export interface Func2<P1, P2, R> { (parameter1: P1, parameter2: P2): R; }
+    export interface Func3<P1, P2, P3, R> { (parameter1: P1, parameter2: P2, parameter3: P3): R; }
+    export interface Func4<P1, P2, P3, P4, R> { (parameter1: P1, parameter2: P2, parameter3: P3, parameter4: P4): R; }
+    export interface Action0 { (): void; }
+    export interface Action1<P> { (parameter: P): void; }
+    export interface Action2<P1, P2> { (parameter1: P1, parameter2: P2): void; }
+    export interface Action3<P1, P2, P3> { (parameter1: P1, parameter2: P2, parameter3: P3): void; }
+    export interface Action4<P1, P2, P3, P4> { (parameter1: P1, parameter2: P2, parameter3: P3, parameter4: P4): void; }
+
+    export interface Dictionary<T> { [index: string]: T }
+
+    export class KeyPair<K, V> {
+        constructor(public key?: K, public value?: V) {
+        }
+    } 
+
+    export function IsString(obj: any): boolean {
+        return typeof obj === 'string' || obj instanceof String;
+    }
+    export function IsDate(obj: any): boolean {
+        return obj && typeof obj.getMonth === 'function';
+    }
+    export function IsDecimal(obj: any): boolean {
+        if (!$.isNumeric(obj))
+            return false;   // not even a number.
+        return obj % 1 != 0;
+    }
 
     export interface ArrayLikeObject<T> {
         length: number;
@@ -164,28 +194,6 @@
                 }
             }
             return new LinqContainer(clone);
-        }
-
-        /**
-         * Groups a container using a string key. Groups should be assumed to be unordered. O(n) performance. 
-         */
-        public groupByString(picker: Func1<T, string>): LinqContainer<Grouping<T, string>> {
-            var groups: { [index: string]: T[] } = {};
-            this.forEach(x => {
-                var key = picker(x);
-                if (groups[key] === undefined) {
-                    groups[key] = []
-                }
-                groups[key].push(x);
-            });
-            var output: Grouping<T, string>[];
-            var keys = Object.keys(groups);
-            for (var i = 0; i < keys.length; i++) {
-                var key = keys[i];
-                output.push(new Grouping<T, string>(key, groups[key]));
-            }
-
-            return new LinqContainer(output);
         }
 
         /**
@@ -386,109 +394,6 @@
      */
     export interface IHashable {
         getHashCode(): number;
-    }
-
-
-    export function LinqXml(document: XMLDocument, nodes?: ArrayLikeObject<Node>): LinqXmlContainer {
-        return new LinqXmlContainer(document, nodes);
-    }
-
-    export class LinqXmlContainer extends LinqContainer<Node> {
-        constructor(public document: XMLDocument, public nodes?: ArrayLikeObject<Node>) {
-            super(nodes || document.childNodes);
-            if (nodes == null)
-                this.nodes = document.childNodes;
-        }
-
-        public addElement(name: string, ns: string = null): LinqXmlContainer {
-            var newNodes: Node[] = [];
-            for (var i = 0; i < this.nodes.length; i++) {
-                var e = document.createElementNS(ns, name);
-                e.namespaceURI = ns;
-                this.nodes[i].appendChild(e);
-                newNodes.push(e);
-            }
-            return LinqXml(document, newNodes);
-        }
-
-        /**
-         * Returns the attribute value with the given name from the first node.
-         */
-        public attribute(name: string): string {
-            return XmlHelper.getAttribute(this.nodes[0], name);
-        }
-
-        /**
-         * Returns the attribute values for each node in the container.
-         */
-        public attributes(name: string): LinqContainer<string> {
-            return Linq(this.nodes).select(x=> XmlHelper.getAttribute(x, name));
-        }
-
-        public addAttribute(name: string, value: string): LinqXmlContainer {
-            for (var i = 0; i < this.nodes.length; i++) {
-                var a = this.document.createAttribute(name);
-                a.value = value;
-                this.nodes[i].attributes.setNamedItem(a);
-            }
-            return this;
-        }
-
-        /**
-         * Removes the attribute with the given name fro all nodes in the container
-         */
-        public removeAttribute(name: string) {
-            for (var i = 0; i < this.nodes.length; i++) {
-                if (this.nodes[i].attributes.getNamedItem(name) != null)
-                    this.nodes[i].attributes.removeNamedItem(name);
-            }
-            return this;
-        }
-
-        /**
-         * Returns a new container with all of the child elements matching the given name
-         */
-        public elements(name: string): LinqXmlContainer {
-            var childNodes = this.select(x => Linq(x.childNodes).where(y => XmlHelper.localName(y) == name).toArray());
-            var union = LinqContainer.multiUnion(childNodes).distinct();
-            return new LinqXmlContainer(this.document, union.toArray());
-        }
-
-        public findElement(name: string): LinqXmlContainer {
-            return new LinqXmlContainer(this.document, [XmlHelper.findFirst(this.nodes[0], name)]);
-        }
-
-        public ancestors(name: string): LinqXmlContainer {
-            var list: Node[] = [];
-            for (var i = 0; i < this.nodes.length; i++) {
-                var node = this.nodes[i].parentNode;
-                while (node != null && node.localName != name) {
-                    node = node.parentNode;
-                }
-                if (node != null)
-                    list.push(node);
-            }
-
-            return LinqXml(this.document, list);
-        }
-
-        public descendants(name: string): LinqXmlContainer {
-            var list: Node[] = [];
-            Linq(this.nodes).forEach(x => Linq(x.childNodes).forEach(y => LinqXmlContainer._descendants(name, y, list)));
-            return LinqXml(this.document, list);
-        }
-
-        private static _descendants(name: string, node: Node, list: Node[]) {
-            if (node == null) return;
-            if (node.localName == name) list.push(node);
-            Linq(node.childNodes).forEach(x => LinqXmlContainer._descendants(name, x, list));
-        }
-    }
-
-    export class Grouping<T, K> extends LinqContainer<T> {
-        constructor(public key: K, values: ArrayLikeObject<T>) {
-            super(values);
-        }
     }
 
 

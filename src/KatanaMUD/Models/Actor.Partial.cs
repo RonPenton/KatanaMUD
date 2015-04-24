@@ -109,7 +109,7 @@ namespace KatanaMUD.Models
             //TODO: Hidden stuff
             var exits = room.GetExits();
             message.Exits = exits.Select(x => new ExitDescription(x, room)).ToArray();
-            message.Actors = room.Actors.Select(x => new ActorDescription(x)).ToArray();
+            message.Actors = room.VisibleActors(this).Select(x => new ActorDescription(x)).ToArray();
             message.VisibleItems = room.Items.Select(x => new ItemDescription(x)).ToArray();
 
             SendMessage(message);
@@ -142,23 +142,22 @@ namespace KatanaMUD.Models
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public bool CanGetItem(Item item)
+        public Validation CanGetItem(Item item)
         {
             // Make sure fixed items aren't able to be gotten
             if (item.ItemTemplate.Fixed)
-                return false;
+                return new Validation("You cannot pick up that item!");
 
             // Make sure item is actually in the room.
             if (item.Room != Room)
-                return false;
+                return new Validation("You are not in the same room as that item!");
 
             // Check weight.
             if (Encumbrance + item.Weight > MaxEncumbrance)
-                return false;
+                return new Validation("You cannot carry that much!");
 
             //TODO: Ask item if it can be gotten. 
-
-            return true;
+            return new Validation();
         }
 
         /// <summary>
@@ -286,10 +285,25 @@ namespace KatanaMUD.Models
 			if (exit.ExitRoom != null)
 			{
 				var newRoom = Game.Data.Rooms.Single(x => x.Id == exit.ExitRoom.Value);
-				//TODO: Construct room messages
+
+                var partyDescription = this.Members.OrderBy(x => x != Leader).ThenBy(x => x.Name).Select(x => new ActorDescription(x)).ToArray();
+
+                var message = new PartyMovementMessage()
+                {
+                    Leader = new ActorDescription(Leader),
+                    Actors = partyDescription,
+                    Direction = exit.Direction,
+                    Enter = false
+                };
+                Leader.Room.ActiveActors.ForEach(x => x.SendMessage(message));
+
 				Move(newRoom, null, null);
-			}
-			else
+
+                message.Direction = Directions.Opposite(exit.Direction);
+                message.Enter = true;
+                newRoom.ActiveActors.ForEach(x => x.SendMessage(message));
+            }
+            else
 			{
 				//TODO: Perform portal movement here
 			}

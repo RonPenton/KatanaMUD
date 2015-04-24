@@ -6,6 +6,15 @@ var __extends = this.__extends || function (d, b) {
 };
 var KMud;
 (function (KMud) {
+    var ActionNotAllowedMessage = (function (_super) {
+        __extends(ActionNotAllowedMessage, _super);
+        function ActionNotAllowedMessage() {
+            _super.call(this, 'ActionNotAllowedMessage');
+        }
+        ActionNotAllowedMessage.ClassName = 'ActionNotAllowedMessage';
+        return ActionNotAllowedMessage;
+    })(KMud.MessageBase);
+    KMud.ActionNotAllowedMessage = ActionNotAllowedMessage;
     var ActorInformationMessage = (function (_super) {
         __extends(ActorInformationMessage, _super);
         function ActorInformationMessage() {
@@ -24,15 +33,15 @@ var KMud;
         return CommunicationMessage;
     })(KMud.MessageBase);
     KMud.CommunicationMessage = CommunicationMessage;
-    var InventoryMessage = (function (_super) {
-        __extends(InventoryMessage, _super);
-        function InventoryMessage() {
-            _super.call(this, 'InventoryMessage');
+    var InventoryCommand = (function (_super) {
+        __extends(InventoryCommand, _super);
+        function InventoryCommand() {
+            _super.call(this, 'InventoryCommand');
         }
-        InventoryMessage.ClassName = 'InventoryMessage';
-        return InventoryMessage;
+        InventoryCommand.ClassName = 'InventoryCommand';
+        return InventoryCommand;
     })(KMud.MessageBase);
-    KMud.InventoryMessage = InventoryMessage;
+    KMud.InventoryCommand = InventoryCommand;
     var InventoryListMessage = (function (_super) {
         __extends(InventoryListMessage, _super);
         function InventoryListMessage() {
@@ -42,24 +51,33 @@ var KMud;
         return InventoryListMessage;
     })(KMud.MessageBase);
     KMud.InventoryListMessage = InventoryListMessage;
-    var GetItemMessage = (function (_super) {
-        __extends(GetItemMessage, _super);
-        function GetItemMessage() {
-            _super.call(this, 'GetItemMessage');
+    var GetItemCommand = (function (_super) {
+        __extends(GetItemCommand, _super);
+        function GetItemCommand() {
+            _super.call(this, 'GetItemCommand');
         }
-        GetItemMessage.ClassName = 'GetItemMessage';
-        return GetItemMessage;
+        GetItemCommand.ClassName = 'GetItemCommand';
+        return GetItemCommand;
     })(KMud.MessageBase);
-    KMud.GetItemMessage = GetItemMessage;
-    var DropItemMessage = (function (_super) {
-        __extends(DropItemMessage, _super);
-        function DropItemMessage() {
-            _super.call(this, 'DropItemMessage');
+    KMud.GetItemCommand = GetItemCommand;
+    var DropItemCommand = (function (_super) {
+        __extends(DropItemCommand, _super);
+        function DropItemCommand() {
+            _super.call(this, 'DropItemCommand');
         }
-        DropItemMessage.ClassName = 'DropItemMessage';
-        return DropItemMessage;
+        DropItemCommand.ClassName = 'DropItemCommand';
+        return DropItemCommand;
     })(KMud.MessageBase);
-    KMud.DropItemMessage = DropItemMessage;
+    KMud.DropItemCommand = DropItemCommand;
+    var ItemOwnershipMessage = (function (_super) {
+        __extends(ItemOwnershipMessage, _super);
+        function ItemOwnershipMessage() {
+            _super.call(this, 'ItemOwnershipMessage');
+        }
+        ItemOwnershipMessage.ClassName = 'ItemOwnershipMessage';
+        return ItemOwnershipMessage;
+    })(KMud.MessageBase);
+    KMud.ItemOwnershipMessage = ItemOwnershipMessage;
     var LoginRejected = (function (_super) {
         __extends(LoginRejected, _super);
         function LoginRejected() {
@@ -69,6 +87,15 @@ var KMud;
         return LoginRejected;
     })(KMud.MessageBase);
     KMud.LoginRejected = LoginRejected;
+    var LoginStateMessage = (function (_super) {
+        __extends(LoginStateMessage, _super);
+        function LoginStateMessage() {
+            _super.call(this, 'LoginStateMessage');
+        }
+        LoginStateMessage.ClassName = 'LoginStateMessage';
+        return LoginStateMessage;
+    })(KMud.MessageBase);
+    KMud.LoginStateMessage = LoginStateMessage;
     var LookMessage = (function (_super) {
         __extends(LookMessage, _super);
         function LookMessage() {
@@ -87,6 +114,15 @@ var KMud;
         return MoveMessage;
     })(KMud.MessageBase);
     KMud.MoveMessage = MoveMessage;
+    var PartyMovementMessage = (function (_super) {
+        __extends(PartyMovementMessage, _super);
+        function PartyMovementMessage() {
+            _super.call(this, 'PartyMovementMessage');
+        }
+        PartyMovementMessage.ClassName = 'PartyMovementMessage';
+        return PartyMovementMessage;
+    })(KMud.MessageBase);
+    KMud.PartyMovementMessage = PartyMovementMessage;
     var PingMessage = (function (_super) {
         __extends(PingMessage, _super);
         function PingMessage() {

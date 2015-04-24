@@ -1,25 +1,41 @@
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
-var Kmud;
-(function (Kmud) {
+var KMud;
+(function (KMud) {
+    var KeyPair = (function () {
+        function KeyPair(key, value) {
+            this.key = key;
+            this.value = value;
+        }
+        return KeyPair;
+    })();
+    KMud.KeyPair = KeyPair;
+    function IsString(obj) {
+        return typeof obj === 'string' || obj instanceof String;
+    }
+    KMud.IsString = IsString;
+    function IsDate(obj) {
+        return obj && typeof obj.getMonth === 'function';
+    }
+    KMud.IsDate = IsDate;
+    function IsDecimal(obj) {
+        if (!$.isNumeric(obj))
+            return false; // not even a number.
+        return obj % 1 != 0;
+    }
+    KMud.IsDecimal = IsDecimal;
     /**
      * Creates a new Linq container.
      */
     function Linq(array) {
         return new LinqContainer(array);
     }
-    Kmud.Linq = Linq;
+    KMud.Linq = Linq;
     /**
      * Creates a new Linq container for a string table.
      */
     function LinqST(table) {
         return new LinqContainer(Object.keys(table).map(function (x) { return new KeyPair(x, table[x]); }));
     }
-    Kmud.LinqST = LinqST;
+    KMud.LinqST = LinqST;
     /**
      * A class with methods that are similar to the .NET LINQ library. Note that these do not support deferred iteration and are executed immediately.
      */
@@ -156,26 +172,6 @@ var Kmud;
                 }
             }
             return new LinqContainer(clone);
-        };
-        /**
-         * Groups a container using a string key. Groups should be assumed to be unordered. O(n) performance.
-         */
-        LinqContainer.prototype.groupByString = function (picker) {
-            var groups = {};
-            this.forEach(function (x) {
-                var key = picker(x);
-                if (groups[key] === undefined) {
-                    groups[key] = [];
-                }
-                groups[key].push(x);
-            });
-            var output;
-            var keys = Object.keys(groups);
-            for (var i = 0; i < keys.length; i++) {
-                var key = keys[i];
-                output.push(new Grouping(key, groups[key]));
-            }
-            return new LinqContainer(output);
         };
         /**
          * Returns true if any items in the array evaluate to true using the predicate function.
@@ -346,108 +342,7 @@ var Kmud;
         };
         return LinqContainer;
     })();
-    Kmud.LinqContainer = LinqContainer;
-    function LinqXml(document, nodes) {
-        return new LinqXmlContainer(document, nodes);
-    }
-    Kmud.LinqXml = LinqXml;
-    var LinqXmlContainer = (function (_super) {
-        __extends(LinqXmlContainer, _super);
-        function LinqXmlContainer(document, nodes) {
-            _super.call(this, nodes || document.childNodes);
-            this.document = document;
-            this.nodes = nodes;
-            if (nodes == null)
-                this.nodes = document.childNodes;
-        }
-        LinqXmlContainer.prototype.addElement = function (name, ns) {
-            if (ns === void 0) { ns = null; }
-            var newNodes = [];
-            for (var i = 0; i < this.nodes.length; i++) {
-                var e = document.createElementNS(ns, name);
-                e.namespaceURI = ns;
-                this.nodes[i].appendChild(e);
-                newNodes.push(e);
-            }
-            return LinqXml(document, newNodes);
-        };
-        /**
-         * Returns the attribute value with the given name from the first node.
-         */
-        LinqXmlContainer.prototype.attribute = function (name) {
-            return XmlHelper.getAttribute(this.nodes[0], name);
-        };
-        /**
-         * Returns the attribute values for each node in the container.
-         */
-        LinqXmlContainer.prototype.attributes = function (name) {
-            return Linq(this.nodes).select(function (x) { return XmlHelper.getAttribute(x, name); });
-        };
-        LinqXmlContainer.prototype.addAttribute = function (name, value) {
-            for (var i = 0; i < this.nodes.length; i++) {
-                var a = this.document.createAttribute(name);
-                a.value = value;
-                this.nodes[i].attributes.setNamedItem(a);
-            }
-            return this;
-        };
-        /**
-         * Removes the attribute with the given name fro all nodes in the container
-         */
-        LinqXmlContainer.prototype.removeAttribute = function (name) {
-            for (var i = 0; i < this.nodes.length; i++) {
-                if (this.nodes[i].attributes.getNamedItem(name) != null)
-                    this.nodes[i].attributes.removeNamedItem(name);
-            }
-            return this;
-        };
-        /**
-         * Returns a new container with all of the child elements matching the given name
-         */
-        LinqXmlContainer.prototype.elements = function (name) {
-            var childNodes = this.select(function (x) { return Linq(x.childNodes).where(function (y) { return XmlHelper.localName(y) == name; }).toArray(); });
-            var union = LinqContainer.multiUnion(childNodes).distinct();
-            return new LinqXmlContainer(this.document, union.toArray());
-        };
-        LinqXmlContainer.prototype.findElement = function (name) {
-            return new LinqXmlContainer(this.document, [XmlHelper.findFirst(this.nodes[0], name)]);
-        };
-        LinqXmlContainer.prototype.ancestors = function (name) {
-            var list = [];
-            for (var i = 0; i < this.nodes.length; i++) {
-                var node = this.nodes[i].parentNode;
-                while (node != null && node.localName != name) {
-                    node = node.parentNode;
-                }
-                if (node != null)
-                    list.push(node);
-            }
-            return LinqXml(this.document, list);
-        };
-        LinqXmlContainer.prototype.descendants = function (name) {
-            var list = [];
-            Linq(this.nodes).forEach(function (x) { return Linq(x.childNodes).forEach(function (y) { return LinqXmlContainer._descendants(name, y, list); }); });
-            return LinqXml(this.document, list);
-        };
-        LinqXmlContainer._descendants = function (name, node, list) {
-            if (node == null)
-                return;
-            if (node.localName == name)
-                list.push(node);
-            Linq(node.childNodes).forEach(function (x) { return LinqXmlContainer._descendants(name, x, list); });
-        };
-        return LinqXmlContainer;
-    })(LinqContainer);
-    Kmud.LinqXmlContainer = LinqXmlContainer;
-    var Grouping = (function (_super) {
-        __extends(Grouping, _super);
-        function Grouping(key, values) {
-            _super.call(this, values);
-            this.key = key;
-        }
-        return Grouping;
-    })(LinqContainer);
-    Kmud.Grouping = Grouping;
+    KMud.LinqContainer = LinqContainer;
     /**
      * Provides methods to perform a merge sort. While typically slower than a quick sort, it is a stable sort, which is sometimes necessary in some conditions.
      */
@@ -480,4 +375,4 @@ var Kmud;
                 values[a++] = right.shift();
         }
     })(MergeSort || (MergeSort = {}));
-})(Kmud || (Kmud = {}));
+})(KMud || (KMud = {}));

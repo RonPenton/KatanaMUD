@@ -82,7 +82,9 @@ namespace KatanaMUD
                     connection.Actor.UnhandledDisconnection = false;
                     connection.Disconnected = true;
 
-                    //TODO: Notify realm of disconnection.
+                    // Notify the realm.
+                    var message = new LoginStateMessage() { Actor = new ActorDescription(connection.Actor), Login = false };
+                    _connections.Values.ForEach(x => x.Actor.SendMessage(message));
                 }
                 _disconnections.Clear();
 
@@ -93,12 +95,18 @@ namespace KatanaMUD
                     connection.Disconnected = true;
                     connection.Socket.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Disconnected", CancellationToken.None);
 
-                    //TODO: Notify realm of disconnection.
+                    // Notify the realm.
+                    var message = new LoginStateMessage() { Actor = new ActorDescription(connection.Actor), Login = false };
+                    _connections.Values.ForEach(x => x.Actor.SendMessage(message));
                 }
                 _pendingDisconnections.Clear();
 
                 foreach (var connection in _newConnections)
                 {
+                    // Notify the realm.
+                    var message = new LoginStateMessage() { Actor = new ActorDescription(connection.Actor), Login = true };
+                    _connections.Values.ForEach(x => x.Actor.SendMessage(message));
+
                     _connections[connection.User] = connection;
 
                     connection.Actor.MessageHandler = new ConnectionMessageHandler(connection.Actor);

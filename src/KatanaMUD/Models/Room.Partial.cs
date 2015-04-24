@@ -39,6 +39,14 @@ namespace KatanaMUD.Models
             _exits[(int)Direction.Up] = r => r.UpExit;
             _exits[(int)Direction.Down] = r => r.DownExit;
         }
+
+        public IEnumerable<Actor> VisibleActors(Actor actor)
+        {
+            //TODO: Visibility
+            return Actors.Where(x => !x.InPurgatory).ToList();
+        }
+
+        public IEnumerable<Actor> ActiveActors => Actors.Where(x => !x.InPurgatory).ToList();
     }
 
     /// <summary>
@@ -93,6 +101,25 @@ namespace KatanaMUD.Models
             {
                 yield return (Direction)i;
             }
+        }
+
+        public static Direction Opposite(Direction direction)
+        {
+            switch (direction)
+            {
+                case Direction.North: return Direction.South;
+                case Direction.South: return Direction.North;
+                case Direction.East: return Direction.West;
+                case Direction.West: return Direction.East;
+                case Direction.Northeast: return Direction.Southwest;
+                case Direction.Southwest: return Direction.Northeast;
+                case Direction.Northwest: return Direction.Southeast;
+                case Direction.Southeast: return Direction.Northwest;
+                case Direction.Up: return Direction.Down;
+                case Direction.Down: return Direction.Up;
+            }
+
+            throw new InvalidOperationException("Invalid Direction");
         }
     }
 }

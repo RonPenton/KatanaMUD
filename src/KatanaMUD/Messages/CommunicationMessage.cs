@@ -44,7 +44,7 @@ namespace KatanaMUD.Messages
 
         private void Say(Actor actor)
         {
-            var actors = actor.Room.Actors;
+            var actors = actor.Room.ActiveActors;
             ActorName = actor.Name;
             ActorId = actor.Id;
             foreach (var a in actors)

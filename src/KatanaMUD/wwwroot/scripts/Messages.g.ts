@@ -1,4 +1,9 @@
 module KMud {
+    export class ActionNotAllowedMessage extends MessageBase {
+        constructor() { super('ActionNotAllowedMessage'); }
+        public Message: string;
+        public static ClassName: string = 'ActionNotAllowedMessage';
+    }
     export class ActorInformationMessage extends MessageBase {
         constructor() { super('ActorInformationMessage'); }
         public Name: string;
@@ -15,9 +20,9 @@ module KMud {
         public ActorId: string;
         public static ClassName: string = 'CommunicationMessage';
     }
-    export class InventoryMessage extends MessageBase {
-        constructor() { super('InventoryMessage'); }
-        public static ClassName: string = 'InventoryMessage';
+    export class InventoryCommand extends MessageBase {
+        constructor() { super('InventoryCommand'); }
+        public static ClassName: string = 'InventoryCommand';
     }
     export class InventoryListMessage extends MessageBase {
         constructor() { super('InventoryListMessage'); }
@@ -26,25 +31,38 @@ module KMud {
         public MaxEncumbrance: number;
         public static ClassName: string = 'InventoryListMessage';
     }
-    export class GetItemMessage extends MessageBase {
-        constructor() { super('GetItemMessage'); }
+    export class GetItemCommand extends MessageBase {
+        constructor() { super('GetItemCommand'); }
         public ItemId: string;
         public ItemName: string;
         public Quantity: number;
-        public static ClassName: string = 'GetItemMessage';
+        public static ClassName: string = 'GetItemCommand';
     }
-    export class DropItemMessage extends MessageBase {
-        constructor() { super('DropItemMessage'); }
+    export class DropItemCommand extends MessageBase {
+        constructor() { super('DropItemCommand'); }
         public ItemId: string;
         public ItemName: string;
         public Quantity: number;
-        public static ClassName: string = 'DropItemMessage';
+        public static ClassName: string = 'DropItemCommand';
+    }
+    export class ItemOwnershipMessage extends MessageBase {
+        constructor() { super('ItemOwnershipMessage'); }
+        public Item: ItemDescription;
+        public Giver: ActorDescription;
+        public Taker: ActorDescription;
+        public static ClassName: string = 'ItemOwnershipMessage';
     }
     export class LoginRejected extends MessageBase {
         constructor() { super('LoginRejected'); }
         public RejectionMessage: string;
         public NoCharacter: boolean;
         public static ClassName: string = 'LoginRejected';
+    }
+    export class LoginStateMessage extends MessageBase {
+        constructor() { super('LoginStateMessage'); }
+        public Actor: ActorDescription;
+        public Login: boolean;
+        public static ClassName: string = 'LoginStateMessage';
     }
     export class LookMessage extends MessageBase {
         constructor() { super('LookMessage'); }
@@ -59,6 +77,15 @@ module KMud {
         public Direction: Direction;
         public Portal: number;
         public static ClassName: string = 'MoveMessage';
+    }
+    export class PartyMovementMessage extends MessageBase {
+        constructor() { super('PartyMovementMessage'); }
+        public Leader: ActorDescription;
+        public Actors: ActorDescription[];
+        public Direction: Direction;
+        public Enter: boolean;
+        public CustomText: string;
+        public static ClassName: string = 'PartyMovementMessage';
     }
     export class PingMessage extends MessageBase {
         constructor() { super('PingMessage'); }

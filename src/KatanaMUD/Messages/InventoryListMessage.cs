@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace KatanaMUD.Messages
 {
-    public class InventoryMessage : MessageBase
+    public class InventoryCommand : MessageBase
     {
         public override void Process(Actor actor)
         {
@@ -26,7 +26,7 @@ namespace KatanaMUD.Messages
     }
 
 
-    public class GetItemMessage : MessageBase
+    public class GetItemCommand : MessageBase
     {
         public Guid? ItemId { get; set; }
         public string ItemName { get; set; }
@@ -38,15 +38,27 @@ namespace KatanaMUD.Messages
 
             if (item != null)
             {
-                if (actor.CanGetItem(item))
+                var action = actor.CanGetItem(item);
+
+                if (action.Allowed)
                 {
                     actor.GetItem(item);
+
+                    var message = new ItemOwnershipMessage()
+                    {
+                        Taker = new ActorDescription(actor),
+                        Item = new ItemDescription(item)
+                    };
+                    actor.Room.ActiveActors.ForEach(x => x.SendMessage(message));
                 }
-                //TODO: failure message.
+                else
+                {
+                    actor.SendMessage(new ActionNotAllowedMessage() { Message = action.Reason });
+                }
             }
             else
             {
-                //TODO: failure message.
+                actor.SendMessage(new ActionNotAllowedMessage() { Message = "Cannot find item!" });
             }
         }
 
@@ -66,7 +78,7 @@ namespace KatanaMUD.Messages
         }
     }
 
-    public class DropItemMessage : MessageBase
+    public class DropItemCommand : MessageBase
     {
         public Guid? ItemId { get; set; }
         public string ItemName { get; set; }
@@ -74,13 +86,20 @@ namespace KatanaMUD.Messages
 
         public override void Process(Actor actor)
         {
-            var item = GetItemMessage.FindItem(ItemId, ItemName, actor.Items);
+            var item = GetItemCommand.FindItem(ItemId, ItemName, actor.Items);
 
             if (item != null)
             {
                 if (actor.CanDropItem(item))
                 {
                     actor.DropItem(item);
+
+                    var message = new ItemOwnershipMessage()
+                    {
+                        Giver = new ActorDescription(actor),
+                        Item = new ItemDescription(item)
+                    };
+                    actor.Room.ActiveActors.ForEach(x => x.SendMessage(message));
                 }
                 //TODO: failure message.
             }
@@ -90,4 +109,6 @@ namespace KatanaMUD.Messages
             }
         }
     }
+
+
 }

@@ -1,4 +1,5 @@
 /// <reference path="jquery.d.ts" />
+/// <reference path="utilities/linq.ts" />
 var KMud;
 (function (KMud) {
     var Game = (function () {
@@ -101,17 +102,19 @@ var KMud;
                     window.location.replace("/Home/ChooseRace");
                 }
             };
-            this.messageHandlers[KMud.ServerMessage.ClassName] = function (message) {
-                _this.addOutput(document.getElementById("Output"), message.Contents);
-            };
             this.messageHandlers[KMud.PongMessage.ClassName] = function (message) {
                 var latency = new Date().valueOf() - new Date(message.SendTime).valueOf();
                 _this.addOutput(document.getElementById("Output"), "Ping: Latency " + latency + "ms", "system-text");
             };
+            this.messageHandlers[KMud.ServerMessage.ClassName] = function (message) { return _this.addOutput(document.getElementById("Output"), message.Contents); };
             this.messageHandlers[KMud.RoomDescriptionMessage.ClassName] = function (message) { return _this.showRoomDescription(message); };
             this.messageHandlers[KMud.CommunicationMessage.ClassName] = function (message) { return _this.showCommunication(message); };
             this.messageHandlers[KMud.ActorInformationMessage.ClassName] = function (message) { return _this.currentPlayer = message; };
             this.messageHandlers[KMud.InventoryListMessage.ClassName] = function (message) { return _this.showInventory(message); };
+            this.messageHandlers[KMud.LoginStateMessage.ClassName] = function (message) { return _this.loginMessage(message); };
+            this.messageHandlers[KMud.PartyMovementMessage.ClassName] = function (message) { return _this.partyMovement(message); };
+            this.messageHandlers[KMud.ItemOwnershipMessage.ClassName] = function (message) { return _this.itemOwnership(message); };
+            this.messageHandlers[KMud.ActionNotAllowedMessage.ClassName] = function (message) { return _this.mainOutput(message.Message, "action-not-allowed"); };
         };
         Game.prototype.registerCommandHandlers = function () {
             var _this = this;
@@ -127,21 +130,29 @@ var KMud;
             this.commandHandlers["u"] = this.commandHandlers["up"] = function (words) { return _this.move(KMud.Direction.Up); };
             this.commandHandlers["d"] = this.commandHandlers["down"] = function (words) { return _this.move(KMud.Direction.Down); };
             this.commandHandlers["l"] = this.commandHandlers["look"] = function (words) { return _this.look(words); };
-            this.commandHandlers["i"] = this.commandHandlers["inv"] = this.commandHandlers["inventory"] = function (words, tail) { return _this.SendMessage(new KMud.InventoryMessage()); };
-            this.commandHandlers["get"] = function (words, tail) { return _this.get(tail); };
+            this.commandHandlers["i"] = this.commandHandlers["inv"] = this.commandHandlers["inventory"] = function (words, tail) { return _this.SendMessage(new KMud.InventoryCommand()); };
+            this.commandHandlers["get"] = this.commandHandlers["g"] = function (words, tail) { return _this.get(tail); };
             this.commandHandlers["drop"] = function (words, tail) { return _this.drop(tail); };
             this.commandHandlers["gos"] = this.commandHandlers["gossip"] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Gossip); };
             this.commandHandlers["say"] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Say); };
             this.symbolCommandHandlers["."] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Say); };
             this.symbolCommandHandlers["/"] = function (words, tail, param) { return _this.talk(tail, KMud.CommunicationType.Telepath, param); };
         };
+        Game.prototype.loginMessage = function (message) {
+            if (message.Login == true) {
+                this.mainOutput(message.Actor.Name + " just entered the Realm.", "login");
+            }
+            else {
+                this.mainOutput(message.Actor.Name + " just left the Realm.", "logout");
+            }
+        };
         Game.prototype.get = function (item) {
-            var message = new KMud.GetItemMessage();
+            var message = new KMud.GetItemCommand();
             message.ItemName = item;
             this.SendMessage(message);
         };
         Game.prototype.drop = function (item) {
-            var message = new KMud.DropItemMessage();
+            var message = new KMud.DropItemCommand();
             message.ItemName = item;
             this.SendMessage(message);
         };
@@ -171,23 +182,100 @@ var KMud;
             message.SendTime = new Date();
             this._socket.send(JSON.stringify(message));
         };
-        Game.prototype.addOutput = function (element, text, css) {
-            if (css === void 0) { css = null; }
-            var scrolledToBottom = (element.scrollHeight - element.scrollTop === element.offsetHeight);
-            var span = document.createElement("span");
-            span.textContent = text;
-            span.className = css;
-            element.appendChild(span);
-            var br = document.createElement("br");
-            element.appendChild(br);
+        Game.prototype.partyMovement = function (message) {
+            var _this = this;
+            var actors = KMud.Linq(message.Actors);
+            if (actors.areAny(function (x) { return x.Id == _this.currentPlayer.Id; })) {
+                // You're the one moving.
+                // Don't show anything if you move. I guess. That's how MajorMUD works. 
+                if (message.Enter == false && message.Leader.Id != this.currentPlayer.Id) {
+                    // else show the party lead message.
+                    this.mainOutput(" -- Following your Party leader " + KMud.Direction[message.Direction].toLowerCase() + " --", "party-follow");
+                }
+            }
+            else {
+                var runs = this.runJoin(actors.select(function (x) { return x.Name; }).toArray(), ", ", "moving-player", "player-separator");
+                if (message.Enter) {
+                    var verb = "walks";
+                    if (message.Actors.length > 1)
+                        verb = "walk";
+                    runs.push([" " + verb + " into the room from the " + KMud.Direction[message.Direction].toLowerCase() + ".", "party-movement"]);
+                }
+                else {
+                    runs.push([" just left to the " + KMud.Direction[message.Direction].toLowerCase() + ".", "party-movement"]);
+                }
+                this.mainOutputRuns(runs);
+            }
+        };
+        Game.prototype.itemOwnership = function (message) {
+            if (message.Giver != null && message.Taker != null) {
+                // player-to-player transfer
+                if (message.Giver.Id == this.currentPlayer.Id) {
+                    this.mainOutput("You just gave " + message.Item.Name + " to " + message.Taker.Name + ".", "item-ownership");
+                }
+                else if (message.Taker.Id == this.currentPlayer.Id) {
+                    this.mainOutput(message.Giver.Name + " just gave you " + message.Item.Name + ".", "item-ownership");
+                }
+                else {
+                    this.mainOutput(message.Giver.Name + " just gave " + message.Taker.Name + " something.", "item-ownership");
+                }
+            }
+            else {
+                if (message.Giver != null && message.Giver.Id == this.currentPlayer.Id) {
+                    this.mainOutput("You dropped " + message.Item.Name + ".", "item-ownership");
+                }
+                else if (message.Taker != null && message.Taker.Id == this.currentPlayer.Id) {
+                    this.mainOutput("You took " + message.Item.Name + ".", "item-ownership");
+                }
+                else if (message.Giver != null) {
+                    this.mainOutput(message.Giver.Name + " dropped " + message.Item.Name + ".", "item-ownership");
+                }
+                else if (message.Taker != null) {
+                    this.mainOutput(message.Taker.Name + " picks up " + message.Item.Name + ".", "item-ownership");
+                }
+            }
+        };
+        Game.prototype.addElements = function (target, elements) {
+            var scrolledToBottom = (target.scrollHeight - target.scrollTop === target.offsetHeight);
+            for (var i = 0; i < elements.length; i++) {
+                target.appendChild(elements[i]);
+            }
             // Keep scrolling to bottom if they're already there.
             if (scrolledToBottom) {
-                element.scrollTop = element.scrollHeight;
+                target.scrollTop = target.scrollHeight;
             }
+        };
+        Game.prototype.addOutput = function (target, text, css) {
+            if (css === void 0) { css = null; }
+            this.addOutputRuns(target, [[text, css]]);
+        };
+        Game.prototype.addOutputRuns = function (target, runs) {
+            var elements = [];
+            for (var i = 0; i < runs.length; i++) {
+                var span = document.createElement("span");
+                span.textContent = runs[i][0];
+                if (runs[i].length > 1)
+                    span.className = runs[i][1];
+                elements.push(span);
+            }
+            elements.push(document.createElement("br"));
+            this.addElements(target, elements);
+        };
+        Game.prototype.runJoin = function (items, separator, itemClass, separatorClass) {
+            var output = [];
+            for (var i = 0; i < items.length - 1; i++) {
+                output.push([items[i], itemClass]);
+                output.push([separator, separatorClass]);
+            }
+            output.push([items[items.length - 1], itemClass]);
+            return output;
         };
         Game.prototype.mainOutput = function (text, css) {
             if (css === void 0) { css = null; }
             this.addOutput(document.getElementById("Output"), text, css);
+        };
+        Game.prototype.mainOutputRuns = function (runs) {
+            this.addOutputRuns(document.getElementById("Output"), runs);
         };
         Game.prototype.showRoomDescription = function (message) {
             var _this = this;
@@ -199,7 +287,7 @@ var KMud;
                 if (StringUtilities.notEmpty(message.Description)) {
                     this.mainOutput(message.Description, "room-desc");
                 }
-                if (message.VisibleItems.length > 1) {
+                if (message.VisibleItems.length > 0) {
                     var items = message.VisibleItems.map(function (x) { return x.Name; }).join(", ");
                     this.mainOutput("You notice " + items + " here.", "items");
                 }
