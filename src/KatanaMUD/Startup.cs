@@ -39,6 +39,12 @@ namespace KatanaMUD
 
         public void Configure(IApplicationBuilder app)
         {
+            var exp = Exp.calcExpNeededOld(0, 0);
+            exp = Exp.calcExpNeededOld(1, 0);
+            exp = Exp.calcExpNeededOld(2, 0);
+            exp = Exp.calcExpNeededOld(3, 0);
+            exp = Exp.calcExpNeededOld(50, 0);
+
             var thread = new Thread(Game.Run);
             thread.Start();
 
@@ -132,6 +138,68 @@ namespace KatanaMUD
             {
                 Game.Connections.Disconnected(connection);
             }
+        }
+    }
+
+
+    public class Exp
+    {
+        static uint[] expModTable = {
+               1,  1, 40, 20, 44, 24, 44, 24, 48, 28, 48, 28, 52,
+              32, 52, 32, 56, 36, 56, 36, 60, 40, 60, 40, 65, 45,
+              65, 45, 70, 50, 70, 50, 75, 55, 50, 40, 50, 40, 50,
+              40, 50, 40, 50, 40, 50, 40, 50, 40, 50, 40, 23, 20,
+              23, 20, 23, 20, 23, 20, 23, 20, 23, 20, 23, 20 };
+
+        public static uint calcExpNeededOld(uint level, uint chart)
+        {
+            uint res = 0,
+                i = 0,
+                scalemul = 0,
+                scalediv = 0;
+
+            res = ((chart * 1000) + 100000) / 100;
+
+            while (i < level)
+            {
+                if (i < 26)
+                {
+                    scalemul = expModTable[i * 2];
+                    scalediv = expModTable[(i * 2) + 1];
+                }
+                else if (i > 60)
+                {
+                    scalemul = 105;
+                    scalediv = 100;
+                }
+                else if (i > 52)
+                {
+                    scalemul = 110;
+                    scalediv = 100;
+                }
+                else
+                {
+                    scalemul = 115;
+                    scalediv = 100;
+                }
+
+                if ((res <= (res * scalemul)) && (((res * scalemul) / scalemul) == res))
+                {
+                    res = (res * scalemul) / scalediv;
+                }
+                else
+                {
+                    res = res / 100;
+                    if ((res <= (res * scalemul)) && (((res * scalemul) / scalemul) == res))
+                        res = (res * scalemul) / scalediv;
+                    else
+                        res = (((res / 100) * scalemul) / scalediv) * 100;
+                    res = res * 100;
+                }
+                i++;
+            }
+
+            return res;
         }
     }
 }
