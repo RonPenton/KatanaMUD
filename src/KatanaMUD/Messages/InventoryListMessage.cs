@@ -90,10 +90,11 @@ namespace KatanaMUD.Messages
 
             if (item != null)
             {
-                if (actor.CanDropItem(item))
+                var action = actor.CanDropItem(item);
+
+                if (action.Allowed)
                 {
                     actor.DropItem(item);
-
                     var message = new ItemOwnershipMessage()
                     {
                         Giver = new ActorDescription(actor),
@@ -101,7 +102,10 @@ namespace KatanaMUD.Messages
                     };
                     actor.Room.ActiveActors.ForEach(x => x.SendMessage(message));
                 }
-                //TODO: failure message.
+                else
+                {
+                    actor.SendMessage(new ActionNotAllowedMessage() { Message = action.Reason });
+                }
             }
             else
             {

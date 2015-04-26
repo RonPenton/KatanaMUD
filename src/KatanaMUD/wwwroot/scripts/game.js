@@ -1,5 +1,7 @@
 /// <reference path="jquery.d.ts" />
 /// <reference path="utilities/linq.ts" />
+//TODO: At some point this file will need to be broken up. Right now ASP.NET 5 doesn't have the right tooling to merge typescript files, so it's a massive pain 
+// in the ass. When (if?) the tooling is added, separate the file into logical blocks. 
 var KMud;
 (function (KMud) {
     var Game = (function () {
@@ -115,6 +117,7 @@ var KMud;
             this.messageHandlers[KMud.PartyMovementMessage.ClassName] = function (message) { return _this.partyMovement(message); };
             this.messageHandlers[KMud.ItemOwnershipMessage.ClassName] = function (message) { return _this.itemOwnership(message); };
             this.messageHandlers[KMud.ActionNotAllowedMessage.ClassName] = function (message) { return _this.mainOutput(message.Message, "action-not-allowed"); };
+            this.messageHandlers[KMud.GenericMessage.ClassName] = function (message) { return _this.mainOutput(message.Message, message.Class); };
         };
         Game.prototype.registerCommandHandlers = function () {
             var _this = this;

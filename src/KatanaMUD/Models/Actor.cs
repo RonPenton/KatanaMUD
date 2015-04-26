@@ -27,6 +27,7 @@ namespace KatanaMUD.Models
         public Actor()
         {
             Stats = new JsonContainer(this);
+            Cash = new JsonContainer(this);
             Items = new ParentChildRelationshipContainer<Actor, Item, Guid>(this, child => child.Actor, (child, parent) => child.Actor= parent);
         }
 
@@ -36,6 +37,7 @@ namespace KatanaMUD.Models
         public Int32 ActorType { get { return _ActorType; } set { _ActorType = value; this.Changed(); } }
         public Int32 CharacterPoints { get { return _CharacterPoints; } set { _CharacterPoints = value; this.Changed(); } }
         public dynamic Stats { get; private set; }
+        public dynamic Cash { get; private set; }
         public User User {
             get { return _User; }
             set
@@ -91,6 +93,8 @@ namespace KatanaMUD.Models
             entity._CharacterPoints = reader.GetInt32(8);
             entity.Stats = new JsonContainer(entity);
             entity.Stats.FromJson(reader.GetSafeString(9));
+            entity.Cash = new JsonContainer(entity);
+            entity.Cash.FromJson(reader.GetSafeString(10));
             return entity;
         }
 
@@ -115,18 +119,19 @@ namespace KatanaMUD.Models
             c.Parameters.AddWithValue("@RaceTemplateId", (object)e.RaceTemplate?.Id ?? DBNull.Value);
             c.Parameters.AddWithValue("@CharacterPoints", (object)e.CharacterPoints ?? DBNull.Value);
             c.Parameters.AddWithValue("@JSONStats", e.Stats.ToJson());
+            c.Parameters.AddWithValue("@JSONCash", e.Cash.ToJson());
         }
 
         public static void GenerateInsertCommand(SqlCommand c, Actor e)
         {
-            c.CommandText = @"INSERT INTO [Actor]([Id], [Name], [Surname], [ActorType], [UserId], [RoomId], [ClassTemplateId], [RaceTemplateId], [CharacterPoints], [JSONStats])
-                              VALUES (@Id, @Name, @Surname, @ActorType, @UserId, @RoomId, @ClassTemplateId, @RaceTemplateId, @CharacterPoints, @JSONStats)";
+            c.CommandText = @"INSERT INTO [Actor]([Id], [Name], [Surname], [ActorType], [UserId], [RoomId], [ClassTemplateId], [RaceTemplateId], [CharacterPoints], [JSONStats], [JSONCash])
+                              VALUES (@Id, @Name, @Surname, @ActorType, @UserId, @RoomId, @ClassTemplateId, @RaceTemplateId, @CharacterPoints, @JSONStats, @JSONCash)";
             AddSqlParameters(c, e);
         }
 
         public static void GenerateUpdateCommand(SqlCommand c, Actor e)
         {
-            c.CommandText = @"UPDATE [Actor] SET [Id] = @Id, [Name] = @Name, [Surname] = @Surname, [ActorType] = @ActorType, [UserId] = @UserId, [RoomId] = @RoomId, [ClassTemplateId] = @ClassTemplateId, [RaceTemplateId] = @RaceTemplateId, [CharacterPoints] = @CharacterPoints, [JSONStats] = @JSONStats WHERE [Id] = @Id";
+            c.CommandText = @"UPDATE [Actor] SET [Id] = @Id, [Name] = @Name, [Surname] = @Surname, [ActorType] = @ActorType, [UserId] = @UserId, [RoomId] = @RoomId, [ClassTemplateId] = @ClassTemplateId, [RaceTemplateId] = @RaceTemplateId, [CharacterPoints] = @CharacterPoints, [JSONStats] = @JSONStats, [JSONCash] = @JSONCash WHERE [Id] = @Id";
             AddSqlParameters(c, e);
         }
 

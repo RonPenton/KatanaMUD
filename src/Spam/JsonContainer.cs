@@ -181,5 +181,10 @@ namespace Spam
             }
             return false;
         }
+
+        public void SetValue(string name, object value)
+        {
+            _dictionary[name] = value;
+        }
     }
 }

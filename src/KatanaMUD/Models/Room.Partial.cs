@@ -47,6 +47,43 @@ namespace KatanaMUD.Models
         }
 
         public IEnumerable<Actor> ActiveActors => Actors.Where(x => !x.InPurgatory).ToList();
+
+
+
+        // A dictionary retaining information about what hidden currencies have been found by which users.
+        // A potential for a memory leak exists here, so: TODO: Clear this at Cleanup. 
+        private Dictionary<Currency, Dictionary<Actor, long>> _foundCurrencies = new Dictionary<Currency, Dictionary<Actor, long>>();
+
+        /// <summary>
+        /// Gets the total amount of cash in a room that a user can see; meaning all the cash that's in sight, and 
+        /// all the cash that they've discovered via searching.
+        /// </summary>
+        /// <param name="currency"></param>
+        /// <param name="actor"></param>
+        /// <returns></returns>
+        public CashInformation GetTotalCashUserCanSee(Currency currency, Actor actor)
+        {
+            Dictionary<Actor, long> record;
+            if (_foundCurrencies.TryGetValue(currency, out record))
+            {
+                long value;
+                if (record.TryGetValue(actor, out value))
+                {
+                    return new CashInformation() { Visible = GetCash(currency), KnownHidden = Math.Min(value, GetHiddenCash(currency)) };
+                }
+            }
+
+            return new CashInformation() { Visible = GetCash(currency), KnownHidden = 0 };
+        }
+
+        public CashInformation GetTotalCash(Currency currency)
+        {
+            return new CashInformation() { Visible = GetCash(currency), KnownHidden = GetHiddenCash(currency) };
+        }
+
+        public long GetCash(Currency currency) => KatanaMUD.Models.Currency.Get(currency, this.Cash);
+
+        public long GetHiddenCash(Currency currency) => KatanaMUD.Models.Currency.Get(currency, this.HiddenCash);
     }
 
     /// <summary>
@@ -121,5 +158,22 @@ namespace KatanaMUD.Models
 
             throw new InvalidOperationException("Invalid Direction");
         }
+
+        public static string Format(string horizontal, string vertical, Direction direction)
+        {
+            if (direction == Direction.Up)
+                return String.Format(vertical, "above");
+            else if (direction == Direction.Down)
+                return String.Format(vertical, "below");
+            return String.Format(horizontal, direction.ToString().ToLower());
+        }
+    }
+
+    public class CashInformation
+    {
+        public long Visible { get; set; }
+        public long KnownHidden { get; set; }
+
+        public long Total => Visible + KnownHidden;
     }
 }

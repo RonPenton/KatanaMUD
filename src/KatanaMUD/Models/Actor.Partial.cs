@@ -115,28 +115,6 @@ namespace KatanaMUD.Models
             SendMessage(message);
         }
 
-        public T GetStat<T>(string name, T baseValue, bool includePercent = true)
-        {
-            List<JsonContainer> containers = new List<JsonContainer>();
-
-            containers.Add((JsonContainer)Stats);
-            containers.AddRange(Items.Select(x => (JsonContainer)x.Stats));
-            //TODO: Buffs here
-
-            return JsonContainer.Calculate<T>(containers, name, baseValue, includePercent);
-        }
-
-        public long MaxEncumbrance
-        {
-            get
-            {
-                var strength = GetStat<long>("Strength", 0);
-                return GetStat<long>("MaxEncumbrance", strength * 48);
-            }
-        }
-
-        public long Encumbrance => Items.Sum(x => x.Weight);
-
         /// <summary>
         /// Determines if an actor can get an item.
         /// </summary>
@@ -160,16 +138,64 @@ namespace KatanaMUD.Models
             return new Validation();
         }
 
+        public Validation CanGetCash(Currency currency, long? quantity)
+        {
+            var q = Room.GetTotalCashUserCanSee(currency, this);
+
+            if (quantity == null)
+            {
+                // No quantity specified. Set total to the amount that the user knows about. Auto-max.
+                quantity = q.Total;
+            }
+
+            // Make sure item is actually in the room.
+            if (q.Total < quantity)
+                return new Validation("You do not see that here!");
+
+            // Check weight.
+            if (Encumbrance + (currency.Weight * quantity) > MaxEncumbrance)
+                return new Validation("You cannot carry that much!");
+
+            return new Validation();
+        }
+
         /// <summary>
         /// Gets an item. Beware that this performs no checks and essentially forces a get. 
+        /// Notifying the room of the item transfer is up to the executor of this method.
         /// </summary>
         /// <param name="item"></param>
         public void GetItem(Item item)
         {
             item.Actor = this;
             item.Room = null;
+        }
 
-            //TODO: Notify item it's been gotten.
+        /// <summary>
+        /// Gets cash. Beware that this performs minimal checks and essentially forces a get. 
+        /// Notifying the room of the item transfer is up to the executor of this method.
+        /// </summary>
+        /// <param name="item"></param>
+        public void GetCash(Currency currency, long? quantity)
+        {
+            var q = Room.GetTotalCashUserCanSee(currency, this);
+            var total = Room.GetTotalCash(currency);
+
+            if (quantity == null)
+            {
+                // No quantity specified. Set total to the amount that the user knows about. Auto-max.
+                quantity = q.Total;
+            }
+
+            // Make sure we don't grab more than what's on the floor. 
+            if (quantity > total.Total)
+                quantity = total.Total;
+
+            var visible = q.Visible;
+            var hidden = quantity.Value - visible;
+
+            Currency.Add(currency, Cash, quantity.Value);
+            Currency.Add(currency, Room.Cash, -visible);
+            Currency.Add(currency, Room.HiddenCash, -hidden);
         }
 
         /// <summary>
@@ -177,18 +203,19 @@ namespace KatanaMUD.Models
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public bool CanDropItem(Item item)
+        public Validation CanDropItem(Item item)
         {
             // Make sure item is actually in the room.
             if (item.Actor != this)
-                return false;
+                return new Validation("Item is not in the same room");
 
+            // TODO: Ask item for a reason why it can't be dropped?
             if (item.ItemTemplate.NotDroppable)
-                return false;
+                return new Validation("You cannot drop that!");
 
-            //TODO: Ask item if it can be dropped. 
+            //TODO: Ask item if it can be dropped.
 
-            return true;
+            return new Validation();
         }
 
         /// <summary>
@@ -199,8 +226,31 @@ namespace KatanaMUD.Models
         {
             item.Actor = null;
             item.Room = Room;
+        }
 
-            //TODO: Notify item it's been dropped.
+        public Validation CanDropCash(Currency currency, long? quantity)
+        {
+            var q = Currency.Get(currency, Cash);
+            if (quantity == null)
+                quantity = q;
+
+            if (quantity > q)
+                return new Validation("You don't see that many " + currency.Name + " here!");
+
+            return new Validation();
+        }
+
+        public void DropCash(Currency currency, long? quantity)
+        {
+            var q = Currency.Get(currency, Cash);
+            if (quantity == null)
+                quantity = q;
+
+            if (quantity > q)
+                quantity = q;
+
+            Currency.Add(currency, Cash, -quantity.Value);
+            Currency.Add(currency, Room.Cash, quantity.Value);
         }
     }
 
@@ -284,6 +334,7 @@ namespace KatanaMUD.Models
 		{
 			if (exit.ExitRoom != null)
 			{
+                var oldRoom = Leader.Room;
 				var newRoom = Game.Data.Rooms.Single(x => x.Id == exit.ExitRoom.Value);
 
                 var partyDescription = this.Members.OrderBy(x => x != Leader).ThenBy(x => x.Name).Select(x => new ActorDescription(x)).ToArray();
@@ -295,13 +346,34 @@ namespace KatanaMUD.Models
                     Direction = exit.Direction,
                     Enter = false
                 };
-                Leader.Room.ActiveActors.ForEach(x => x.SendMessage(message));
+                oldRoom.ActiveActors.ForEach(x => x.SendMessage(message));
 
 				Move(newRoom, null, null);
 
                 message.Direction = Directions.Opposite(exit.Direction);
                 message.Enter = true;
                 newRoom.ActiveActors.ForEach(x => x.SendMessage(message));
+
+                // send "movement" messages to adjacent rooms. 
+                var exits = newRoom.GetExits();
+                foreach (var ex in exits)
+                {
+                    if (ex.ExitRoom != null)
+                    {
+                        if (ex.ExitRoom != oldRoom.Id)
+                        {
+                            var room = Game.Data.Rooms[ex.ExitRoom.Value];
+                            var generic = new GenericMessage();
+                            generic.Message = Directions.Format("You hear movement to the {0}.", "You hear movement {0} you.", Directions.Opposite(ex.Direction));
+                            generic.Class = "hear-movement";
+                            room.ActiveActors.ForEach(x => x.SendMessage(generic));
+                        }
+                    }
+                    else
+                    {
+                        // TODO: Portal notification here? 
+                    }
+                }
             }
             else
 			{

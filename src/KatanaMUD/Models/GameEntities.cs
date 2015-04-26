@@ -10,6 +10,7 @@ namespace KatanaMUD.Models
         {
             Actors = new EntityContainer<Actor, Guid>(this);
             ClassTemplates = new EntityContainer<ClassTemplate, Int32>(this);
+            Currencys = new EntityContainer<Currency, Int32>(this);
             Items = new EntityContainer<Item, Guid>(this);
             ItemTemplates = new EntityContainer<ItemTemplate, Int32>(this);
             RaceTemplates = new EntityContainer<RaceTemplate, Int32>(this);
@@ -22,6 +23,7 @@ namespace KatanaMUD.Models
 
         public EntityContainer<Actor, Guid> Actors { get; private set; }
         public EntityContainer<ClassTemplate, Int32> ClassTemplates { get; private set; }
+        public EntityContainer<Currency, Int32> Currencys { get; private set; }
         public EntityContainer<Item, Guid> Items { get; private set; }
         public EntityContainer<ItemTemplate, Int32> ItemTemplates { get; private set; }
         public EntityContainer<RaceTemplate, Int32> RaceTemplates { get; private set; }
@@ -49,6 +51,12 @@ namespace KatanaMUD.Models
             meta.GenerateInsertCommand = (SqlCommand c, IEntity e) => ClassTemplate.GenerateInsertCommand(c, (ClassTemplate)e);
             meta.GenerateUpdateCommand = (SqlCommand c, IEntity e) => ClassTemplate.GenerateUpdateCommand(c, (ClassTemplate)e);
             meta.GenerateDeleteCommand = (SqlCommand c, IEntity e) => ClassTemplate.GenerateDeleteCommand(c, (ClassTemplate)e);
+            EntityTypes.Add(meta);
+
+            meta = new EntityMetadata() { EntityType = typeof(Currency), Container = Currencys };
+            meta.GenerateInsertCommand = (SqlCommand c, IEntity e) => Currency.GenerateInsertCommand(c, (Currency)e);
+            meta.GenerateUpdateCommand = (SqlCommand c, IEntity e) => Currency.GenerateUpdateCommand(c, (Currency)e);
+            meta.GenerateDeleteCommand = (SqlCommand c, IEntity e) => Currency.GenerateDeleteCommand(c, (Currency)e);
             EntityTypes.Add(meta);
 
             meta = new EntityMetadata() { EntityType = typeof(Item), Container = Items };
@@ -111,6 +119,7 @@ namespace KatanaMUD.Models
         {
             LoadData(connection, Actors, "Actor", Actor.Load);
             LoadData(connection, ClassTemplates, "ClassTemplate", ClassTemplate.Load);
+            LoadData(connection, Currencys, "Currency", Currency.Load);
             LoadData(connection, Items, "Item", Item.Load);
             LoadData(connection, ItemTemplates, "ItemTemplate", ItemTemplate.Load);
             LoadData(connection, RaceTemplates, "RaceTemplate", RaceTemplate.Load);

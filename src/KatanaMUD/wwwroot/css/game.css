@@ -117,3 +117,6 @@ input:focus {
   color: red;
   font-weight: bold;
 }
+.hear-movement {
+  color: purple;
+}

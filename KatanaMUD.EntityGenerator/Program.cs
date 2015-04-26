@@ -436,6 +436,8 @@ namespace {0}
                 return prefix + "Boolean";
             if (column.DataType == "bigint")
                 return prefix + "Int64";
+            if (column.DataType == "float")
+                return prefix + "Float";
 
             throw new InvalidOperationException("Datatype not supported: " + column.TypeName.ToString());
         }

@@ -1,6 +1,10 @@
 ﻿/// <reference path="jquery.d.ts" />
 /// <reference path="utilities/linq.ts" />
 
+
+//TODO: At some point this file will need to be broken up. Right now ASP.NET 5 doesn't have the right tooling to merge typescript files, so it's a massive pain 
+// in the ass. When (if?) the tooling is added, separate the file into logical blocks. 
+
 module KMud {
     export class Game {
         private input: HTMLInputElement;
@@ -132,6 +136,7 @@ module KMud {
             this.messageHandlers[PartyMovementMessage.ClassName] = (message: PartyMovementMessage) => this.partyMovement(message);
             this.messageHandlers[ItemOwnershipMessage.ClassName] = (message: ItemOwnershipMessage) => this.itemOwnership(message);
             this.messageHandlers[ActionNotAllowedMessage.ClassName] = (message: ActionNotAllowedMessage) => this.mainOutput(message.Message, "action-not-allowed");
+            this.messageHandlers[GenericMessage.ClassName] = (message: GenericMessage) => this.mainOutput(message.Message, message.Class);
         }
 
         private registerCommandHandlers() {

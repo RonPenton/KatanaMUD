@@ -61,6 +61,7 @@ namespace KatanaMUD.EntityGenerator
                         case "datetimeoffset": case "datetime": return "DateTime?";
                         case "bit": return "Boolean?";
                         case "bigint": return "Int64?";
+                        case "float": return "float?";
                     }
                 }
 
@@ -72,6 +73,7 @@ namespace KatanaMUD.EntityGenerator
                     case "datetimeoffset": case "datetime": return "DateTime";
                     case "bit": return "Boolean";
                     case "bigint": return "Int64";
+                    case "float": return "float";
                 }
 
                 throw new InvalidOperationException("Datatype not supported: " + this.DataType);

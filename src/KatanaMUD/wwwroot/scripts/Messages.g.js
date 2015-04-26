@@ -33,6 +33,15 @@ var KMud;
         return CommunicationMessage;
     })(KMud.MessageBase);
     KMud.CommunicationMessage = CommunicationMessage;
+    var GenericMessage = (function (_super) {
+        __extends(GenericMessage, _super);
+        function GenericMessage() {
+            _super.call(this, 'GenericMessage');
+        }
+        GenericMessage.ClassName = 'GenericMessage';
+        return GenericMessage;
+    })(KMud.MessageBase);
+    KMud.GenericMessage = GenericMessage;
     var InventoryCommand = (function (_super) {
         __extends(InventoryCommand, _super);
         function InventoryCommand() {

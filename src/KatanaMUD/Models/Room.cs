@@ -29,6 +29,8 @@ namespace KatanaMUD.Models
 
         public Room()
         {
+            Cash = new JsonContainer(this);
+            HiddenCash = new JsonContainer(this);
             Actors = new ParentChildRelationshipContainer<Room, Actor, Guid>(this, child => child.Room, (child, parent) => child.Room= parent);
             Items = new ParentChildRelationshipContainer<Room, Item, Guid>(this, child => child.Room, (child, parent) => child.Room= parent);
         }
@@ -45,6 +47,8 @@ namespace KatanaMUD.Models
         public Int32? SouthWestExit { get { return _SouthWestExit; } set { _SouthWestExit = value; this.Changed(); } }
         public Int32? UpExit { get { return _UpExit; } set { _UpExit = value; this.Changed(); } }
         public Int32? DownExit { get { return _DownExit; } set { _DownExit = value; this.Changed(); } }
+        public dynamic Cash { get; private set; }
+        public dynamic HiddenCash { get; private set; }
         public Region Region {
             get { return _Region; }
             set
@@ -84,6 +88,10 @@ namespace KatanaMUD.Models
             entity._SouthWestExit = reader.GetSafeInt32(11);
             entity._UpExit = reader.GetSafeInt32(12);
             entity._DownExit = reader.GetSafeInt32(13);
+            entity.Cash = new JsonContainer(entity);
+            entity.Cash.FromJson(reader.GetSafeString(14));
+            entity.HiddenCash = new JsonContainer(entity);
+            entity.HiddenCash.FromJson(reader.GetSafeString(15));
             return entity;
         }
 
@@ -110,18 +118,20 @@ namespace KatanaMUD.Models
             c.Parameters.AddWithValue("@SouthWestExit", (object)e.SouthWestExit ?? DBNull.Value);
             c.Parameters.AddWithValue("@UpExit", (object)e.UpExit ?? DBNull.Value);
             c.Parameters.AddWithValue("@DownExit", (object)e.DownExit ?? DBNull.Value);
+            c.Parameters.AddWithValue("@JSONCash", e.Cash.ToJson());
+            c.Parameters.AddWithValue("@JSONHiddenCash", e.HiddenCash.ToJson());
         }
 
         public static void GenerateInsertCommand(SqlCommand c, Room e)
         {
-            c.CommandText = @"INSERT INTO [Room]([Id], [RegionId], [Name], [TextBlockId], [NorthExit], [SouthExit], [EastExit], [WestExit], [NorthEastExit], [NorthWestExit], [SouthEastExit], [SouthWestExit], [UpExit], [DownExit])
-                              VALUES (@Id, @RegionId, @Name, @TextBlockId, @NorthExit, @SouthExit, @EastExit, @WestExit, @NorthEastExit, @NorthWestExit, @SouthEastExit, @SouthWestExit, @UpExit, @DownExit)";
+            c.CommandText = @"INSERT INTO [Room]([Id], [RegionId], [Name], [TextBlockId], [NorthExit], [SouthExit], [EastExit], [WestExit], [NorthEastExit], [NorthWestExit], [SouthEastExit], [SouthWestExit], [UpExit], [DownExit], [JSONCash], [JSONHiddenCash])
+                              VALUES (@Id, @RegionId, @Name, @TextBlockId, @NorthExit, @SouthExit, @EastExit, @WestExit, @NorthEastExit, @NorthWestExit, @SouthEastExit, @SouthWestExit, @UpExit, @DownExit, @JSONCash, @JSONHiddenCash)";
             AddSqlParameters(c, e);
         }
 
         public static void GenerateUpdateCommand(SqlCommand c, Room e)
         {
-            c.CommandText = @"UPDATE [Room] SET [Id] = @Id, [RegionId] = @RegionId, [Name] = @Name, [TextBlockId] = @TextBlockId, [NorthExit] = @NorthExit, [SouthExit] = @SouthExit, [EastExit] = @EastExit, [WestExit] = @WestExit, [NorthEastExit] = @NorthEastExit, [NorthWestExit] = @NorthWestExit, [SouthEastExit] = @SouthEastExit, [SouthWestExit] = @SouthWestExit, [UpExit] = @UpExit, [DownExit] = @DownExit WHERE [Id] = @Id";
+            c.CommandText = @"UPDATE [Room] SET [Id] = @Id, [RegionId] = @RegionId, [Name] = @Name, [TextBlockId] = @TextBlockId, [NorthExit] = @NorthExit, [SouthExit] = @SouthExit, [EastExit] = @EastExit, [WestExit] = @WestExit, [NorthEastExit] = @NorthEastExit, [NorthWestExit] = @NorthWestExit, [SouthEastExit] = @SouthEastExit, [SouthWestExit] = @SouthWestExit, [UpExit] = @UpExit, [DownExit] = @DownExit, [JSONCash] = @JSONCash, [JSONHiddenCash] = @JSONHiddenCash WHERE [Id] = @Id";
             AddSqlParameters(c, e);
         }
 

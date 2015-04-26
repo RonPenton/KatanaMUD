@@ -20,6 +20,12 @@ module KMud {
         public ActorId: string;
         public static ClassName: string = 'CommunicationMessage';
     }
+    export class GenericMessage extends MessageBase {
+        constructor() { super('GenericMessage'); }
+        public Message: string;
+        public Class: string;
+        public static ClassName: string = 'GenericMessage';
+    }
     export class InventoryCommand extends MessageBase {
         constructor() { super('InventoryCommand'); }
         public static ClassName: string = 'InventoryCommand';
