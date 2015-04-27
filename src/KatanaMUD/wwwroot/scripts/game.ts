@@ -310,7 +310,7 @@ module KMud {
                 }
             }
             else {
-                name = "some " + name;
+                name = "some " + name + "s";
             }
 
             if (message.Giver != null && message.Taker != null) {
@@ -414,6 +414,9 @@ module KMud {
                         items += ", ";
                     var groups = Linq(message.VisibleItems).groupBy(x => x.TemplateId + "|" + x.Name);
                     items += groups.select(x => (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name).toArray().join(", ");
+                }
+
+                if (items.length > 0) {
                     this.mainOutput("You notice " + items + " here.", "items");
                 }
 

@@ -271,7 +271,7 @@ var KMud;
                 }
             }
             else {
-                name = "some " + name;
+                name = "some " + name + "s";
             }
             if (message.Giver != null && message.Taker != null) {
                 // player-to-player transfer
@@ -361,6 +361,8 @@ var KMud;
                         items += ", ";
                     var groups = KMud.Linq(message.VisibleItems).groupBy(function (x) { return x.TemplateId + "|" + x.Name; });
                     items += groups.select(function (x) { return (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name; }).toArray().join(", ");
+                }
+                if (items.length > 0) {
                     this.mainOutput("You notice " + items + " here.", "items");
                 }
                 if (message.Actors.length > 1) {

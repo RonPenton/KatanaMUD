@@ -43,6 +43,9 @@ input:focus {
   height: 100%;
   border: solid 1px white;
 }
+#StatArea span {
+  margin-right: 0px;
+}
 #Tabs {
   width: 100%;
   flex-grow: 0;
