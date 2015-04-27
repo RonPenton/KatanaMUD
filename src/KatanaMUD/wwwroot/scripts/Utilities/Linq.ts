@@ -386,6 +386,28 @@
                 return -1;
             return 0;
         }
+
+        /**
+        * Groups a container using a string key. Groups should be assumed to be unordered. O(n) performance. 
+        */
+        public groupBy(picker: Func1<T, string> | Func1<T, number>): LinqContainer<Grouping<T, any>> {
+            var groups: any = {};
+            this.forEach(x => {
+                var key = <any>picker(x);
+                if (groups[key] === undefined) {
+                    groups[key] = []
+                }
+                groups[key].push(x);
+            });
+            var output: Grouping<T, any>[] = [];
+            var keys = Object.keys(groups);
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                output.push(new Grouping<T, any>(key, groups[key]));
+            }
+
+            return new LinqContainer(output);
+        }
     }
 
     /**
@@ -425,6 +447,12 @@
             }
             while (left.length) values[a++] = left.shift();
             while (right.length) values[a++] = right.shift();
+        }
+    }
+
+    export class Grouping<T, K> extends LinqContainer<T> {
+        constructor(public key: K, values: ArrayLikeObject<T>) {
+            super(values);
         }
     }
 }

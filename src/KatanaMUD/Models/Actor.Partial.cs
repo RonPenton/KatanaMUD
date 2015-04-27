@@ -110,7 +110,11 @@ namespace KatanaMUD.Models
             var exits = room.GetExits();
             message.Exits = exits.Select(x => new ExitDescription(x, room)).ToArray();
             message.Actors = room.VisibleActors(this).Select(x => new ActorDescription(x)).ToArray();
-            message.VisibleItems = room.Items.Select(x => new ItemDescription(x)).ToArray();
+            message.VisibleItems = room.Items.Where(x => x.HiddenTime == null).OrderBy(x => x.Name).Select(x => new ItemDescription(x)).ToArray();
+            message.VisibleCash = Game.Data.Currencies.OrderByDescending(x => x.Value).Select(x => new CurrencyDescription(x, room.GetCash(x))).Where(x => x.Amount != 0).ToArray();
+
+            message.FoundItems = room.Items.Where(x => x.HiddenTime != null && x.UsersWhoFoundMe.Contains(this)).OrderBy(x => x.Name).Select(x => new ItemDescription(x)).ToArray();
+            message.FoundCash = Game.Data.Currencies.OrderByDescending(x => x.Value).Select(x => new CurrencyDescription(x, room.GetTotalCashUserCanSee(x, this).KnownHidden)).Where(x => x.Amount != 0).ToArray();
 
             SendMessage(message);
         }
@@ -142,7 +146,7 @@ namespace KatanaMUD.Models
         {
             var q = Room.GetTotalCashUserCanSee(currency, this);
 
-            if (quantity == null)
+            if (quantity == null || quantity == 0)
             {
                 // No quantity specified. Set total to the amount that the user knows about. Auto-max.
                 quantity = q.Total;
@@ -190,7 +194,7 @@ namespace KatanaMUD.Models
             if (quantity > total.Total)
                 quantity = total.Total;
 
-            var visible = q.Visible;
+            var visible = Math.Min(quantity.Value, q.Visible);
             var hidden = quantity.Value - visible;
 
             Currency.Add(currency, Cash, quantity.Value);
@@ -259,83 +263,84 @@ namespace KatanaMUD.Models
     /// Parties are not database entities, we don't bother to persist that data to disk.
     /// </summary>
 	public class Party
-	{
-		public Party(Actor leader, params Actor[] actors)
-			: this(leader, actors.AsEnumerable()) { }
+    {
+        public Party(Actor leader, params Actor[] actors)
+            : this(leader, actors.AsEnumerable())
+        { }
 
-		public Party(Actor leader, IEnumerable<Actor> actors)
-		{
-			_members.AddRange(actors);
-			_members.Add(leader);
-			Leader = leader;
-			_members.ForEach(x => x.Party = this);
-		}
+        public Party(Actor leader, IEnumerable<Actor> actors)
+        {
+            _members.AddRange(actors);
+            _members.Add(leader);
+            Leader = leader;
+            _members.ForEach(x => x.Party = this);
+        }
 
-		private Actor _leader;
+        private Actor _leader;
 
-		public Actor Leader
-		{
-			get { return _leader; }
-			set
-			{
-				if (!_members.Contains(value))
-					throw new InvalidOperationException("Leader must exist within the party.");
-				_leader = value;
-			}
-		}
+        public Actor Leader
+        {
+            get { return _leader; }
+            set
+            {
+                if (!_members.Contains(value))
+                    throw new InvalidOperationException("Leader must exist within the party.");
+                _leader = value;
+            }
+        }
 
-		public IEnumerable<Actor> Members => _members.ToList().AsReadOnly();
+        public IEnumerable<Actor> Members => _members.ToList().AsReadOnly();
 
-		public void Add(Actor actor)
-		{
-			if (actor.Party == this)
-				return;
+        public void Add(Actor actor)
+        {
+            if (actor.Party == this)
+                return;
 
-			if (actor.Party.Members.Count() > 1)
-				throw new InvalidOperationException("Cannot add actor to party, since they are already in a party.");
+            if (actor.Party.Members.Count() > 1)
+                throw new InvalidOperationException("Cannot add actor to party, since they are already in a party.");
 
-			actor.Party = this;
-			_members.Add(actor);
-		}
+            actor.Party = this;
+            _members.Add(actor);
+        }
 
-		public void Remove(Actor actor)
-		{
-			if (actor == _leader)
-				throw new InvalidOperationException("Cannot Remove the leader from a party.");
-			if (_members.Remove(actor))
-				actor.Party = null;
-		}
+        public void Remove(Actor actor)
+        {
+            if (actor == _leader)
+                throw new InvalidOperationException("Cannot Remove the leader from a party.");
+            if (_members.Remove(actor))
+                actor.Party = null;
+        }
 
-		public void Disband()
-		{
-			foreach (var member in _members)
-			{
-				member.Party = null;
-			}
-			_members.Clear();
-		}
+        public void Disband()
+        {
+            foreach (var member in _members)
+            {
+                member.Party = null;
+            }
+            _members.Clear();
+        }
 
-		private HashSet<Actor> _members { get; } = new HashSet<Actor>();
+        private HashSet<Actor> _members { get; } = new HashSet<Actor>();
 
 
-		public bool CanMove(Exit exit)
-		{
-			//TODO: check if party can move. 
-			return true;
-		}
+        public bool CanMove(Exit exit)
+        {
+            //TODO: check if party can move. 
+            return true;
+        }
 
-		/// <summary>
-		/// Moves the player through the exit. 
-		/// NOTE: This assumes that CanMove has already been called and heeded. 
-		/// If you ignore that, the consequences are yours to deal with.
-		/// </summary>
-		/// <param name="exit"></param>
-		public void Move(Exit exit)
-		{
-			if (exit.ExitRoom != null)
-			{
+        /// <summary>
+        /// Moves the player through the exit. 
+        /// NOTE: This assumes that CanMove has already been called and heeded. 
+        /// If you ignore that, the consequences are yours to deal with.
+        /// </summary>
+        /// <param name="exit"></param>
+        public void Move(Exit exit)
+        {
+            if (exit.ExitRoom != null)
+            {
                 var oldRoom = Leader.Room;
-				var newRoom = Game.Data.Rooms.Single(x => x.Id == exit.ExitRoom.Value);
+                var newRoom = Game.Data.Rooms.Single(x => x.Id == exit.ExitRoom.Value);
 
                 var partyDescription = this.Members.OrderBy(x => x != Leader).ThenBy(x => x.Name).Select(x => new ActorDescription(x)).ToArray();
 
@@ -348,7 +353,7 @@ namespace KatanaMUD.Models
                 };
                 oldRoom.ActiveActors.ForEach(x => x.SendMessage(message));
 
-				Move(newRoom, null, null);
+                Move(newRoom, null, null);
 
                 message.Direction = Directions.Opposite(exit.Direction);
                 message.Enter = true;
@@ -376,22 +381,22 @@ namespace KatanaMUD.Models
                 }
             }
             else
-			{
-				//TODO: Perform portal movement here
-			}
-		}
+            {
+                //TODO: Perform portal movement here
+            }
+        }
 
-		public void Move(Room newRoom, RoomMessage exit, RoomMessage entrance)
-		{
-			//TODO: send exit message to _leader.Room
+        public void Move(Room newRoom, RoomMessage exit, RoomMessage entrance)
+        {
+            //TODO: send exit message to _leader.Room
 
-			Members.ForEach(x =>
-			{
-				x.Room = newRoom;
-				x.SendRoomDescription(newRoom);
-			});
+            Members.ForEach(x =>
+            {
+                x.Room = newRoom;
+                x.SendRoomDescription(newRoom);
+            });
 
-			//TODO: send entrance message to newRoom
-		}
-	}
+            //TODO: send entrance message to newRoom
+        }
+    }
 }

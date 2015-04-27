@@ -214,8 +214,8 @@ namespace {0}
                         link = linkTable.SecondLink;
 
                     builder.AppendFormat(@"            {0} = new ObservableHashSet<{1}>();
-			{0}.ItemsAdded += {0}_ItemsAdded;
-			{0}.ItemsRemoved += {0}_ItemsRemoved;
+            {0}.ItemsAdded += {0}_ItemsAdded;
+            {0}.ItemsRemoved += {0}_ItemsRemoved;
 ", link.PluralName, link.Name);
                 }
                 builder.Append("        }\r\n\r\n");
@@ -232,11 +232,13 @@ namespace {0}
 
                 foreach (var relationship in table.Relationships)
                 {
+                    builder.AppendFormat("        partial void On{0}Changing({0} oldValue, {0} newValue);\r\n", relationship.Column.ForeignKeyTable);
                     builder.AppendFormat("        public {0} {0} {{\r\n", relationship.Column.ForeignKeyTable);
                     builder.AppendFormat("            get {{ return _{0}; }}\r\n", relationship.Column.ForeignKeyTable);
                     builder.AppendFormat(@"            set
             {{
-                ChangeParent(value, ref _{0}, 
+                    On{0}Changing(_{0}, value);
+                    ChangeParent(value, ref _{0}, 
                     ({0} parent, {1} child) => parent.{2}.Remove(child), 
                     ({0} parent, {1} child) => parent.{2}.Add(child));
             }}
@@ -386,7 +388,7 @@ namespace {0}
                         item2Key = "item.Key";
                     }
 
-                    builder.AppendFormat(@"		private void {0}_ItemsAdded(object sender, CollectionChangedEventArgs<{1}> e)
+                    builder.AppendFormat(@"        private void {0}_ItemsAdded(object sender, CollectionChangedEventArgs<{1}> e)
         {{
             foreach (var item in e.Items)
             {{
@@ -394,14 +396,14 @@ namespace {0}
                 Context.{3}.Link({4}, {5}, false);
             }}
         }}
-		private void {0}_ItemsRemoved(object sender, CollectionChangedEventArgs<{1}> e)
-		{{
-			foreach (var item in e.Items)
-			{{
-				item.{2}.Remove(this, true);
-				Context.{3}.Unlink({4}, {5});
-			}}
-		}}
+        private void {0}_ItemsRemoved(object sender, CollectionChangedEventArgs<{1}> e)
+        {{
+            foreach (var item in e.Items)
+            {{
+                item.{2}.Remove(this, true);
+                Context.{3}.Unlink({4}, {5});
+            }}
+        }}
 
 ", other.PluralName, other.Name, current.PluralName, link.PluralName, item1Key, item2Key);
                 }
@@ -437,7 +439,7 @@ namespace {0}
             if (column.DataType == "bigint")
                 return prefix + "Int64";
             if (column.DataType == "float")
-                return prefix + "Float";
+                return prefix + "Double";
 
             throw new InvalidOperationException("Datatype not supported: " + column.TypeName.ToString());
         }
@@ -447,18 +449,18 @@ namespace {0}
         {
             string query = @"use [KatanaMUD]
 select o.name as [Table], 
-		c.name as [Column], 
-		c.column_id,
-		st.name as [Type], 
-		c.max_length as [MaxLength], 
-		c.precision as [Precision],  
-		c.scale as [Scale],
-		c.is_nullable as [Nullable],
-		c.is_identity as [Identity],
-		c.is_computed as [Computed],
-		i.is_primary_key as [Primary],
-		fkt.name as [ForeignKeyTable],
-		refc.name as [ForeignKeyColumn]
+        c.name as [Column], 
+        c.column_id,
+        st.name as [Type], 
+        c.max_length as [MaxLength], 
+        c.precision as [Precision],  
+        c.scale as [Scale],
+        c.is_nullable as [Nullable],
+        c.is_identity as [Identity],
+        c.is_computed as [Computed],
+        i.is_primary_key as [Primary],
+        fkt.name as [ForeignKeyTable],
+        refc.name as [ForeignKeyColumn]
 from sys.objects o inner join sys.columns c on o.object_id = c.object_id
 inner join sys.types st on c.user_type_id = st.user_type_id
 left join sys.index_columns ic on ic.object_id = o.object_id and ic.column_id = c.column_id

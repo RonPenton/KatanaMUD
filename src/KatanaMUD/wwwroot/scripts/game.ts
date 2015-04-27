@@ -135,6 +135,7 @@ module KMud {
             this.messageHandlers[LoginStateMessage.ClassName] = (message: LoginStateMessage) => this.loginMessage(message);
             this.messageHandlers[PartyMovementMessage.ClassName] = (message: PartyMovementMessage) => this.partyMovement(message);
             this.messageHandlers[ItemOwnershipMessage.ClassName] = (message: ItemOwnershipMessage) => this.itemOwnership(message);
+            this.messageHandlers[CashTransferMessage.ClassName] = (message: CashTransferMessage) => this.cashTransfer(message);
             this.messageHandlers[ActionNotAllowedMessage.ClassName] = (message: ActionNotAllowedMessage) => this.mainOutput(message.Message, "action-not-allowed");
             this.messageHandlers[GenericMessage.ClassName] = (message: GenericMessage) => this.mainOutput(message.Message, message.Class);
         }
@@ -177,13 +178,29 @@ module KMud {
 
         private get(item: string) {
             var message = new GetItemCommand();
-            message.ItemName = item;
+            var tokens = item.split(/\s+/gi);
+            var quantity = parseInt(tokens[0]);
+            if (!isNaN(quantity)) {
+                message.Quantity = quantity;
+                message.ItemName = tokens.slice(1).join(" ");
+            }
+            else {
+                message.ItemName = item;
+            }
             this.SendMessage(message);
         }
 
         private drop(item: string) {
             var message = new DropItemCommand();
-            message.ItemName = item;
+            var tokens = item.split(/\s+/gi);
+            var quantity = parseInt(tokens[0]);
+            if (!isNaN(quantity)) {
+                message.Quantity = quantity;
+                message.ItemName = tokens.slice(1).join(" ");
+            }
+            else {
+                message.ItemName = item;
+            }
             this.SendMessage(message);
         }
 
@@ -247,13 +264,62 @@ module KMud {
         }
 
         private itemOwnership(message: ItemOwnershipMessage) {
+            var groups = Linq(message.Items).groupBy(x => x.TemplateId + "|" + x.Name).toArray();
+
+            for (var i = 0; i < groups.length; i++) {
+                var name = groups[i].values[0].Name;
+                if (groups[i].values.length > 1) {
+                    name = String(groups[i].values.length) + " " + name;
+                }
+
+                if (message.Giver != null && message.Taker != null) {
+                    // player-to-player transfer
+                    if (message.Giver.Id == this.currentPlayer.Id) {
+                        this.mainOutput("You just gave " + name + " to " + message.Taker.Name + ".", "item-ownership");
+                    }
+                    else if (message.Taker.Id == this.currentPlayer.Id) {
+                        this.mainOutput(message.Giver.Name + " just gave you " + name + ".", "item-ownership");
+                    }
+                    else {
+                        this.mainOutput(message.Giver.Name + " just gave " + message.Taker.Name + " something.", "item-ownership");
+                    }
+                }
+                else {
+                    if (message.Giver != null && message.Giver.Id == this.currentPlayer.Id) {
+                        this.mainOutput("You dropped " + name + ".", "item-ownership");
+                    }
+                    else if (message.Taker != null && message.Taker.Id == this.currentPlayer.Id) {
+                        this.mainOutput("You took " + name + ".", "item-ownership");
+                    }
+                    else if (message.Giver != null) {
+                        this.mainOutput(message.Giver.Name + " dropped " + name + ".", "item-ownership");
+                    }
+                    else if (message.Taker != null) {
+                        this.mainOutput(message.Taker.Name + " picks up " + name + ".", "item-ownership");
+                    }
+                }
+            }
+        }
+
+        private cashTransfer(message: CashTransferMessage) {
+            var name = message.Currency.Name;
+            if (message.Quantity > 0) {
+                name = String(message.Quantity) + " " + name;
+                if (message.Quantity > 1) {
+                    name = name + "s";
+                }
+            }
+            else {
+                name = "some " + name;
+            }
+
             if (message.Giver != null && message.Taker != null) {
                 // player-to-player transfer
                 if (message.Giver.Id == this.currentPlayer.Id) {
-                    this.mainOutput("You just gave " + message.Item.Name + " to " + message.Taker.Name + ".", "item-ownership");
+                    this.mainOutput("You just gave " + name + " to " + message.Taker.Name + ".", "item-ownership");
                 }
                 else if (message.Taker.Id == this.currentPlayer.Id) {
-                    this.mainOutput(message.Giver.Name + " just gave you " + message.Item.Name + ".", "item-ownership");
+                    this.mainOutput(message.Giver.Name + " just gave you " + name + ".", "item-ownership");
                 }
                 else {
                     this.mainOutput(message.Giver.Name + " just gave " + message.Taker.Name + " something.", "item-ownership");
@@ -261,16 +327,16 @@ module KMud {
             }
             else {
                 if (message.Giver != null && message.Giver.Id == this.currentPlayer.Id) {
-                    this.mainOutput("You dropped " + message.Item.Name + ".", "item-ownership");
+                    this.mainOutput("You dropped " + name + ".", "item-ownership");
                 }
                 else if (message.Taker != null && message.Taker.Id == this.currentPlayer.Id) {
-                    this.mainOutput("You took " + message.Item.Name + ".", "item-ownership");
+                    this.mainOutput("You took " + name + ".", "item-ownership");
                 }
                 else if (message.Giver != null) {
-                    this.mainOutput(message.Giver.Name + " dropped " + message.Item.Name + ".", "item-ownership");
+                    this.mainOutput(message.Giver.Name + " dropped " + name + ".", "item-ownership");
                 }
                 else if (message.Taker != null) {
-                    this.mainOutput(message.Taker.Name + " picks up " + message.Item.Name + ".", "item-ownership");
+                    this.mainOutput(message.Taker.Name + " picks up " + name + ".", "item-ownership");
                 }
             }
         }
@@ -337,8 +403,17 @@ module KMud {
                     this.mainOutput(message.Description, "room-desc");
                 }
 
+                var items: string = "";
+
+                if (message.VisibleCash.length > 0) {
+                    items = Linq(message.VisibleCash).select(x => String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "")).toArray().join(", ");
+                }
+
                 if (message.VisibleItems.length > 0) {
-                    var items = message.VisibleItems.map(x => x.Name).join(", ");
+                    if (items.length > 0)
+                        items += ", ";
+                    var groups = Linq(message.VisibleItems).groupBy(x => x.TemplateId + "|" + x.Name);
+                    items += groups.select(x => (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name).toArray().join(", ");
                     this.mainOutput("You notice " + items + " here.", "items");
                 }
 
@@ -378,7 +453,19 @@ module KMud {
         }
 
         private showInventory(message: InventoryListMessage) {
-            var items = message.Items.map(x => x.Name).join(", ");
+
+            var groups = Linq(message.Items).groupBy(x => x.TemplateId + "|" + x.Name);
+
+            var items: string = "";
+            if (message.Cash.length > 0) {
+                items = Linq(message.Cash).select(x => String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "")).toArray().join(", ");
+            }
+            if (message.Items.length > 0) {
+                if (items.length > 0)
+                    items += ", ";
+                items += groups.select(x => (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name).toArray().join(", ");
+            }
+
             var str = "You are carrying " + items;
             this.mainOutput(str, "inventory");
 

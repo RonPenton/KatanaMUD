@@ -47,92 +47,92 @@ module KMud {
 
     function down(input: JQuery): boolean {
         var row = input.closest("div");
-		var stats = new Row(row);
+        var stats = new Row(row);
 
         if (stats.val() == stats.current)
             return false;
 
-		var newVal = stats.val() - 1;
+        var newVal = stats.val() - 1;
         var points = stats.cpsPerPoint(newVal + 1);
-		stats.val(newVal);
-		cps(points);
+        stats.val(newVal);
+        cps(points);
 
         return true;
     }
 
     function up(input: JQuery): boolean {
         var row = input.closest("div");
-		var stats = new Row(row);
+        var stats = new Row(row);
         var newVal = stats.val() + 1;
 
-		var points = stats.cpsPerPoint(newVal);
+        var points = stats.cpsPerPoint(newVal);
         if (points > cps() || newVal > stats.max)
             return false;
 
-		stats.val(newVal);
-		cps(-points);
+        stats.val(newVal);
+        cps(-points);
         return true;
     }
 
-	function cps(val?: number) {
-		if (val !== undefined) {
-			$("#cps").val(String(parseInt($("#cps").val()) + val));
-		}
-		return parseInt($("#cps").val());
-	}
+    function cps(val?: number) {
+        if (val !== undefined) {
+            $("#cps").val(String(parseInt($("#cps").val()) + val));
+        }
+        return parseInt($("#cps").val());
+    }
 
 
 
-	class Row {
-		constructor(row: JQuery) {
-			this.initial = parseInt(row.find(".initial").val());
-			this.current = parseInt(row.find(".current").val());
+    class Row {
+        constructor(row: JQuery) {
+            this.initial = parseInt(row.find(".initial").val());
+            this.current = parseInt(row.find(".current").val());
             this.max = parseInt(row.find(".maxval").val());
-			this.input = row.find("input[type='text']");
-		}
+            this.input = row.find("input[type='text']");
+        }
 
-		public initial: number;
-		public current: number;
-		public max: number;
-		public input: JQuery;
+        public initial: number;
+        public current: number;
+        public max: number;
+        public input: JQuery;
 
-		public val(points?: number): number {
-			if (points !== undefined) {
-				this.input.val(String(points));
-			}
+        public val(points?: number): number {
+            if (points !== undefined) {
+                this.input.val(String(points));
+            }
 
-			return parseInt(this.input.val());
-		}
+            return parseInt(this.input.val());
+        }
 
-		public cpsPerPoint(point: number): number {
-			var difference = point - this.initial;
-			if (difference < 0)
-				throw new Error();
+        public cpsPerPoint(point: number): number {
+            var difference = point - this.initial;
+            if (difference < 0)
+                throw new Error();
 
-			// 0 -> 0
-			// 1-10 -> 1
-			// 11-20 -> 2
-			// 21->30 -> 3
-			// etc
+            // 0 -> 0
+            // 1-10 -> 1
+            // 11-20 -> 2
+            // 21->30 -> 3
+            // etc
 
-			return Math.floor((difference + 9) / 10);
-		}
+            return Math.floor((difference + 9) / 10);
+        }
 
-		public cpsCost(start: number, end: number): number {
-			if (end < this.current || end > this.max)
-				return NaN;
+        public cpsCost(start: number, end: number): number {
+            if (end < this.current || end > this.max)
+                return NaN;
 
-			var cost: number = 0;
-			while (end < start) {
-				cost -= this.cpsPerPoint(start);
-				start--;
-			}
-			while (end > start) {
-				cost += this.cpsPerPoint(start + 1);
-				start++;
-			}
+            var cost: number = 0;
+            while (end < start) {
+                cost -= this.cpsPerPoint(start);
+                start--;
+            }
+            while (end > start) {
+                cost += this.cpsPerPoint(start + 1);
+                start++;
+            }
 
-			return cost;
-		}
-	}
+            return cost;
+        }
+    }
 }

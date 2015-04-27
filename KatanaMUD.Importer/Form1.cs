@@ -16,15 +16,15 @@ using KatanaMUD.Importer.Structures;
 
 namespace KatanaMUD.Importer
 {
-	public partial class Form1 : Form
-	{
-		public Form1()
-		{
-			InitializeComponent();
-		}
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
 
-		private void Form1_Load(object sender, EventArgs e)
-		{
+        private void Form1_Load(object sender, EventArgs e)
+        {
             var context = new GameEntities("Server=localhost;Database=KatanaMUD;integrated security=True;");
             context.LoadFromDatabase();
 
@@ -67,6 +67,6 @@ namespace KatanaMUD.Importer
             //context.RaceTemplates.AddRange(races, true);
             //context.ClassTemplates.AddRange(classes, true);
             context.SaveChanges();
-		}
-	}
+        }
+    }
 }

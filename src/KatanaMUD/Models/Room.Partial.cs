@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace KatanaMUD.Models
 {
@@ -84,6 +85,19 @@ namespace KatanaMUD.Models
         public long GetCash(Currency currency) => KatanaMUD.Models.Currency.Get(currency, this.Cash);
 
         public long GetHiddenCash(Currency currency) => KatanaMUD.Models.Currency.Get(currency, this.HiddenCash);
+
+        public IEnumerable<Item> ItemsUserCanSee(Actor actor)
+        {
+            return Items.Where(x => CanUserSeeItem(x, actor)).OrderBy(x => x.Name);
+        }
+
+        public bool CanUserSeeItem(Item item, Actor actor)
+        {
+            if (item.Room != this)
+                throw new InvalidOperationException("Item isn't in this room, cannot determine visibility");
+            return item.HiddenTime == null || item.UsersWhoFoundMe.Contains(actor);
+        }
+
     }
 
     /// <summary>

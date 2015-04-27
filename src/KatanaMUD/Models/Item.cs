@@ -33,31 +33,37 @@ namespace KatanaMUD.Models
         public Int32? EquippedSlot { get { return _EquippedSlot; } set { _EquippedSlot = value; this.Changed(); } }
         public DateTime? HiddenTime { get { return _HiddenTime; } set { _HiddenTime = value; this.Changed(); } }
         public dynamic Stats { get; private set; }
+        partial void OnItemTemplateChanging(ItemTemplate oldValue, ItemTemplate newValue);
         public ItemTemplate ItemTemplate {
             get { return _ItemTemplate; }
             set
             {
-                ChangeParent(value, ref _ItemTemplate, 
+                    OnItemTemplateChanging(_ItemTemplate, value);
+                    ChangeParent(value, ref _ItemTemplate, 
                     (ItemTemplate parent, Item child) => parent.Items.Remove(child), 
                     (ItemTemplate parent, Item child) => parent.Items.Add(child));
             }
         }
 
+        partial void OnActorChanging(Actor oldValue, Actor newValue);
         public Actor Actor {
             get { return _Actor; }
             set
             {
-                ChangeParent(value, ref _Actor, 
+                    OnActorChanging(_Actor, value);
+                    ChangeParent(value, ref _Actor, 
                     (Actor parent, Item child) => parent.Items.Remove(child), 
                     (Actor parent, Item child) => parent.Items.Add(child));
             }
         }
 
+        partial void OnRoomChanging(Room oldValue, Room newValue);
         public Room Room {
             get { return _Room; }
             set
             {
-                ChangeParent(value, ref _Room, 
+                    OnRoomChanging(_Room, value);
+                    ChangeParent(value, ref _Room, 
                     (Room parent, Item child) => parent.Items.Remove(child), 
                     (Room parent, Item child) => parent.Items.Add(child));
             }

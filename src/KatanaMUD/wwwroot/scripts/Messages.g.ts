@@ -32,6 +32,7 @@ module KMud {
     }
     export class InventoryListMessage extends MessageBase {
         constructor() { super('InventoryListMessage'); }
+        public Cash: CurrencyDescription[];
         public Items: ItemDescription[];
         public Encumbrance: number;
         public MaxEncumbrance: number;
@@ -53,10 +54,18 @@ module KMud {
     }
     export class ItemOwnershipMessage extends MessageBase {
         constructor() { super('ItemOwnershipMessage'); }
-        public Item: ItemDescription;
+        public Items: ItemDescription[];
         public Giver: ActorDescription;
         public Taker: ActorDescription;
         public static ClassName: string = 'ItemOwnershipMessage';
+    }
+    export class CashTransferMessage extends MessageBase {
+        constructor() { super('CashTransferMessage'); }
+        public Currency: CurrencyDescription;
+        public Quantity: number;
+        public Giver: ActorDescription;
+        public Taker: ActorDescription;
+        public static ClassName: string = 'CashTransferMessage';
     }
     export class LoginRejected extends MessageBase {
         constructor() { super('LoginRejected'); }
@@ -110,10 +119,14 @@ module KMud {
         public Description: string;
         public Actors: ActorDescription[];
         public VisibleItems: ItemDescription[];
+        public FoundItems: ItemDescription[];
+        public VisibleCash: CurrencyDescription[];
+        public FoundCash: CurrencyDescription[];
         public Exits: ExitDescription[];
         public IsCurrentRoom: boolean;
         public CannotSee: boolean;
         public CannotSeeMessage: string;
+        public LightLevel: LightLevel;
         public static ClassName: string = 'RoomDescriptionMessage';
     }
     export class ServerMessage extends MessageBase {
@@ -121,10 +134,15 @@ module KMud {
         public Contents: string;
         public static ClassName: string = 'ServerMessage';
     }
+    export class CurrencyDescription {
+        public Name: string;
+        public Amount: number;
+    }
     export class ItemDescription {
         public Name: string;
         public Id: string;
         public TemplateId: number;
+        public Modified: boolean;
     }
     export class ActorDescription {
         public Name: string;
@@ -157,5 +175,14 @@ module KMud {
         Southwest = 7,
         Up = 8,
         Down = 9,
+    }
+    export enum LightLevel {
+        Nothing = 0,
+        PitchBlack = 1,
+        VeryDark = 2,
+        BarelyVisible = 3,
+        DimlyLit = 4,
+        RegularLight = 5,
+        Daylight = 6,
     }
 }

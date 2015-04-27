@@ -49,21 +49,25 @@ namespace KatanaMUD.Models
         public Int32? DownExit { get { return _DownExit; } set { _DownExit = value; this.Changed(); } }
         public dynamic Cash { get; private set; }
         public dynamic HiddenCash { get; private set; }
+        partial void OnRegionChanging(Region oldValue, Region newValue);
         public Region Region {
             get { return _Region; }
             set
             {
-                ChangeParent(value, ref _Region, 
+                    OnRegionChanging(_Region, value);
+                    ChangeParent(value, ref _Region, 
                     (Region parent, Room child) => parent.Rooms.Remove(child), 
                     (Region parent, Room child) => parent.Rooms.Add(child));
             }
         }
 
+        partial void OnTextBlockChanging(TextBlock oldValue, TextBlock newValue);
         public TextBlock TextBlock {
             get { return _TextBlock; }
             set
             {
-                ChangeParent(value, ref _TextBlock, 
+                    OnTextBlockChanging(_TextBlock, value);
+                    ChangeParent(value, ref _TextBlock, 
                     (TextBlock parent, Room child) => parent.Rooms.Remove(child), 
                     (TextBlock parent, Room child) => parent.Rooms.Add(child));
             }

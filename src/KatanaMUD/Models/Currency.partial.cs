@@ -3,7 +3,7 @@ using Spam;
 
 namespace KatanaMUD.Models
 {
-    public partial class Currency
+    public partial class Currency : IItem
     {
         public static long Get(Currency currency, dynamic collection)
         {
@@ -14,6 +14,8 @@ namespace KatanaMUD.Models
 
             object value;
             container.GetValue(currency.ShortName, out value);
+            if (value == null)
+                return 0;
             return Convert.ToInt64(value);
         }
 

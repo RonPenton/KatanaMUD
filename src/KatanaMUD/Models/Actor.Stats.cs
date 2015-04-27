@@ -27,7 +27,15 @@ namespace KatanaMUD.Models
             }
         }
 
-        public long Encumbrance => Items.Sum(x => x.Weight);
+        public long Encumbrance
+        {
+            get
+            {
+                long enc = Items.Sum(x => x.Weight);
+                enc += Game.Data.Currencies.Select(x => (long)(x.Weight * (long)Currency.Get(x, this.Cash))).Sum();
+                return enc;
+            }
+        }
 
 
         public long Perception {

@@ -87,6 +87,15 @@ var KMud;
         return ItemOwnershipMessage;
     })(KMud.MessageBase);
     KMud.ItemOwnershipMessage = ItemOwnershipMessage;
+    var CashTransferMessage = (function (_super) {
+        __extends(CashTransferMessage, _super);
+        function CashTransferMessage() {
+            _super.call(this, 'CashTransferMessage');
+        }
+        CashTransferMessage.ClassName = 'CashTransferMessage';
+        return CashTransferMessage;
+    })(KMud.MessageBase);
+    KMud.CashTransferMessage = CashTransferMessage;
     var LoginRejected = (function (_super) {
         __extends(LoginRejected, _super);
         function LoginRejected() {
@@ -168,6 +177,12 @@ var KMud;
         return ServerMessage;
     })(KMud.MessageBase);
     KMud.ServerMessage = ServerMessage;
+    var CurrencyDescription = (function () {
+        function CurrencyDescription() {
+        }
+        return CurrencyDescription;
+    })();
+    KMud.CurrencyDescription = CurrencyDescription;
     var ItemDescription = (function () {
         function ItemDescription() {
         }
@@ -211,4 +226,14 @@ var KMud;
         Direction[Direction["Down"] = 9] = "Down";
     })(KMud.Direction || (KMud.Direction = {}));
     var Direction = KMud.Direction;
+    (function (LightLevel) {
+        LightLevel[LightLevel["Nothing"] = 0] = "Nothing";
+        LightLevel[LightLevel["PitchBlack"] = 1] = "PitchBlack";
+        LightLevel[LightLevel["VeryDark"] = 2] = "VeryDark";
+        LightLevel[LightLevel["BarelyVisible"] = 3] = "BarelyVisible";
+        LightLevel[LightLevel["DimlyLit"] = 4] = "DimlyLit";
+        LightLevel[LightLevel["RegularLight"] = 5] = "RegularLight";
+        LightLevel[LightLevel["Daylight"] = 6] = "Daylight";
+    })(KMud.LightLevel || (KMud.LightLevel = {}));
+    var LightLevel = KMud.LightLevel;
 })(KMud || (KMud = {}));

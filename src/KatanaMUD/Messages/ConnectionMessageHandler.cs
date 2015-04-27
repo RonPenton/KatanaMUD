@@ -22,8 +22,11 @@ namespace KatanaMUD.Messages
 
         public static async void HandleMessage(WebSocket socket, MessageBase message)
         {
-            var encoded = Encoding.UTF8.GetBytes(MessageSerializer.SerializeMessage(message));
-            await socket.SendAsync(new ArraySegment<byte>(encoded, 0, encoded.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+            if (socket.State == WebSocketState.Open)
+            {
+                var encoded = Encoding.UTF8.GetBytes(MessageSerializer.SerializeMessage(message));
+                await socket.SendAsync(new ArraySegment<byte>(encoded, 0, encoded.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+            }
         }
 
     }

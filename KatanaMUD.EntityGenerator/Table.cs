@@ -26,6 +26,8 @@ namespace KatanaMUD.EntityGenerator
         {
             get
             {
+                if (Name.EndsWith("y"))
+                    return Name.Substring(0, Name.Length - 1) + "ies";
                 return Name + "s";
             }
         }

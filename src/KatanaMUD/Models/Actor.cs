@@ -38,41 +38,49 @@ namespace KatanaMUD.Models
         public Int32 CharacterPoints { get { return _CharacterPoints; } set { _CharacterPoints = value; this.Changed(); } }
         public dynamic Stats { get; private set; }
         public dynamic Cash { get; private set; }
+        partial void OnUserChanging(User oldValue, User newValue);
         public User User {
             get { return _User; }
             set
             {
-                ChangeParent(value, ref _User, 
+                    OnUserChanging(_User, value);
+                    ChangeParent(value, ref _User, 
                     (User parent, Actor child) => parent.Actors.Remove(child), 
                     (User parent, Actor child) => parent.Actors.Add(child));
             }
         }
 
+        partial void OnRoomChanging(Room oldValue, Room newValue);
         public Room Room {
             get { return _Room; }
             set
             {
-                ChangeParent(value, ref _Room, 
+                    OnRoomChanging(_Room, value);
+                    ChangeParent(value, ref _Room, 
                     (Room parent, Actor child) => parent.Actors.Remove(child), 
                     (Room parent, Actor child) => parent.Actors.Add(child));
             }
         }
 
+        partial void OnClassTemplateChanging(ClassTemplate oldValue, ClassTemplate newValue);
         public ClassTemplate ClassTemplate {
             get { return _ClassTemplate; }
             set
             {
-                ChangeParent(value, ref _ClassTemplate, 
+                    OnClassTemplateChanging(_ClassTemplate, value);
+                    ChangeParent(value, ref _ClassTemplate, 
                     (ClassTemplate parent, Actor child) => parent.Actors.Remove(child), 
                     (ClassTemplate parent, Actor child) => parent.Actors.Add(child));
             }
         }
 
+        partial void OnRaceTemplateChanging(RaceTemplate oldValue, RaceTemplate newValue);
         public RaceTemplate RaceTemplate {
             get { return _RaceTemplate; }
             set
             {
-                ChangeParent(value, ref _RaceTemplate, 
+                    OnRaceTemplateChanging(_RaceTemplate, value);
+                    ChangeParent(value, ref _RaceTemplate, 
                     (RaceTemplate parent, Actor child) => parent.Actors.Remove(child), 
                     (RaceTemplate parent, Actor child) => parent.Actors.Add(child));
             }

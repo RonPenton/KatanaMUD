@@ -11,6 +11,9 @@ namespace KatanaMUD.Messages
         public string Description { get; set; }
         public ActorDescription[] Actors { get; set; }
         public ItemDescription[] VisibleItems { get; set; }
+        public ItemDescription[] FoundItems { get; set; }
+        public CurrencyDescription[] VisibleCash { get; set; }
+        public CurrencyDescription[] FoundCash { get; set; }
         public ExitDescription[] Exits { get; set; }
         public bool IsCurrentRoom { get; set; }
         /// <summary>
@@ -22,6 +25,7 @@ namespace KatanaMUD.Messages
         /// blank, and the CannotSeeMessage should be shown instead.
         /// </summary>
         public string CannotSeeMessage { get; set; }
+        public LightLevel LightLevel { get; set; }
     }
 
     public class ExitDescription
@@ -58,8 +62,8 @@ namespace KatanaMUD.Messages
     {
         public string Name { get; set; }
         public Guid Id { get; set; }
-
         public int TemplateId { get; set; }
+        public bool Modified { get; set; }
 
         public ItemDescription() { }
 
@@ -68,6 +72,32 @@ namespace KatanaMUD.Messages
             this.Name = item.CustomName ?? item.ItemTemplate.Name;
             this.Id = item.Id;
             this.TemplateId = item.ItemTemplate.Id;
+            this.Modified = item.Modified;
         }
+    }
+
+    public class CurrencyDescription
+    {
+        public string Name { get; set; }
+        public long Amount { get; set; }
+
+        public CurrencyDescription() { }
+
+        public CurrencyDescription(Currency currency, long amount)
+        {
+            Name = currency.Name;
+            Amount = amount;
+        }
+    }
+
+    public enum LightLevel
+    {
+        Nothing,
+        PitchBlack,
+        VeryDark,
+        BarelyVisible,
+        DimlyLit,
+        RegularLight,
+        Daylight
     }
 }

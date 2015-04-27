@@ -1,3 +1,9 @@
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
 var KMud;
 (function (KMud) {
     var KeyPair = (function () {
@@ -340,6 +346,26 @@ var KMud;
                 return -1;
             return 0;
         };
+        /**
+        * Groups a container using a string key. Groups should be assumed to be unordered. O(n) performance.
+        */
+        LinqContainer.prototype.groupBy = function (picker) {
+            var groups = {};
+            this.forEach(function (x) {
+                var key = picker(x);
+                if (groups[key] === undefined) {
+                    groups[key] = [];
+                }
+                groups[key].push(x);
+            });
+            var output = [];
+            var keys = Object.keys(groups);
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                output.push(new Grouping(key, groups[key]));
+            }
+            return new LinqContainer(output);
+        };
         return LinqContainer;
     })();
     KMud.LinqContainer = LinqContainer;
@@ -375,4 +401,13 @@ var KMud;
                 values[a++] = right.shift();
         }
     })(MergeSort || (MergeSort = {}));
+    var Grouping = (function (_super) {
+        __extends(Grouping, _super);
+        function Grouping(key, values) {
+            _super.call(this, values);
+            this.key = key;
+        }
+        return Grouping;
+    })(LinqContainer);
+    KMud.Grouping = Grouping;
 })(KMud || (KMud = {}));

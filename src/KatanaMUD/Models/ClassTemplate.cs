@@ -19,8 +19,8 @@ namespace KatanaMUD.Models
             Stats = new JsonContainer(this);
             Actors = new ParentChildRelationshipContainer<ClassTemplate, Actor, Guid>(this, child => child.ClassTemplate, (child, parent) => child.ClassTemplate= parent);
             RaceTemplates = new ObservableHashSet<RaceTemplate>();
-			RaceTemplates.ItemsAdded += RaceTemplates_ItemsAdded;
-			RaceTemplates.ItemsRemoved += RaceTemplates_ItemsRemoved;
+            RaceTemplates.ItemsAdded += RaceTemplates_ItemsAdded;
+            RaceTemplates.ItemsRemoved += RaceTemplates_ItemsRemoved;
         }
 
         public Int32 Id { get { return _Id; } set { _Id = value; this.Changed(); } }
@@ -73,7 +73,7 @@ namespace KatanaMUD.Models
             c.Parameters.Clear();
             c.Parameters.AddWithValue("@Id", e.Id);
         }
-		private void RaceTemplates_ItemsAdded(object sender, CollectionChangedEventArgs<RaceTemplate> e)
+        private void RaceTemplates_ItemsAdded(object sender, CollectionChangedEventArgs<RaceTemplate> e)
         {
             foreach (var item in e.Items)
             {
@@ -81,14 +81,14 @@ namespace KatanaMUD.Models
                 Context.RaceClassRestrictions.Link(item.Key, this.Key, false);
             }
         }
-		private void RaceTemplates_ItemsRemoved(object sender, CollectionChangedEventArgs<RaceTemplate> e)
-		{
-			foreach (var item in e.Items)
-			{
-				item.ClassTemplates.Remove(this, true);
-				Context.RaceClassRestrictions.Unlink(item.Key, this.Key);
-			}
-		}
+        private void RaceTemplates_ItemsRemoved(object sender, CollectionChangedEventArgs<RaceTemplate> e)
+        {
+            foreach (var item in e.Items)
+            {
+                item.ClassTemplates.Remove(this, true);
+                Context.RaceClassRestrictions.Unlink(item.Key, this.Key);
+            }
+        }
 
     }
 }

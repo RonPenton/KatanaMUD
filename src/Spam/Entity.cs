@@ -18,10 +18,10 @@ namespace Spam
         public bool IsNew => Container?.IsNew(this) ?? false;
 
         public void Changed()
-		{
-			if (this.Container != null)
-				this.Container.SetChanged(this);
-		}
+        {
+            if (this.Container != null)
+                this.Container.SetChanged(this);
+        }
 
         protected void ChangeParent<P, T>(P value, ref P field, Action<P, T> removeChild, Action<P, T> addChild) where P : class where T : Entity<K>
         {

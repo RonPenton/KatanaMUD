@@ -116,6 +116,7 @@ var KMud;
             this.messageHandlers[KMud.LoginStateMessage.ClassName] = function (message) { return _this.loginMessage(message); };
             this.messageHandlers[KMud.PartyMovementMessage.ClassName] = function (message) { return _this.partyMovement(message); };
             this.messageHandlers[KMud.ItemOwnershipMessage.ClassName] = function (message) { return _this.itemOwnership(message); };
+            this.messageHandlers[KMud.CashTransferMessage.ClassName] = function (message) { return _this.cashTransfer(message); };
             this.messageHandlers[KMud.ActionNotAllowedMessage.ClassName] = function (message) { return _this.mainOutput(message.Message, "action-not-allowed"); };
             this.messageHandlers[KMud.GenericMessage.ClassName] = function (message) { return _this.mainOutput(message.Message, message.Class); };
         };
@@ -151,12 +152,28 @@ var KMud;
         };
         Game.prototype.get = function (item) {
             var message = new KMud.GetItemCommand();
-            message.ItemName = item;
+            var tokens = item.split(/\s+/gi);
+            var quantity = parseInt(tokens[0]);
+            if (!isNaN(quantity)) {
+                message.Quantity = quantity;
+                message.ItemName = tokens.slice(1).join(" ");
+            }
+            else {
+                message.ItemName = item;
+            }
             this.SendMessage(message);
         };
         Game.prototype.drop = function (item) {
             var message = new KMud.DropItemCommand();
-            message.ItemName = item;
+            var tokens = item.split(/\s+/gi);
+            var quantity = parseInt(tokens[0]);
+            if (!isNaN(quantity)) {
+                message.Quantity = quantity;
+                message.ItemName = tokens.slice(1).join(" ");
+            }
+            else {
+                message.ItemName = item;
+            }
             this.SendMessage(message);
         };
         Game.prototype.talk = function (text, type, param) {
@@ -211,13 +228,58 @@ var KMud;
             }
         };
         Game.prototype.itemOwnership = function (message) {
+            var groups = KMud.Linq(message.Items).groupBy(function (x) { return x.TemplateId + "|" + x.Name; }).toArray();
+            for (var i = 0; i < groups.length; i++) {
+                var name = groups[i].values[0].Name;
+                if (groups[i].values.length > 1) {
+                    name = String(groups[i].values.length) + " " + name;
+                }
+                if (message.Giver != null && message.Taker != null) {
+                    // player-to-player transfer
+                    if (message.Giver.Id == this.currentPlayer.Id) {
+                        this.mainOutput("You just gave " + name + " to " + message.Taker.Name + ".", "item-ownership");
+                    }
+                    else if (message.Taker.Id == this.currentPlayer.Id) {
+                        this.mainOutput(message.Giver.Name + " just gave you " + name + ".", "item-ownership");
+                    }
+                    else {
+                        this.mainOutput(message.Giver.Name + " just gave " + message.Taker.Name + " something.", "item-ownership");
+                    }
+                }
+                else {
+                    if (message.Giver != null && message.Giver.Id == this.currentPlayer.Id) {
+                        this.mainOutput("You dropped " + name + ".", "item-ownership");
+                    }
+                    else if (message.Taker != null && message.Taker.Id == this.currentPlayer.Id) {
+                        this.mainOutput("You took " + name + ".", "item-ownership");
+                    }
+                    else if (message.Giver != null) {
+                        this.mainOutput(message.Giver.Name + " dropped " + name + ".", "item-ownership");
+                    }
+                    else if (message.Taker != null) {
+                        this.mainOutput(message.Taker.Name + " picks up " + name + ".", "item-ownership");
+                    }
+                }
+            }
+        };
+        Game.prototype.cashTransfer = function (message) {
+            var name = message.Currency.Name;
+            if (message.Quantity > 0) {
+                name = String(message.Quantity) + " " + name;
+                if (message.Quantity > 1) {
+                    name = name + "s";
+                }
+            }
+            else {
+                name = "some " + name;
+            }
             if (message.Giver != null && message.Taker != null) {
                 // player-to-player transfer
                 if (message.Giver.Id == this.currentPlayer.Id) {
-                    this.mainOutput("You just gave " + message.Item.Name + " to " + message.Taker.Name + ".", "item-ownership");
+                    this.mainOutput("You just gave " + name + " to " + message.Taker.Name + ".", "item-ownership");
                 }
                 else if (message.Taker.Id == this.currentPlayer.Id) {
-                    this.mainOutput(message.Giver.Name + " just gave you " + message.Item.Name + ".", "item-ownership");
+                    this.mainOutput(message.Giver.Name + " just gave you " + name + ".", "item-ownership");
                 }
                 else {
                     this.mainOutput(message.Giver.Name + " just gave " + message.Taker.Name + " something.", "item-ownership");
@@ -225,16 +287,16 @@ var KMud;
             }
             else {
                 if (message.Giver != null && message.Giver.Id == this.currentPlayer.Id) {
-                    this.mainOutput("You dropped " + message.Item.Name + ".", "item-ownership");
+                    this.mainOutput("You dropped " + name + ".", "item-ownership");
                 }
                 else if (message.Taker != null && message.Taker.Id == this.currentPlayer.Id) {
-                    this.mainOutput("You took " + message.Item.Name + ".", "item-ownership");
+                    this.mainOutput("You took " + name + ".", "item-ownership");
                 }
                 else if (message.Giver != null) {
-                    this.mainOutput(message.Giver.Name + " dropped " + message.Item.Name + ".", "item-ownership");
+                    this.mainOutput(message.Giver.Name + " dropped " + name + ".", "item-ownership");
                 }
                 else if (message.Taker != null) {
-                    this.mainOutput(message.Taker.Name + " picks up " + message.Item.Name + ".", "item-ownership");
+                    this.mainOutput(message.Taker.Name + " picks up " + name + ".", "item-ownership");
                 }
             }
         };
@@ -290,8 +352,15 @@ var KMud;
                 if (StringUtilities.notEmpty(message.Description)) {
                     this.mainOutput(message.Description, "room-desc");
                 }
+                var items = "";
+                if (message.VisibleCash.length > 0) {
+                    items = KMud.Linq(message.VisibleCash).select(function (x) { return String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : ""); }).toArray().join(", ");
+                }
                 if (message.VisibleItems.length > 0) {
-                    var items = message.VisibleItems.map(function (x) { return x.Name; }).join(", ");
+                    if (items.length > 0)
+                        items += ", ";
+                    var groups = KMud.Linq(message.VisibleItems).groupBy(function (x) { return x.TemplateId + "|" + x.Name; });
+                    items += groups.select(function (x) { return (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name; }).toArray().join(", ");
                     this.mainOutput("You notice " + items + " here.", "items");
                 }
                 if (message.Actors.length > 1) {
@@ -325,7 +394,16 @@ var KMud;
             }
         };
         Game.prototype.showInventory = function (message) {
-            var items = message.Items.map(function (x) { return x.Name; }).join(", ");
+            var groups = KMud.Linq(message.Items).groupBy(function (x) { return x.TemplateId + "|" + x.Name; });
+            var items = "";
+            if (message.Cash.length > 0) {
+                items = KMud.Linq(message.Cash).select(function (x) { return String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : ""); }).toArray().join(", ");
+            }
+            if (message.Items.length > 0) {
+                if (items.length > 0)
+                    items += ", ";
+                items += groups.select(function (x) { return (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name; }).toArray().join(", ");
+            }
             var str = "You are carrying " + items;
             this.mainOutput(str, "inventory");
             //TODO: You have no keys.

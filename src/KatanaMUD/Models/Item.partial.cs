@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using Spam;
 
 namespace KatanaMUD.Models
 {
-    public partial class Item
+    public partial class Item : IItem
     {
         public string Name => CustomName ?? ItemTemplate.Name;
 
@@ -29,5 +30,23 @@ namespace KatanaMUD.Models
         }
 
         public long Weight => GetStat<long>("Weight", 0);
+
+        /// <summary>
+        /// A list of users who currently know of my existence. 
+        /// This list is cleared when the owner of an item is changed.
+        /// TODO: Clear this list at cleanup to prevent memory leaks.
+        /// </summary>
+        public HashSet<Actor> UsersWhoFoundMe { get; } = new HashSet<Actor>();
+
+        partial void OnRoomChanging(Room oldValue, Room newValue)
+        {
+            if (oldValue != newValue)
+                UsersWhoFoundMe.Clear();
+        }
+    }
+
+    public interface IItem
+    {
+        string Name { get; }
     }
 }

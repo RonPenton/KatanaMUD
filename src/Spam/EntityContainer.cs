@@ -38,7 +38,7 @@ namespace Spam
         public T New(K key)
         {
             T item = new T();
-            if(!key.Equals(default(K)))
+            if (!key.Equals(default(K)))
             {
                 item.Key = key;
             }
@@ -158,7 +158,7 @@ namespace Spam
             {
                 return (KeyGenerator<Key>)new LongKeyGenerator();
             }
-            else if(typeof(Key) == typeof(string))
+            else if (typeof(Key) == typeof(string))
             {
                 return null;
             }
@@ -284,8 +284,8 @@ namespace Spam
 
         public int GetHashCode(Tuple<K1, K2> obj)
         {
-			// Perform an XOR on the respective hash codes. It's consistent, 
-			// it takes both into account, and it's fast. Should work.
+            // Perform an XOR on the respective hash codes. It's consistent, 
+            // it takes both into account, and it's fast. Should work.
             return obj.Item1.GetHashCode() ^ obj.Item2.GetHashCode();
         }
     }
