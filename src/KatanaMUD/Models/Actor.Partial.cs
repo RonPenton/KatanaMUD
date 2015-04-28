@@ -89,7 +89,7 @@ namespace KatanaMUD.Models
         /// <param name="exitRoom"></param>
         public void ChangeRooms(Room room, int? exitRoom)
         {
-            Room newRoom = Game.Data.Rooms.Single(x => x.Id == exitRoom);
+            Room newRoom = Game.Data.Rooms[exitRoom.Value];
 
             // TODO: notify old room of user exiting. 
             Room = newRoom;
@@ -365,7 +365,7 @@ namespace KatanaMUD.Models
             if (exit.ExitRoom != null)
             {
                 var oldRoom = Leader.Room;
-                var newRoom = Game.Data.Rooms.Single(x => x.Id == exit.ExitRoom.Value);
+                var newRoom = Game.Data.Rooms[exit.ExitRoom.Value];
 
                 var partyDescription = this.Members.OrderBy(x => x != Leader).ThenBy(x => x.Name).Select(x => new ActorDescription(x)).ToArray();
 
