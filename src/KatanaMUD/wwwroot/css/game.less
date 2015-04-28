@@ -1,9 +1,8 @@
 ﻿body {
     background-color: #111;
-    overflow:hidden;
+    overflow: hidden;
     display: flex;
     height: 100vh;
-
     font-size: 16px;
     font-family: Consolas, Courier New, Courier, monospace;
     color: white;
@@ -11,7 +10,7 @@
 
 .game-text {
     span {
-		padding: 2px 0px;
+        padding: 2px 0px;
 		display:inline-block;
 		max-width: 80ch;
         word-wrap: break-word;
@@ -33,8 +32,7 @@ input {
     background-color: #111;
     border: none;
     outline: 0;
-
-    &:focus{
+    &:focus {
         border: none;
         outline: 0;
     }
@@ -42,14 +40,14 @@ input {
 
 #TelnetArea {
     display: flex;
-    flex-direction:column;
+    flex-direction: column;
     flex-grow: 1;
 }
 
 #InformationArea {
     flex-grow: 0;
     width: 200px;
-	min-width: 200px;
+    min-width: 200px;
     height: 100%;
     border: solid 1px white;
 }
@@ -66,7 +64,7 @@ input {
     border: solid 1px white;
 }
 
-#Output{
+#Output {
     width: 100%;
     flex-grow: 1;
     overflow-y: scroll;
@@ -85,16 +83,16 @@ input {
 }
 
 .room-name {
-	color: cyan;
-	font-weight: bold;
+    color: cyan;
+    font-weight: bold;
 }
 
 .room-description {
-	color: white;
+    color: white;
 }
 
 .exits {
-	color: rgb(22, 190, 22);
+    color: rgb(22, 190, 22);
 }
 
 .actors {
@@ -105,7 +103,7 @@ input {
     color: fuchsia;
 }
 
-.say { 
+.say {
     color: greenyellow;
 }
 
@@ -126,7 +124,7 @@ input {
     font-weight: bold;
 }
 
-.moving-player{
+.moving-player {
     color: red;
 }
 
@@ -153,4 +151,12 @@ input {
 
 .hear-movement {
     color: purple;
+}
+
+.cannot-see {
+    color: darkgray;
+}
+
+.dimly-lit {
+    color: gray;
 }

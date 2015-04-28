@@ -31,6 +31,7 @@ namespace KatanaMUD.Models
         {
             Cash = new JsonContainer(this);
             HiddenCash = new JsonContainer(this);
+            Stats = new JsonContainer(this);
             Actors = new ParentChildRelationshipContainer<Room, Actor, Guid>(this, child => child.Room, (child, parent) => child.Room= parent);
             Items = new ParentChildRelationshipContainer<Room, Item, Guid>(this, child => child.Room, (child, parent) => child.Room= parent);
         }
@@ -49,6 +50,7 @@ namespace KatanaMUD.Models
         public Int32? DownExit { get { return _DownExit; } set { _DownExit = value; this.Changed(); } }
         public dynamic Cash { get; private set; }
         public dynamic HiddenCash { get; private set; }
+        public dynamic Stats { get; private set; }
         partial void OnRegionChanging(Region oldValue, Region newValue);
         public Region Region {
             get { return _Region; }
@@ -96,6 +98,8 @@ namespace KatanaMUD.Models
             entity.Cash.FromJson(reader.GetSafeString(14));
             entity.HiddenCash = new JsonContainer(entity);
             entity.HiddenCash.FromJson(reader.GetSafeString(15));
+            entity.Stats = new JsonContainer(entity);
+            entity.Stats.FromJson(reader.GetSafeString(16));
             return entity;
         }
 
@@ -124,18 +128,19 @@ namespace KatanaMUD.Models
             c.Parameters.AddWithValue("@DownExit", (object)e.DownExit ?? DBNull.Value);
             c.Parameters.AddWithValue("@JSONCash", e.Cash.ToJson());
             c.Parameters.AddWithValue("@JSONHiddenCash", e.HiddenCash.ToJson());
+            c.Parameters.AddWithValue("@JSONStats", e.Stats.ToJson());
         }
 
         public static void GenerateInsertCommand(SqlCommand c, Room e)
         {
-            c.CommandText = @"INSERT INTO [Room]([Id], [RegionId], [Name], [TextBlockId], [NorthExit], [SouthExit], [EastExit], [WestExit], [NorthEastExit], [NorthWestExit], [SouthEastExit], [SouthWestExit], [UpExit], [DownExit], [JSONCash], [JSONHiddenCash])
-                              VALUES (@Id, @RegionId, @Name, @TextBlockId, @NorthExit, @SouthExit, @EastExit, @WestExit, @NorthEastExit, @NorthWestExit, @SouthEastExit, @SouthWestExit, @UpExit, @DownExit, @JSONCash, @JSONHiddenCash)";
+            c.CommandText = @"INSERT INTO [Room]([Id], [RegionId], [Name], [TextBlockId], [NorthExit], [SouthExit], [EastExit], [WestExit], [NorthEastExit], [NorthWestExit], [SouthEastExit], [SouthWestExit], [UpExit], [DownExit], [JSONCash], [JSONHiddenCash], [JSONStats])
+                              VALUES (@Id, @RegionId, @Name, @TextBlockId, @NorthExit, @SouthExit, @EastExit, @WestExit, @NorthEastExit, @NorthWestExit, @SouthEastExit, @SouthWestExit, @UpExit, @DownExit, @JSONCash, @JSONHiddenCash, @JSONStats)";
             AddSqlParameters(c, e);
         }
 
         public static void GenerateUpdateCommand(SqlCommand c, Room e)
         {
-            c.CommandText = @"UPDATE [Room] SET [Id] = @Id, [RegionId] = @RegionId, [Name] = @Name, [TextBlockId] = @TextBlockId, [NorthExit] = @NorthExit, [SouthExit] = @SouthExit, [EastExit] = @EastExit, [WestExit] = @WestExit, [NorthEastExit] = @NorthEastExit, [NorthWestExit] = @NorthWestExit, [SouthEastExit] = @SouthEastExit, [SouthWestExit] = @SouthWestExit, [UpExit] = @UpExit, [DownExit] = @DownExit, [JSONCash] = @JSONCash, [JSONHiddenCash] = @JSONHiddenCash WHERE [Id] = @Id";
+            c.CommandText = @"UPDATE [Room] SET [Id] = @Id, [RegionId] = @RegionId, [Name] = @Name, [TextBlockId] = @TextBlockId, [NorthExit] = @NorthExit, [SouthExit] = @SouthExit, [EastExit] = @EastExit, [WestExit] = @WestExit, [NorthEastExit] = @NorthEastExit, [NorthWestExit] = @NorthWestExit, [SouthEastExit] = @SouthEastExit, [SouthWestExit] = @SouthWestExit, [UpExit] = @UpExit, [DownExit] = @DownExit, [JSONCash] = @JSONCash, [JSONHiddenCash] = @JSONHiddenCash, [JSONStats] = @JSONStats WHERE [Id] = @Id";
             AddSqlParameters(c, e);
         }
 

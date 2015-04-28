@@ -185,6 +185,8 @@ namespace Spam
         public void SetValue(string name, object value)
         {
             _dictionary[name] = value;
+            if (_owner != null)
+                _owner.Changed();
         }
     }
 }

@@ -85,6 +85,7 @@ module KMud {
         public Actor: number;
         public Item: number;
         public YouFigureItOut: string;
+        public Brief: boolean;
         public static ClassName: string = 'LookMessage';
     }
     export class MoveMessage extends MessageBase {
@@ -177,12 +178,12 @@ module KMud {
         Down = 9,
     }
     export enum LightLevel {
-        Nothing = 0,
-        PitchBlack = 1,
-        VeryDark = 2,
-        BarelyVisible = 3,
-        DimlyLit = 4,
-        RegularLight = 5,
-        Daylight = 6,
+        Daylight = 50,
+        Nothing = -10000,
+        PitchBlack = -500,
+        VeryDark = -250,
+        BarelyVisible = -200,
+        DimlyLit = -150,
+        RegularLight = -50,
     }
 }

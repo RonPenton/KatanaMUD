@@ -92,12 +92,33 @@ namespace KatanaMUD.Messages
 
     public enum LightLevel
     {
-        Nothing,
-        PitchBlack,
-        VeryDark,
-        BarelyVisible,
-        DimlyLit,
-        RegularLight,
-        Daylight
+        Daylight = 50,
+        RegularLight = -50,
+        DimlyLit = -150,
+        BarelyVisible = -200,
+        VeryDark = -250,
+        PitchBlack = -500,
+        Nothing = -10000
+    }
+
+    public static class LightLevels
+    {
+        public static LightLevel Get(long illumination)
+        {
+            foreach (LightLevel level in Enum.GetValues(typeof(LightLevel)).Cast<LightLevel>().OrderByDescending(x => (int)x))
+            {
+                if (illumination >= (int)level)
+                    return level;
+            }
+
+            return LightLevel.Nothing;
+        }
+
+        public static bool IsTooDarkToSee(LightLevel level)
+        {
+            return level == LightLevel.Nothing ||
+                   level == LightLevel.PitchBlack ||
+                   level == LightLevel.VeryDark;
+        }
     }
 }

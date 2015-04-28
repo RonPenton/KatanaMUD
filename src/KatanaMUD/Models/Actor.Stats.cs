@@ -12,7 +12,7 @@ namespace KatanaMUD.Models
             List<JsonContainer> containers = new List<JsonContainer>();
 
             containers.Add((JsonContainer)Stats);
-            containers.AddRange(Items.Select(x => (JsonContainer)x.Stats));
+            containers.AddRange(EquippedItems.Select(x => (JsonContainer)x.Stats));
             //TODO: Buffs here
 
             return JsonContainer.Calculate<T>(containers, name, baseValue, includePercent);
@@ -37,7 +37,6 @@ namespace KatanaMUD.Models
             }
         }
 
-
         public long Perception {
             get
             {
@@ -49,5 +48,7 @@ namespace KatanaMUD.Models
                                 ((double)GetStat<long>("Charm", 0) * (1.0 / 8.0)));
             }
         }
+
+        public long Illumination => GetStat<long>("Illumination", 0);
     }
 }

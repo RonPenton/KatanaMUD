@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Spam;
 
 namespace KatanaMUD.Models
 {
@@ -48,8 +49,6 @@ namespace KatanaMUD.Models
         }
 
         public IEnumerable<Actor> ActiveActors => Actors.Where(x => !x.InPurgatory).ToList();
-
-
 
         // A dictionary retaining information about what hidden currencies have been found by which users.
         // A potential for a memory leak exists here, so: TODO: Clear this at Cleanup. 
@@ -98,6 +97,12 @@ namespace KatanaMUD.Models
             return item.HiddenTime == null || item.UsersWhoFoundMe.Contains(actor);
         }
 
+        public T GetStat<T>(string name, T baseValue, bool includePercent = true)
+        {
+            return JsonContainer.Calculate<T>(new List<JsonContainer>() { (JsonContainer)Stats }, name, baseValue, includePercent);
+        }
+
+        public long Illumination => GetStat<long>("Illumination", 0); // TODO: account for light sources like lit torches
     }
 
     /// <summary>

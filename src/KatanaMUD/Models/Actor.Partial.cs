@@ -96,17 +96,37 @@ namespace KatanaMUD.Models
             // TODO: notify new room of user entering.
         }
 
-        public void SendRoomDescription(Room room)
+        public void SendRoomDescription(Room room, bool brief = false)
         {
             var message = new RoomDescriptionMessage()
             {
-                Description = room.TextBlock.Text,
-                IsCurrentRoom = room == this.Room,
-                Name = room.Name,
-                RoomId = room.Id
+                IsCurrentRoom = room == this.Room
             };
 
+            var illumination = room.Illumination + Illumination;
+            message.LightLevel = LightLevels.Get(illumination);
+
+            
+            if (LightLevels.IsTooDarkToSee(message.LightLevel))
+            {
+                // Too dark to see. Send the light information and that's it.
+                message.CannotSee = true;
+                SendMessage(message);
+                return;
+            }
+
+            //TODO: Check to see if the user is blind? Somehow. I have no idea yet. 
+
+            if (!brief)
+            {
+                message.Description = room.TextBlock.Text;
+            }
+
             //TODO: Hidden stuff
+
+            message.Name = room.Name;
+            message.RoomId = room.Id;
+
             var exits = room.GetExits();
             message.Exits = exits.Select(x => new ExitDescription(x, room)).ToArray();
             message.Actors = room.VisibleActors(this).Select(x => new ActorDescription(x)).ToArray();
@@ -256,6 +276,8 @@ namespace KatanaMUD.Models
             Currency.Add(currency, Cash, -quantity.Value);
             Currency.Add(currency, Room.Cash, quantity.Value);
         }
+
+        public IEnumerable<Item> EquippedItems => Items.Where(x => x.EquippedSlot != null);
     }
 
     /// <summary>
@@ -322,11 +344,14 @@ namespace KatanaMUD.Models
 
         private HashSet<Actor> _members { get; } = new HashSet<Actor>();
 
-
-        public bool CanMove(Exit exit)
+        public Validation CanMove(Exit exit)
         {
-            //TODO: check if party can move. 
-            return true;
+            if (Members.Any(x => x.Encumbrance > x.MaxEncumbrance))
+            {
+                return new Validation("At least one person in your party is too heavy to move!");
+            }
+
+            return new Validation();
         }
 
         /// <summary>
@@ -388,15 +413,16 @@ namespace KatanaMUD.Models
 
         public void Move(Room newRoom, RoomMessage exit, RoomMessage entrance)
         {
-            //TODO: send exit message to _leader.Room
-
             Members.ForEach(x =>
             {
                 x.Room = newRoom;
-                x.SendRoomDescription(newRoom);
             });
 
-            //TODO: send entrance message to newRoom
+            Members.ForEach(x =>
+            {
+                // send description AFTER the whole party has moved, because members might have lights.
+                x.SendRoomDescription(newRoom);
+            });
         }
     }
 }

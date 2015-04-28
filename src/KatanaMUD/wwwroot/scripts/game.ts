@@ -18,15 +18,21 @@ module KMud {
         constructor() {
             this.input = <HTMLInputElement>document.getElementById("InputBox");
             $("#InputBox").keypress(x => {
-                if (x.keyCode == 13 && this.input.value.trim() != "") {
-                    this.addOutput(document.getElementById("Output"), this.input.value, "command-text");
-                    this.lastCommands.unshift(this.input.value);
-                    this.processCommand(this.input.value);
-                    this.input.value = "";
-                    this.currentCommand = -1;
+                if (x.keyCode == 13) {
+                    if (this.input.value.trim() != "") {
+                        this.addOutput(document.getElementById("Output"), this.input.value, "command-text");
+                        this.lastCommands.unshift(this.input.value);
+                        this.processCommand(this.input.value);
+                        this.input.value = "";
+                        this.currentCommand = -1;
 
-                    while (this.lastCommands.length > 20) {
-                        this.lastCommands.shift()
+                        while (this.lastCommands.length > 20) {
+                            this.lastCommands.shift()
+                        }
+                    }
+                    else {
+                        // Hardcoded "brief look" command when user simply hits "enter".
+                        this.look([], true);
                     }
                 }
             }).keydown(x => {
@@ -217,8 +223,10 @@ module KMud {
             this._socket.send(JSON.stringify(message));
         }
 
-        private look(words: string[]) {
+        private look(words: string[], brief: boolean = false) {
             var message = new LookMessage()
+            message.Brief = brief;
+
             //TODO: Parse parameters
             this._socket.send(JSON.stringify(message));
         }
@@ -395,7 +403,17 @@ module KMud {
 
         private showRoomDescription(message: RoomDescriptionMessage) {
             if (message.CannotSee) {
-                this.mainOutput(message.CannotSeeMessage, "cannot-see");
+                if (!StringUtilities.isNullOrWhitespace(message.CannotSeeMessage)) {
+                    this.mainOutput(message.CannotSeeMessage, "cannot-see");
+                }
+                else {
+                    if (message.LightLevel == LightLevel.Nothing)
+                        this.mainOutput("The room is darker than anything you've ever seen before - you can't see anything", "cannot-see");
+                    if (message.LightLevel == LightLevel.PitchBlack)
+                        this.mainOutput("The room is pitch black - you can't see anything", "cannot-see");
+                    if (message.LightLevel == LightLevel.VeryDark)
+                        this.mainOutput("The room is very dark - you can't see anything", "cannot-see");
+                }
             }
             else {
                 this.mainOutput(message.Name, "room-name");
@@ -431,6 +449,11 @@ module KMud {
                 else {
                     this.mainOutput("Obvious exits: NONE!!!", "exits");
                 }
+
+                if (message.LightLevel == LightLevel.BarelyVisible)
+                    this.mainOutput("The room is barely visible", "dimly-lit");
+                if (message.LightLevel == LightLevel.DimlyLit)
+                    this.mainOutput("The room is dimly lit", "dimly-lit");
             }
         }
 

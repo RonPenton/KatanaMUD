@@ -9,6 +9,7 @@ namespace KatanaMUD.Messages
         public int? Actor { get; set; }
         public int? Item { get; set; }
         public string YouFigureItOut { get; set; }
+        public bool Brief { get; set; }
 
         public override void Process(Actor actor)
         {
@@ -33,7 +34,7 @@ namespace KatanaMUD.Messages
             }
             else
             {
-                actor.SendRoomDescription(actor.Room);
+                actor.SendRoomDescription(actor.Room, Brief);
             }
         }
     }

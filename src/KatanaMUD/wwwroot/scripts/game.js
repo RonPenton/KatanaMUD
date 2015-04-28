@@ -14,14 +14,20 @@ var KMud;
             this.symbolCommandHandlers = {};
             this.input = document.getElementById("InputBox");
             $("#InputBox").keypress(function (x) {
-                if (x.keyCode == 13 && _this.input.value.trim() != "") {
-                    _this.addOutput(document.getElementById("Output"), _this.input.value, "command-text");
-                    _this.lastCommands.unshift(_this.input.value);
-                    _this.processCommand(_this.input.value);
-                    _this.input.value = "";
-                    _this.currentCommand = -1;
-                    while (_this.lastCommands.length > 20) {
-                        _this.lastCommands.shift();
+                if (x.keyCode == 13) {
+                    if (_this.input.value.trim() != "") {
+                        _this.addOutput(document.getElementById("Output"), _this.input.value, "command-text");
+                        _this.lastCommands.unshift(_this.input.value);
+                        _this.processCommand(_this.input.value);
+                        _this.input.value = "";
+                        _this.currentCommand = -1;
+                        while (_this.lastCommands.length > 20) {
+                            _this.lastCommands.shift();
+                        }
+                    }
+                    else {
+                        // Hardcoded "brief look" command when user simply hits "enter".
+                        _this.look([], true);
                     }
                 }
             }).keydown(function (x) {
@@ -187,8 +193,10 @@ var KMud;
             }
             this._socket.send(JSON.stringify(message));
         };
-        Game.prototype.look = function (words) {
+        Game.prototype.look = function (words, brief) {
+            if (brief === void 0) { brief = false; }
             var message = new KMud.LookMessage();
+            message.Brief = brief;
             //TODO: Parse parameters
             this._socket.send(JSON.stringify(message));
         };
@@ -345,7 +353,17 @@ var KMud;
         Game.prototype.showRoomDescription = function (message) {
             var _this = this;
             if (message.CannotSee) {
-                this.mainOutput(message.CannotSeeMessage, "cannot-see");
+                if (!StringUtilities.isNullOrWhitespace(message.CannotSeeMessage)) {
+                    this.mainOutput(message.CannotSeeMessage, "cannot-see");
+                }
+                else {
+                    if (message.LightLevel == KMud.LightLevel.Nothing)
+                        this.mainOutput("The room is darker than anything you've ever seen before - you can't see anything", "cannot-see");
+                    if (message.LightLevel == KMud.LightLevel.PitchBlack)
+                        this.mainOutput("The room is pitch black - you can't see anything", "cannot-see");
+                    if (message.LightLevel == KMud.LightLevel.VeryDark)
+                        this.mainOutput("The room is very dark - you can't see anything", "cannot-see");
+                }
             }
             else {
                 this.mainOutput(message.Name, "room-name");
@@ -375,6 +393,10 @@ var KMud;
                 else {
                     this.mainOutput("Obvious exits: NONE!!!", "exits");
                 }
+                if (message.LightLevel == KMud.LightLevel.BarelyVisible)
+                    this.mainOutput("The room is barely visible", "dimly-lit");
+                if (message.LightLevel == KMud.LightLevel.DimlyLit)
+                    this.mainOutput("The room is dimly lit", "dimly-lit");
             }
         };
         Game.prototype.showCommunication = function (message) {

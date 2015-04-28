@@ -123,3 +123,9 @@ input:focus {
 .hear-movement {
   color: purple;
 }
+.cannot-see {
+  color: darkgray;
+}
+.dimly-lit {
+  color: gray;
+}
