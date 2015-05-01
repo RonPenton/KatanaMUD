@@ -62,7 +62,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="KatanaMUD">
-      <HintPath>..\artifacts\bin\KatanaMUD\Debug\aspnet50\KatanaMUD.dll</HintPath>
+      <HintPath>..\artifacts\bin\KatanaMUD\Debug\dnx451\KatanaMUD.dll</HintPath>
     </Reference>
     <Reference Include="KatanaMUD.Helpers">
       <HintPath>..\artifacts\bin\KatanaMUD.Helpers\Debug\aspnet50\KatanaMUD.Helpers.dll</HintPath>

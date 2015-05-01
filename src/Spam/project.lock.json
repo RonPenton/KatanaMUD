@@ -1,0 +1,49 @@
+{
+  "locked": false,
+  "version": -9998,
+  "projectFileDependencyGroups": {
+    "": [
+      "KatanaMUD.Helpers >= 1.0.0-*",
+      "Newtonsoft.Json >= 7.0.1-beta2"
+    ],
+    "DNX,Version=v4.5.1": [
+      "framework/System.Data >= 4.0.0.0"
+    ]
+  },
+  "libraries": {
+    "Newtonsoft.Json/7.0.1-beta2": {
+      "serviceable": false,
+      "sha": "/NZ+ZdbbNyoWYrjRajzERgKGGOcbjfGbi2mi/4C5MpT5BOV2nUoQ+RIYaN0WxYq6i20nHQbYN56IWBTB4ut20Q==",
+      "frameworks": {
+        "DNX,Version=v4.5.1": {
+          "dependencies": {},
+          "frameworkAssemblies": [],
+          "runtimeAssemblies": [
+            "lib/net45/Newtonsoft.Json.dll"
+          ],
+          "compileAssemblies": [
+            "lib/net45/Newtonsoft.Json.dll"
+          ]
+        }
+      },
+      "files": [
+        "Newtonsoft.Json.7.0.1-beta2.nupkg",
+        "Newtonsoft.Json.7.0.1-beta2.nupkg.sha512",
+        "Newtonsoft.Json.nuspec",
+        "lib/net20/Newtonsoft.Json.dll",
+        "lib/net20/Newtonsoft.Json.xml",
+        "lib/net35/Newtonsoft.Json.dll",
+        "lib/net35/Newtonsoft.Json.xml",
+        "lib/net40/Newtonsoft.Json.dll",
+        "lib/net40/Newtonsoft.Json.xml",
+        "lib/net45/Newtonsoft.Json.dll",
+        "lib/net45/Newtonsoft.Json.xml",
+        "lib/portable-net40+sl5+wp80+win8+wpa81/Newtonsoft.Json.dll",
+        "lib/portable-net40+sl5+wp80+win8+wpa81/Newtonsoft.Json.xml",
+        "lib/portable-net45+wp80+win8+wpa81+aspnetcore50/Newtonsoft.Json.dll",
+        "lib/portable-net45+wp80+win8+wpa81+aspnetcore50/Newtonsoft.Json.xml",
+        "tools/install.ps1"
+      ]
+    }
+  }
+}

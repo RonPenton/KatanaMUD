@@ -1,5 +1,6 @@
 ﻿using KatanaMUD.Messages;
 using KatanaMUD.Models;
+using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
 using Spam;
 using System;

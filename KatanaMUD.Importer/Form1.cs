@@ -25,7 +25,7 @@ namespace KatanaMUD.Importer
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            var context = new GameEntities("Server=localhost;Database=KatanaMUD;integrated security=True;");
+            var context = new GameEntities("Server=KATANAMUD\\SQLEXPRESS;Database=KatanaMUD;integrated security=True;");
             context.LoadFromDatabase();
 
             //var races = Btrieve.GetAllRaces(new FileInfo(@"C:\Users\spsadmin\Documents\MMUDDats\wccrace2.dat").FullName, context.RaceTemplates);

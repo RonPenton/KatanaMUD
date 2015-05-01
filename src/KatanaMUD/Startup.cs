@@ -9,11 +9,10 @@ using System.Text;
 using Microsoft.Framework.ConfigurationModel;
 using Microsoft.AspNet.Hosting;
 using KatanaMUD.Models;
-using Microsoft.AspNet.Security.Cookies;
 using Microsoft.AspNet.StaticFiles;
 using KatanaMUD.Messages;
 using System.Linq;
-using Microsoft.AspNet.Http.Interfaces;
+using Microsoft.AspNet.Authentication.Cookies;
 
 namespace KatanaMUD
 {
@@ -52,8 +51,9 @@ namespace KatanaMUD
 
             app.UseCookieAuthentication(opts =>
             {
-                opts.AuthenticationType = CookieAuthenticationDefaults.AuthenticationType;
+                opts.AuthenticationScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 opts.LoginPath = new PathString("/Account/Login");
+                opts.AutomaticAuthentication = true;
             });
 
             app.UseWebSockets();

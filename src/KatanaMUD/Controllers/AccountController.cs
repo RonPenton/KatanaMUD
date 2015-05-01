@@ -6,8 +6,8 @@ using System.Text;
 using KatanaMUD.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Security.Cookies;
 using System.Linq;
+using Microsoft.AspNet.Authentication.Cookies;
 
 // For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -51,8 +51,8 @@ namespace KatanaMUD.Controllers
             user.PasswordHash = hash;
 
             var claim = new Claim(ClaimTypes.Name, model.Username);
-            var identity = new ClaimsIdentity(new List<Claim>() { claim }, CookieAuthenticationDefaults.AuthenticationType);
-            Context.Response.SignIn(identity);
+            var identity = new ClaimsIdentity(new List<Claim>() { claim }, CookieAuthenticationDefaults.AuthenticationScheme);
+            Context.Response.SignIn(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(new[] { identity }));
 
             return RedirectToAction("Index", controllerName: "Home");
         }
@@ -68,8 +68,8 @@ namespace KatanaMUD.Controllers
             if (hash == user.PasswordHash)
             {
                 var claim = new Claim(ClaimTypes.Name, model.Username);
-                var identity = new ClaimsIdentity(new List<Claim>() { claim }, CookieAuthenticationDefaults.AuthenticationType);
-                Context.Response.SignIn(identity);
+                var identity = new ClaimsIdentity(new List<Claim>() { claim }, CookieAuthenticationDefaults.AuthenticationScheme);
+                Context.Response.SignIn(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(new[] { identity }));
 
                 return RedirectToAction("Index", controllerName: "Home");
             }
@@ -85,7 +85,7 @@ namespace KatanaMUD.Controllers
         [HttpPost]
         public IActionResult Logout()
         {
-            Context.Response.SignOut(CookieAuthenticationDefaults.AuthenticationType);
+            Context.Response.SignOut(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login");
         }
 

@@ -22,7 +22,7 @@ namespace KatanaMUD
 
         async public static void Run()
         {
-            Data = new GameEntities("Server=localhost;Database=KatanaMUD;integrated security=True;");
+            Data = new GameEntities("Server=KATANAMUD\\SQLEXPRESS;Database=KatanaMUD;integrated security=True;");
             Data.LoadFromDatabase();
 
             DateTime lastTime = DateTime.UtcNow;
