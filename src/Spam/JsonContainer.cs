@@ -182,6 +182,19 @@ namespace Spam
             return false;
         }
 
+        public static T GetValue<T>(dynamic container, string name)
+        {
+            var c = container as JsonContainer;
+            if (c == null)
+                return default(T);
+
+            object o;
+            if (!c.GetValue(name, out o))
+                return default(T);
+
+            return (T)Convert.ChangeType(o, typeof(T));
+        }
+
         public void SetValue(string name, object value)
         {
             _dictionary[name] = value;

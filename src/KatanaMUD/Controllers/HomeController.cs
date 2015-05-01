@@ -2,6 +2,7 @@
 using KatanaMUD.Models;
 using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
+using Microsoft.AspNet.Mvc.Rendering;
 using Spam;
 using System;
 using System.Data.SqlClient;
@@ -232,5 +233,22 @@ namespace KatanaMUD.Controllers
             return (int)Math.Floor((difference + 9.0) / 10.0);
         }
 
-    }
+
+        public static void EditControl(IHtmlHelper html, long initial, long max, long current, string label)
+        {
+
+            html.ViewContext.Writer.Write(html.Raw("<div class=\"statrow\">"));
+            html.ViewContext.Writer.Write(html.Raw("<label>" + label + "</label>"));
+            html.ViewContext.Writer.Write(html.Raw("<input type=\"hidden\" class=\"initial\" value=\"" + initial.ToString() + "\" />"));
+            html.ViewContext.Writer.Write(html.Raw("<input type=\"hidden\" class=\"current\" value=\"" + current.ToString() + "\" />"));
+            html.ViewContext.Writer.Write(html.Raw("<input type=\"hidden\" class=\"maxval\" value=\"" + max.ToString() + "\" />"));
+            html.ViewContext.Writer.Write(html.Raw("<label class=\"range\">" + String.Format("{0}-{1}", initial, max) + "</label>"));
+            html.ViewContext.Writer.Write(html.Raw("<input type=\"button\" class=\"reset\" value=\"Reset\" tabindex=\"-100\" />"));
+            html.ViewContext.Writer.Write(html.Raw("<input type=\"button\" class=\"down\" value=\"-\" tabindex=\"-100\" />"));
+            html.ViewContext.Writer.Write(html.Raw("<input type=\"text\" class=\"edit\" value=\"" + current.ToString() + "\" name=\"" + label + "\" id=\"" + label + "\" />"));
+            html.ViewContext.Writer.Write(html.Raw("<input type=\"button\" class=\"up\" value=\"+\" tabindex=\"-100\" />"));
+            html.ViewContext.Writer.Write(html.Raw("<input type=\"button\" class=\"max\" value=\"Max\" tabindex=\"-100\" />"));
+            html.ViewContext.Writer.Write(html.Raw("</div>"));
+        }
+}
 }

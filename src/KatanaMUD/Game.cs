@@ -67,6 +67,14 @@ namespace KatanaMUD
                         message.Item2.Process(message.Item1);
                     }
 
+                    foreach(var connection in Connections.GetConnections())
+                    {
+                        var handler = connection?.Actor?.MessageHandler as ConnectionMessageHandler;
+                        if (handler != null)
+                            await handler.SendMessages();
+                    }
+
+
                     lastTime = newTime;
 
                     // Save changes to the database.

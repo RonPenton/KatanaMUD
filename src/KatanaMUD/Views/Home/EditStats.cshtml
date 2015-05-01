@@ -6,6 +6,7 @@
     bool isNew = (bool)ViewBag.IsNew;
 }
 
+
 <script src="~/scripts/statedit.js"></script>
 
 <h3>Edit Stats</h3>
@@ -44,29 +45,14 @@
         <input type="text" id="cps" disabled value="@Model.CharacterPoints" />
     </div>
 
-    @helper EditControl(long initial, long max, long current, string label)
-    {
-            <div class="statrow">
-                <label>@label</label>
-                <input type="hidden" class="initial" value="@initial" />
-                <input type="hidden" class="current" value="@current" />
-                <input type="hidden" class="maxval" value="@max" />
-                <label class="range">@String.Format("{0}-{1}", initial, max)</label>
-                <input type="button" class="reset" value="Reset" tabindex="-100" />
-                <input type="button" class="down" value="-" tabindex="-100" />
-                <input type="text" class="edit" value="@current" name="@label" id="@label" />
-                <input type="button" class="up" value="+" tabindex="-100" />
-                <input type="button" class="max" value="Max" tabindex="-100" />
-            </div>
-    }
 
     <div class="stat-area">
-        @EditControl(Model.RaceTemplate.Stats.Strength, Model.RaceTemplate.Stats.StrengthCap, Model.Stats.Strength, "Strength")
-        @EditControl(Model.RaceTemplate.Stats.Intellect, Model.RaceTemplate.Stats.IntellectCap, Model.Stats.Intellect, "Intellect")
-        @EditControl(Model.RaceTemplate.Stats.Willpower, Model.RaceTemplate.Stats.WillpowerCap, Model.Stats.Willpower, "Willpower")
-        @EditControl(Model.RaceTemplate.Stats.Agility, Model.RaceTemplate.Stats.AgilityCap, Model.Stats.Agility, "Agility")
-        @EditControl(Model.RaceTemplate.Stats.Health, Model.RaceTemplate.Stats.HealthCap, Model.Stats.Health, "Health")
-        @EditControl(Model.RaceTemplate.Stats.Charm, Model.RaceTemplate.Stats.CharmCap, Model.Stats.Charm, "Charm")
+        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model.RaceTemplate.Stats.Strength, Model.RaceTemplate.Stats.StrengthCap, Model.Stats.Strength, "Strength");}
+        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model.RaceTemplate.Stats.Intellect, Model.RaceTemplate.Stats.IntellectCap, Model.Stats.Intellect, "Intellect"); }
+        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model.RaceTemplate.Stats.Willpower, Model.RaceTemplate.Stats.WillpowerCap, Model.Stats.Willpower, "Willpower"); }
+        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model.RaceTemplate.Stats.Agility, Model.RaceTemplate.Stats.AgilityCap, Model.Stats.Agility, "Agility"); }
+        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model.RaceTemplate.Stats.Health, Model.RaceTemplate.Stats.HealthCap, Model.Stats.Health, "Health"); }
+        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model.RaceTemplate.Stats.Charm, Model.RaceTemplate.Stats.CharmCap, Model.Stats.Charm, "Charm"); }
     </div>
     <input type="submit" value="Next" />
 }
