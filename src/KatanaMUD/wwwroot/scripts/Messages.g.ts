@@ -135,6 +135,11 @@ module KMud {
         public Contents: string;
         public static ClassName: string = 'ServerMessage';
     }
+    export class SysopMessage extends MessageBase {
+        constructor() { super('SysopMessage'); }
+        public Command: string;
+        public static ClassName: string = 'SysopMessage';
+    }
     export class CurrencyDescription {
         public Name: string;
         public Amount: number;

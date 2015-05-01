@@ -177,6 +177,15 @@ var KMud;
         return ServerMessage;
     })(KMud.MessageBase);
     KMud.ServerMessage = ServerMessage;
+    var SysopMessage = (function (_super) {
+        __extends(SysopMessage, _super);
+        function SysopMessage() {
+            _super.call(this, 'SysopMessage');
+        }
+        SysopMessage.ClassName = 'SysopMessage';
+        return SysopMessage;
+    })(KMud.MessageBase);
+    KMud.SysopMessage = SysopMessage;
     var CurrencyDescription = (function () {
         function CurrencyDescription() {
         }

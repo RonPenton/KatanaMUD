@@ -145,6 +145,11 @@ var KMud;
             this.commandHandlers["drop"] = function (words, tail) { return _this.drop(tail); };
             this.commandHandlers["gos"] = this.commandHandlers["gossip"] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Gossip); };
             this.commandHandlers["say"] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Say); };
+            this.commandHandlers["sys"] = this.commandHandlers["sysop"] = function (words, tail) {
+                var msg = new KMud.SysopMessage();
+                msg.Command = tail;
+                _this.SendMessage(msg);
+            };
             this.symbolCommandHandlers["."] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Say); };
             this.symbolCommandHandlers["/"] = function (words, tail, param) { return _this.talk(tail, KMud.CommunicationType.Telepath, param); };
         };
