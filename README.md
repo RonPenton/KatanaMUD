@@ -1,3 +1,9 @@
+#Development Server
+
+We now have a development server. The server may not always be running (if it crashes, for example), and may be taken down frequently for updates. But when it's up, it's here: 
+
+* http://katanamud.cloudapp.net/
+
 # KatanaMUD
 A web browser MUD. It originally started life as a clone of MajorMUD, but may end up diverging from that vision significantly in the end.
 
