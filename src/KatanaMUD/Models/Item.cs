@@ -14,7 +14,7 @@ namespace KatanaMUD.Models
         private String _CustomName;
         private Boolean _Modified;
         private Int32? _EquippedSlot;
-        private DateTime? _HiddenTime;
+        private Int64? _HiddenTime;
         private Int32 _ItemTemplateId;
         private ItemTemplate _ItemTemplate;
         private Guid? _ActorId;
@@ -31,7 +31,7 @@ namespace KatanaMUD.Models
         public String CustomName { get { return _CustomName; } set { _CustomName = value; this.Changed(); } }
         public Boolean Modified { get { return _Modified; } set { _Modified = value; this.Changed(); } }
         public Int32? EquippedSlot { get { return _EquippedSlot; } set { _EquippedSlot = value; this.Changed(); } }
-        public DateTime? HiddenTime { get { return _HiddenTime; } set { _HiddenTime = value; this.Changed(); } }
+        public Int64? HiddenTime { get { return _HiddenTime; } set { _HiddenTime = value; this.Changed(); } }
         public dynamic Stats { get; private set; }
         partial void OnItemTemplateChanging(ItemTemplate oldValue, ItemTemplate newValue);
         public ItemTemplate ItemTemplate {
@@ -81,7 +81,7 @@ namespace KatanaMUD.Models
             entity.Stats = new JsonContainer(entity);
             entity.Stats.FromJson(reader.GetSafeString(6));
             entity._EquippedSlot = reader.GetSafeInt32(7);
-            entity._HiddenTime = reader.GetSafeDateTime(8);
+            entity._HiddenTime = reader.GetSafeInt64(8);
             return entity;
         }
 

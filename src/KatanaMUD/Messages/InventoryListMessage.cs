@@ -163,6 +163,7 @@ namespace KatanaMUD.Messages
         public Guid? ItemId { get; set; }
         public string ItemName { get; set; }
         public int Quantity { get; set; }
+        public bool Hide { get; set; }
 
         public override void Process(Actor actor)
         {
@@ -187,13 +188,21 @@ namespace KatanaMUD.Messages
                 var action = actor.CanDropCash(currency, Quantity);
                 if (action.Allowed)
                 {
-                    actor.DropCash(currency, Quantity);
+                    actor.DropCash(currency, Quantity, Hide);
+
                     var message = new CashTransferMessage()
                     {
                         Giver = new ActorDescription(actor),
-                        Currency = new CurrencyDescription(currency, Quantity)
+                        Currency = new CurrencyDescription(currency, Quantity),
+                        Hide = Hide
                     };
-                    actor.Room.ActiveActors.Where(x => x != actor).ForEach(x => x.SendMessage(message));
+
+                    if (Hide == false)
+                    {
+                        // let the actors in the room know, but only if it's not being hidden.
+                        actor.Room.ActiveActors.Where(x => x != actor).ForEach(x => x.SendMessage(message));
+                    }
+
                     message.Quantity = Quantity;    // Only the actor involved knows the amount.
                     actor.SendMessage(message);
                 }
@@ -218,7 +227,7 @@ namespace KatanaMUD.Messages
 
                     if (action.Allowed)
                     {
-                        actor.DropItem(item);
+                        actor.DropItem(item, Hide);
                         successes.Add(item);
                     }
                     else
@@ -232,9 +241,18 @@ namespace KatanaMUD.Messages
                     var message = new ItemOwnershipMessage()
                     {
                         Giver = new ActorDescription(actor),
-                        Items = successes.Select(x => new ItemDescription(x)).ToArray()
+                        Items = successes.Select(x => new ItemDescription(x)).ToArray(),
+                        Hide = Hide
                     };
-                    actor.Room.ActiveActors.ForEach(x => x.SendMessage(message));
+
+                    if (Hide == false)
+                    {
+                        actor.Room.ActiveActors.ForEach(x => x.SendMessage(message));
+                    }
+                    else
+                    {
+                        actor.SendMessage(message);
+                    }
                 }
                 if (failures.Any())
                 {

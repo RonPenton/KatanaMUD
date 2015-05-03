@@ -5,10 +5,9 @@ namespace KatanaMUD.Messages
     public class ItemOwnershipMessage : MessageBase
     {
         public ItemDescription[] Items { get; set; }
-
         public ActorDescription Giver { get; set; }
-
         public ActorDescription Taker { get; set; }
+        public bool Hide { get; set; }
     }
 
     public class CashTransferMessage : MessageBase
@@ -17,5 +16,6 @@ namespace KatanaMUD.Messages
         public long Quantity { get; set; }
         public ActorDescription Giver { get; set; }
         public ActorDescription Taker { get; set; }
+        public bool Hide { get; set; }
     }
 }

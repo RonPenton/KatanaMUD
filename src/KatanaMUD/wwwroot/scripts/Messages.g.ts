@@ -50,6 +50,7 @@ module KMud {
         public ItemId: string;
         public ItemName: string;
         public Quantity: number;
+        public Hide: boolean;
         public static ClassName: string = 'DropItemCommand';
     }
     export class ItemOwnershipMessage extends MessageBase {
@@ -57,6 +58,7 @@ module KMud {
         public Items: ItemDescription[];
         public Giver: ActorDescription;
         public Taker: ActorDescription;
+        public Hide: boolean;
         public static ClassName: string = 'ItemOwnershipMessage';
     }
     export class CashTransferMessage extends MessageBase {
@@ -65,6 +67,7 @@ module KMud {
         public Quantity: number;
         public Giver: ActorDescription;
         public Taker: ActorDescription;
+        public Hide: boolean;
         public static ClassName: string = 'CashTransferMessage';
     }
     export class LoginRejected extends MessageBase {

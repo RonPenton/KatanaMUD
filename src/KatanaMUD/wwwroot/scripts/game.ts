@@ -163,7 +163,8 @@ module KMud {
 
             this.commandHandlers["i"] = this.commandHandlers["inv"] = this.commandHandlers["inventory"] = (words, tail) => this.SendMessage(new InventoryCommand());
             this.commandHandlers["get"] = this.commandHandlers["g"] = (words, tail) => this.get(tail);
-            this.commandHandlers["drop"] = (words, tail) => this.drop(tail);
+            this.commandHandlers["drop"] = this.commandHandlers["dr"] = (words, tail) => this.drop(tail, false);
+            this.commandHandlers["hide"] = this.commandHandlers["hid"] = (words, tail) => this.drop(tail, true);
 
 
             this.commandHandlers["gos"] = this.commandHandlers["gossip"] = (words, tail) => this.talk(tail, CommunicationType.Gossip);
@@ -202,8 +203,9 @@ module KMud {
             this.SendMessage(message);
         }
 
-        private drop(item: string) {
+        private drop(item: string, hide: boolean) {
             var message = new DropItemCommand();
+            message.Hide = hide;
             var tokens = item.split(/\s+/gi);
             var quantity = parseInt(tokens[0]);
             if (!isNaN(quantity)) {
@@ -300,7 +302,11 @@ module KMud {
                 }
                 else {
                     if (message.Giver != null && message.Giver.Id == this.currentPlayer.Id) {
-                        this.mainOutput("You dropped " + name + ".", "item-ownership");
+                        var verb = "dropped";
+                        if (message.Hide)
+                            verb = "hid";
+
+                        this.mainOutput("You " + verb + " " + name + ".", "item-ownership");
                     }
                     else if (message.Taker != null && message.Taker.Id == this.currentPlayer.Id) {
                         this.mainOutput("You took " + name + ".", "item-ownership");
@@ -341,7 +347,11 @@ module KMud {
             }
             else {
                 if (message.Giver != null && message.Giver.Id == this.currentPlayer.Id) {
-                    this.mainOutput("You dropped " + name + ".", "item-ownership");
+                    var verb = "dropped";
+                    if (message.Hide)
+                        verb = "hid";
+
+                    this.mainOutput("You " + verb + " " + name + ".", "item-ownership");
                 }
                 else if (message.Taker != null && message.Taker.Id == this.currentPlayer.Id) {
                     this.mainOutput("You took " + name + ".", "item-ownership");

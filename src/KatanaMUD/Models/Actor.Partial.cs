@@ -192,6 +192,7 @@ namespace KatanaMUD.Models
         {
             item.Actor = this;
             item.Room = null;
+            item.HiddenTime = null;
         }
 
         /// <summary>
@@ -246,10 +247,19 @@ namespace KatanaMUD.Models
         /// Drops an item. Beware that this performs no checks and essentially forces a drop. 
         /// </summary>
         /// <param name="item"></param>
-        public void DropItem(Item item)
+        public void DropItem(Item item, bool hide)
         {
             item.Actor = null;
             item.Room = Room;
+
+            if (hide)
+            {
+                item.HiddenTime = Game.GameTime.Ticks;
+            }
+            else
+            {
+                item.HiddenTime = null;
+            }
         }
 
         public Validation CanDropCash(Currency currency, long? quantity)
@@ -264,7 +274,7 @@ namespace KatanaMUD.Models
             return new Validation();
         }
 
-        public void DropCash(Currency currency, long? quantity)
+        public void DropCash(Currency currency, long? quantity, bool hide)
         {
             var q = Currency.Get(currency, Cash);
             if (quantity == null)
@@ -273,8 +283,12 @@ namespace KatanaMUD.Models
             if (quantity > q)
                 quantity = q;
 
+            var container = Room.Cash;
+            if (hide == true)
+                container = Room.HiddenCash;
+
             Currency.Add(currency, Cash, -quantity.Value);
-            Currency.Add(currency, Room.Cash, quantity.Value);
+            Currency.Add(currency, container, quantity.Value);
         }
 
         public IEnumerable<Item> EquippedItems => Items.Where(x => x.EquippedSlot != null);

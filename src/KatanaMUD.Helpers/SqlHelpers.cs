@@ -30,6 +30,14 @@ namespace KatanaMUD
             return val.Value;
         }
 
+        public static long? GetSafeInt64(this SqlDataReader reader, int index)
+        {
+            var val = reader.GetSqlInt64(index);
+            if (val.IsNull)
+                return null;
+            return val.Value;
+        }
+
         public static Guid? GetSafeGuid(this SqlDataReader reader, int index)
         {
             var val = reader.GetSqlGuid(index);

@@ -20,21 +20,39 @@ namespace KatanaMUD
 
         public static ConcurrentSet<Actor> ActiveActors { get; } = new ConcurrentSet<Actor>();
 
+
+        public static TimeSpan GameTime { get; private set; }
+
+
         async public static void Run()
         {
             Data = new GameEntities("Server=KATANAMUD\\SQLEXPRESS;Database=KatanaMUD;integrated security=True;");
             Data.LoadFromDatabase();
 
+            var gameTime = Data.Settings["GameTime"];
+            if (gameTime == null)
+            {
+                GameTime = new TimeSpan(0);
+                gameTime = Data.Settings.New("GameTime");
+                gameTime.Value = 0.ToString();
+            }
+            else
+            {
+                GameTime = new TimeSpan(long.Parse(gameTime.Value));
+            }
+
             DateTime lastTime = DateTime.UtcNow;
-            var pingTime = lastTime;
             var saveTime = lastTime.AddMinutes(1);
 
-            Console.WriteLine("KatanaMUD 0.1 Server Started");
+            Console.WriteLine("KatanaMUD 0.2 Server Started");
             while (true)
             {
                 try
                 {
                     var newTime = DateTime.UtcNow;
+                    var timeDifference = newTime.Subtract(lastTime);
+                    GameTime.Add(timeDifference);
+                    gameTime.Value = GameTime.Ticks.ToString();
 
                     // handle connections/disconnections
                     Connections.HandleConnectsAndDisconnects();
@@ -67,6 +85,9 @@ namespace KatanaMUD
                         message.Item2.Process(message.Item1);
                     }
 
+                    //TODO: This could really be done in parallel, or even on separate threads. 
+                    // I figure this should be addressed sooner rather than later, since once combat is enabled, output messages could get 
+                    // laggy if we simply perform awaits on each one instead of letting the hardware do its thing and go on to the next. 
                     foreach(var connection in Connections.GetConnections())
                     {
                         var handler = connection?.Actor?.MessageHandler as ConnectionMessageHandler;
