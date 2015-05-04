@@ -22,6 +22,14 @@ namespace Spam
 
         public T this[K key] { get { return _storage[key]; } }
 
+        public T Find(K key)
+        {
+            T t;
+            if (_storage.TryGetValue(key, out t))
+                return t;
+            return default(T);
+        }
+
         public int Count => _storage.Count;
 
         public bool IsReadOnly => false;

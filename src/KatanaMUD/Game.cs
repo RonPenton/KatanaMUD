@@ -29,7 +29,7 @@ namespace KatanaMUD
             Data = new GameEntities("Server=KATANAMUD\\SQLEXPRESS;Database=KatanaMUD;integrated security=True;");
             Data.LoadFromDatabase();
 
-            var gameTime = Data.Settings["GameTime"];
+            var gameTime = Data.Settings.Find("GameTime");
             if (gameTime == null)
             {
                 GameTime = new TimeSpan(0);
