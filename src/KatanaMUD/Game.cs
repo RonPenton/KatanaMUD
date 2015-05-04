@@ -51,7 +51,7 @@ namespace KatanaMUD
                 {
                     var newTime = DateTime.UtcNow;
                     var timeDifference = newTime.Subtract(lastTime);
-                    GameTime.Add(timeDifference);
+                    GameTime = GameTime.Add(timeDifference);
                     gameTime.Value = GameTime.Ticks.ToString();
 
                     // handle connections/disconnections
