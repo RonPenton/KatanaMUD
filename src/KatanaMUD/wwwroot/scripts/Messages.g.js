@@ -168,6 +168,24 @@ var KMud;
         return RoomDescriptionMessage;
     })(KMud.MessageBase);
     KMud.RoomDescriptionMessage = RoomDescriptionMessage;
+    var SearchCommand = (function (_super) {
+        __extends(SearchCommand, _super);
+        function SearchCommand() {
+            _super.call(this, 'SearchCommand');
+        }
+        SearchCommand.ClassName = 'SearchCommand';
+        return SearchCommand;
+    })(KMud.MessageBase);
+    KMud.SearchCommand = SearchCommand;
+    var SearchMessage = (function (_super) {
+        __extends(SearchMessage, _super);
+        function SearchMessage() {
+            _super.call(this, 'SearchMessage');
+        }
+        SearchMessage.ClassName = 'SearchMessage';
+        return SearchMessage;
+    })(KMud.MessageBase);
+    KMud.SearchMessage = SearchMessage;
     var ServerMessage = (function (_super) {
         __extends(ServerMessage, _super);
         function ServerMessage() {

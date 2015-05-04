@@ -28,6 +28,12 @@ var KMud;
         return obj % 1 != 0;
     }
     KMud.IsDecimal = IsDecimal;
+    function pushRange(array, items) {
+        for (var i = 0; i < items.length; i++) {
+            array.push(items[i]);
+        }
+    }
+    KMud.pushRange = pushRange;
     /**
      * Creates a new Linq container.
      */

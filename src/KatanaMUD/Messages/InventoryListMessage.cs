@@ -11,7 +11,7 @@ namespace KatanaMUD.Messages
         public override void Process(Actor actor)
         {
             var response = new InventoryListMessage();
-            response.Cash = Game.Data.Currencies.OrderByDescending(x => x.Value).Select(x => new CurrencyDescription(x, Currency.Get(x, actor.Cash))).Where(x => x.Amount > 0).ToArray();
+            response.Cash = Game.Data.AllCurrencies.Select(x => new CurrencyDescription(x, Currency.Get(x, actor.Cash))).Where(x => x.Amount > 0).ToArray();
             response.Items = actor.Items.Select(x => new ItemDescription(x)).ToArray();
             response.Encumbrance = actor.Encumbrance;
             response.MaxEncumbrance = actor.MaxEncumbrance;
@@ -39,7 +39,7 @@ namespace KatanaMUD.Messages
             if (Quantity < 0)
                 throw new InvalidOperationException("Cannot drop negative items.");
 
-            var availableCurrencies = Game.Data.Currencies.OrderByDescending(x => x.Value).Where(x => actor.Room.GetTotalCashUserCanSee(x, actor).Total > 0).ToList();
+            var availableCurrencies = Game.Data.AllCurrencies.Where(x => actor.Room.GetTotalCashUserCanSee(x, actor).Total > 0).ToList();
             var items = FindItems(availableCurrencies, actor.Room.ItemsUserCanSee(actor).ToList(), ItemId, ItemName, Math.Max(Quantity, 1));
 
             // Handle a cash get.
@@ -170,7 +170,7 @@ namespace KatanaMUD.Messages
             if (Quantity < 0)
                 throw new InvalidOperationException("Cannot drop negative items.");
 
-            var availableCurrencies = Game.Data.Currencies.OrderByDescending(x => x.Value).Where(x => Currency.Get(x, actor.Cash) > 0).ToList();
+            var availableCurrencies = Game.Data.AllCurrencies.Where(x => Currency.Get(x, actor.Cash) > 0).ToList();
             var items = GetItemCommand.FindItems(availableCurrencies, actor.Items.ToList(), ItemId, ItemName, Math.Max(Quantity, 1));
 
             // Handle a cash drop.

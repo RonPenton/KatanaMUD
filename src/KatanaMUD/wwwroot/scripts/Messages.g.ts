@@ -133,6 +133,17 @@ module KMud {
         public LightLevel: LightLevel;
         public static ClassName: string = 'RoomDescriptionMessage';
     }
+    export class SearchCommand extends MessageBase {
+        constructor() { super('SearchCommand'); }
+        public Direction: Direction;
+        public static ClassName: string = 'SearchCommand';
+    }
+    export class SearchMessage extends MessageBase {
+        constructor() { super('SearchMessage'); }
+        public FoundItems: ItemDescription[];
+        public FoundCash: CurrencyDescription[];
+        public static ClassName: string = 'SearchMessage';
+    }
     export class ServerMessage extends MessageBase {
         constructor() { super('ServerMessage'); }
         public Contents: string;

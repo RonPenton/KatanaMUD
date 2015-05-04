@@ -8,7 +8,7 @@ using Spam;
 namespace KatanaMUD.Models
 {
     public partial class Room
-    {
+    { 
         public Exit GetExit(Direction direction)
         {
             var exit = new Exit() { Direction = direction };
@@ -69,16 +69,47 @@ namespace KatanaMUD.Models
                 long value;
                 if (record.TryGetValue(actor, out value))
                 {
-                    return new CashInformation() { Visible = GetCash(currency), KnownHidden = Math.Min(value, GetHiddenCash(currency)) };
+                    return new CashInformation() { Currency = currency, Visible = GetCash(currency), KnownHidden = Math.Min(value, GetHiddenCash(currency)) };
                 }
             }
 
-            return new CashInformation() { Visible = GetCash(currency), KnownHidden = 0 };
+            return new CashInformation() { Currency = currency, Visible = GetCash(currency), KnownHidden = 0 };
+        }
+
+        /// <summary>
+        /// Tells the room that the given user has found the given amount of hidden currency. 
+        /// </summary>
+        /// <param name="actor"></param>
+        /// <param name="currency"></param>
+        /// <param name="amount"></param>
+        public void FoundCash(Actor actor, Currency currency, long amount)
+        {
+            Dictionary<Actor, long> record;
+            if (!_foundCurrencies.TryGetValue(currency, out record))
+            {
+                record = new Dictionary<Actor, long>();
+                _foundCurrencies[currency] = record;
+            }
+
+            long value;
+            if (record.TryGetValue(actor, out value))
+            {
+                record[actor] = Math.Min(value + amount, GetHiddenCash(currency));
+            }
+            else
+            {
+                record[actor] = Math.Min(amount, GetHiddenCash(currency));
+            }
+        }
+
+        public IEnumerable<CashInformation> GetTotalCashUserCanSee(Actor actor)
+        {
+            return Game.Data.AllCurrencies.Select(x => GetTotalCashUserCanSee(x, actor));
         }
 
         public CashInformation GetTotalCash(Currency currency)
         {
-            return new CashInformation() { Visible = GetCash(currency), KnownHidden = GetHiddenCash(currency) };
+            return new CashInformation() { Currency = currency, Visible = GetCash(currency), KnownHidden = GetHiddenCash(currency) };
         }
 
         public long GetCash(Currency currency) => KatanaMUD.Models.Currency.Get(currency, this.Cash);
@@ -94,15 +125,19 @@ namespace KatanaMUD.Models
         {
             if (item.Room != this)
                 throw new InvalidOperationException("Item isn't in this room, cannot determine visibility");
-            return item.HiddenTime == null || item.UsersWhoFoundMe.Contains(actor);
+
+            // Show all items that are either visible, are emitting illumination, or have previously been found by the user.
+            return item.HiddenTime == null || item.Illumination > 0 || item.UsersWhoFoundMe.Contains(actor);
         }
 
-        public T GetStat<T>(string name, T baseValue, bool includePercent = true)
+        /// <summary>
+        /// Clears the amount of cash that users have found in the room. Call this whenever the amount of hidden cash in a room is changed.
+        /// </summary>
+        /// <param name="currency"></param>
+        public void ClearFoundHiddenCash(Currency currency)
         {
-            return JsonContainer.Calculate<T>(new List<JsonContainer>() { (JsonContainer)Stats }, name, baseValue, includePercent);
+            _foundCurrencies.Remove(currency);
         }
-
-        public long Illumination => GetStat<long>("Illumination", 0); // TODO: account for light sources like lit torches
     }
 
     /// <summary>
@@ -192,6 +227,7 @@ namespace KatanaMUD.Models
     {
         public long Visible { get; set; }
         public long KnownHidden { get; set; }
+        public Currency Currency { get; set; }
 
         public long Total => Visible + KnownHidden;
     }

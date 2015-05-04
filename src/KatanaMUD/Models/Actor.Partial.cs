@@ -131,10 +131,10 @@ namespace KatanaMUD.Models
             message.Exits = exits.Select(x => new ExitDescription(x, room)).ToArray();
             message.Actors = room.VisibleActors(this).Select(x => new ActorDescription(x)).ToArray();
             message.VisibleItems = room.Items.Where(x => x.HiddenTime == null).OrderBy(x => x.Name).Select(x => new ItemDescription(x)).ToArray();
-            message.VisibleCash = Game.Data.Currencies.OrderByDescending(x => x.Value).Select(x => new CurrencyDescription(x, room.GetCash(x))).Where(x => x.Amount != 0).ToArray();
+            message.VisibleCash = Game.Data.AllCurrencies.Select(x => new CurrencyDescription(x, room.GetCash(x))).Where(x => x.Amount != 0).ToArray();
 
             message.FoundItems = room.Items.Where(x => x.HiddenTime != null && x.UsersWhoFoundMe.Contains(this)).OrderBy(x => x.Name).Select(x => new ItemDescription(x)).ToArray();
-            message.FoundCash = Game.Data.Currencies.OrderByDescending(x => x.Value).Select(x => new CurrencyDescription(x, room.GetTotalCashUserCanSee(x, this).KnownHidden)).Where(x => x.Amount != 0).ToArray();
+            message.FoundCash = room.GetTotalCashUserCanSee(this).Where(x => x.KnownHidden > 0).Select(x => new CurrencyDescription(x.Currency, x.KnownHidden)).ToArray();
 
             SendMessage(message);
         }
@@ -221,6 +221,7 @@ namespace KatanaMUD.Models
             Currency.Add(currency, Cash, quantity.Value);
             Currency.Add(currency, Room.Cash, -visible);
             Currency.Add(currency, Room.HiddenCash, -hidden);
+            Room.ClearFoundHiddenCash(currency);
         }
 
         /// <summary>
@@ -289,6 +290,9 @@ namespace KatanaMUD.Models
 
             Currency.Add(currency, Cash, -quantity.Value);
             Currency.Add(currency, container, quantity.Value);
+
+            if (hide == true)
+                Room.ClearFoundHiddenCash(currency);
         }
 
         public IEnumerable<Item> EquippedItems => Items.Where(x => x.EquippedSlot != null);

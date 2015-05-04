@@ -129,3 +129,9 @@ input:focus {
 .dimly-lit {
   color: gray;
 }
+.search {
+  color: white;
+}
+.search-found {
+  color: darkcyan;
+}

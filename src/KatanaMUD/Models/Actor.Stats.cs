@@ -37,7 +37,11 @@ namespace KatanaMUD.Models
             }
         }
 
-        public long Perception {
+        /// <summary>
+        /// The bese perception value for the player, not including Room Light. 
+        /// </summary>
+        public long PerceptionBase
+        {
             get
             {
                 // This is the best approximation I've found for MajorMUD. If anyone knows a better formula, feel free to update it.'
@@ -49,6 +53,23 @@ namespace KatanaMUD.Models
             }
         }
 
+        /// <summary>
+        /// Perception, factoring room light. 
+        /// TODO: Determine if this is really the formula we want to go with.
+        /// </summary>
+        public long PerceptionFinal
+        {
+            get
+            {
+                // Illumination counts as half a percent. So -200 illumination (very dark, cannot see) means that a person with 100 perception cannot see anything. 
+                // Night Vision counts directly against illumination. So -200 illumination and +100 NV means you have an effective -100 illumination.
+                return PerceptionBase + ((Room.Illumination + NightVision) / 2);
+            }
+        }
+
+        public long NightVision => GetStat<long>("NightVision", 0, true);
+
+        // TODO: Get illumination from buffs and equipped light sources.
         public long Illumination => GetStat<long>("Illumination", 0);
     }
 }

@@ -142,6 +142,7 @@ module KMud {
             this.messageHandlers[PartyMovementMessage.ClassName] = (message: PartyMovementMessage) => this.partyMovement(message);
             this.messageHandlers[ItemOwnershipMessage.ClassName] = (message: ItemOwnershipMessage) => this.itemOwnership(message);
             this.messageHandlers[CashTransferMessage.ClassName] = (message: CashTransferMessage) => this.cashTransfer(message);
+            this.messageHandlers[SearchMessage.ClassName] = (message: SearchMessage) => this.search(message);
             this.messageHandlers[ActionNotAllowedMessage.ClassName] = (message: ActionNotAllowedMessage) => this.mainOutput(message.Message, "action-not-allowed");
             this.messageHandlers[GenericMessage.ClassName] = (message: GenericMessage) => this.mainOutput(message.Message, message.Class);
         }
@@ -165,6 +166,7 @@ module KMud {
             this.commandHandlers["get"] = this.commandHandlers["g"] = (words, tail) => this.get(tail);
             this.commandHandlers["drop"] = this.commandHandlers["dr"] = (words, tail) => this.drop(tail, false);
             this.commandHandlers["hide"] = this.commandHandlers["hid"] = (words, tail) => this.drop(tail, true);
+            this.commandHandlers["search"] = this.commandHandlers["sea"] = (words, tail) => this.SendMessage(new SearchCommand());
 
 
             this.commandHandlers["gos"] = this.commandHandlers["gossip"] = (words, tail) => this.talk(tail, CommunicationType.Gossip);
@@ -365,6 +367,25 @@ module KMud {
             }
         }
 
+        private search(message: SearchMessage) {
+            if (message.FoundCash.length == 0 && message.FoundItems.length == 0) {
+                this.mainOutput("Your search revealed nothing.", "search");
+                return;
+            }
+            
+            var items = [];
+            for (var i = 0; i < message.FoundCash.length; i++) {
+                items.push(message.FoundCash[i].Amount + " " + message.FoundCash[i].Name);
+            }
+
+            if (message.FoundItems.length > 0) {
+                var groups = Linq(message.FoundItems).groupBy(x => x.TemplateId + "|" + x.Name);
+                pushRange(items, groups.select(x => (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name).toArray());
+            }
+
+            this.mainOutput("You notice " + items.join(", ") + " here.", "search-found");
+        }
+
         private addElements(target: HTMLElement, elements: HTMLElement[]) {
             var scrolledToBottom = (target.scrollHeight - target.scrollTop === target.offsetHeight);
             
@@ -437,21 +458,28 @@ module KMud {
                     this.mainOutput(message.Description, "room-desc");
                 }
 
-                var items: string = "";
+                var items = [];
 
                 if (message.VisibleCash.length > 0) {
-                    items = Linq(message.VisibleCash).select(x => String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "")).toArray().join(", ");
+                    pushRange(items, Linq(message.VisibleCash).select(x => String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "")).toArray());
+                }
+
+                if (message.FoundCash.length > 0) {
+                    pushRange(items, Linq(message.FoundCash).select(x => String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "") + " (*)").toArray());
                 }
 
                 if (message.VisibleItems.length > 0) {
-                    if (items.length > 0)
-                        items += ", ";
                     var groups = Linq(message.VisibleItems).groupBy(x => x.TemplateId + "|" + x.Name);
-                    items += groups.select(x => (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name).toArray().join(", ");
+                    pushRange(items, groups.select(x => (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name).toArray());
+                }
+
+                if (message.FoundItems.length > 0) {
+                    var groups = Linq(message.VisibleItems).groupBy(x => x.TemplateId + "|" + x.Name);
+                    pushRange(items, groups.select(x => (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name + " (*)").toArray());
                 }
 
                 if (items.length > 0) {
-                    this.mainOutput("You notice " + items + " here.", "items");
+                    this.mainOutput("You notice " + items.join(", ") + " here.", "items");
                 }
 
                 if (message.Actors.length > 1) {

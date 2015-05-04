@@ -29,6 +29,12 @@
             return false;   // not even a number.
         return obj % 1 != 0;
     }
+    export function pushRange<T>(array: T[], items: T[]) {
+        for (var i = 0; i < items.length; i++) {
+            array.push(items[i]);
+        }
+    }
+
 
     export interface ArrayLikeObject<T> {
         length: number;

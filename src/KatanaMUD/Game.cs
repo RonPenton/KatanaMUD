@@ -20,9 +20,10 @@ namespace KatanaMUD
 
         public static ConcurrentSet<Actor> ActiveActors { get; } = new ConcurrentSet<Actor>();
 
+        // TODO: figure out if we need to seed this better, or use a different algorithm altogether.
+        public static Random Random { get; } = new Random();
 
         public static TimeSpan GameTime { get; private set; }
-
 
         async public static void Run()
         {

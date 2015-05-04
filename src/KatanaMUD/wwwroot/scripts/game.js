@@ -73,7 +73,7 @@ var KMud;
                 return;
             }
             // No clue. Say it, don't spray it.
-            this.talk(command, 2 /* Say */);
+            this.talk(command, KMud.CommunicationType.Say);
         };
         Game.prototype.connect = function (url) {
             var _this = this;
@@ -123,36 +123,38 @@ var KMud;
             this.messageHandlers[KMud.PartyMovementMessage.ClassName] = function (message) { return _this.partyMovement(message); };
             this.messageHandlers[KMud.ItemOwnershipMessage.ClassName] = function (message) { return _this.itemOwnership(message); };
             this.messageHandlers[KMud.CashTransferMessage.ClassName] = function (message) { return _this.cashTransfer(message); };
+            this.messageHandlers[KMud.SearchMessage.ClassName] = function (message) { return _this.search(message); };
             this.messageHandlers[KMud.ActionNotAllowedMessage.ClassName] = function (message) { return _this.mainOutput(message.Message, "action-not-allowed"); };
             this.messageHandlers[KMud.GenericMessage.ClassName] = function (message) { return _this.mainOutput(message.Message, message.Class); };
         };
         Game.prototype.registerCommandHandlers = function () {
             var _this = this;
             this.commandHandlers["ping"] = function (x) { return _this.ping(); };
-            this.commandHandlers["n"] = this.commandHandlers["north"] = function (words) { return _this.move(0 /* North */); };
-            this.commandHandlers["s"] = this.commandHandlers["south"] = function (words) { return _this.move(1 /* South */); };
-            this.commandHandlers["e"] = this.commandHandlers["east"] = function (words) { return _this.move(2 /* East */); };
-            this.commandHandlers["w"] = this.commandHandlers["west"] = function (words) { return _this.move(3 /* West */); };
-            this.commandHandlers["ne"] = this.commandHandlers["northeast"] = function (words) { return _this.move(4 /* Northeast */); };
-            this.commandHandlers["nw"] = this.commandHandlers["northwest"] = function (words) { return _this.move(5 /* Northwest */); };
-            this.commandHandlers["se"] = this.commandHandlers["southeast"] = function (words) { return _this.move(6 /* Southeast */); };
-            this.commandHandlers["sw"] = this.commandHandlers["southwest"] = function (words) { return _this.move(7 /* Southwest */); };
-            this.commandHandlers["u"] = this.commandHandlers["up"] = function (words) { return _this.move(8 /* Up */); };
-            this.commandHandlers["d"] = this.commandHandlers["down"] = function (words) { return _this.move(9 /* Down */); };
+            this.commandHandlers["n"] = this.commandHandlers["north"] = function (words) { return _this.move(KMud.Direction.North); };
+            this.commandHandlers["s"] = this.commandHandlers["south"] = function (words) { return _this.move(KMud.Direction.South); };
+            this.commandHandlers["e"] = this.commandHandlers["east"] = function (words) { return _this.move(KMud.Direction.East); };
+            this.commandHandlers["w"] = this.commandHandlers["west"] = function (words) { return _this.move(KMud.Direction.West); };
+            this.commandHandlers["ne"] = this.commandHandlers["northeast"] = function (words) { return _this.move(KMud.Direction.Northeast); };
+            this.commandHandlers["nw"] = this.commandHandlers["northwest"] = function (words) { return _this.move(KMud.Direction.Northwest); };
+            this.commandHandlers["se"] = this.commandHandlers["southeast"] = function (words) { return _this.move(KMud.Direction.Southeast); };
+            this.commandHandlers["sw"] = this.commandHandlers["southwest"] = function (words) { return _this.move(KMud.Direction.Southwest); };
+            this.commandHandlers["u"] = this.commandHandlers["up"] = function (words) { return _this.move(KMud.Direction.Up); };
+            this.commandHandlers["d"] = this.commandHandlers["down"] = function (words) { return _this.move(KMud.Direction.Down); };
             this.commandHandlers["l"] = this.commandHandlers["look"] = function (words) { return _this.look(words); };
             this.commandHandlers["i"] = this.commandHandlers["inv"] = this.commandHandlers["inventory"] = function (words, tail) { return _this.SendMessage(new KMud.InventoryCommand()); };
             this.commandHandlers["get"] = this.commandHandlers["g"] = function (words, tail) { return _this.get(tail); };
             this.commandHandlers["drop"] = this.commandHandlers["dr"] = function (words, tail) { return _this.drop(tail, false); };
             this.commandHandlers["hide"] = this.commandHandlers["hid"] = function (words, tail) { return _this.drop(tail, true); };
-            this.commandHandlers["gos"] = this.commandHandlers["gossip"] = function (words, tail) { return _this.talk(tail, 0 /* Gossip */); };
-            this.commandHandlers["say"] = function (words, tail) { return _this.talk(tail, 2 /* Say */); };
+            this.commandHandlers["search"] = this.commandHandlers["sea"] = function (words, tail) { return _this.SendMessage(new KMud.SearchCommand()); };
+            this.commandHandlers["gos"] = this.commandHandlers["gossip"] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Gossip); };
+            this.commandHandlers["say"] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Say); };
             this.commandHandlers["sys"] = this.commandHandlers["sysop"] = function (words, tail) {
                 var msg = new KMud.SysopMessage();
                 msg.Command = tail;
                 _this.SendMessage(msg);
             };
-            this.symbolCommandHandlers["."] = function (words, tail) { return _this.talk(tail, 2 /* Say */); };
-            this.symbolCommandHandlers["/"] = function (words, tail, param) { return _this.talk(tail, 8 /* Telepath */, param); };
+            this.symbolCommandHandlers["."] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Say); };
+            this.symbolCommandHandlers["/"] = function (words, tail, param) { return _this.talk(tail, KMud.CommunicationType.Telepath, param); };
         };
         Game.prototype.loginMessage = function (message) {
             if (message.Login == true) {
@@ -321,6 +323,21 @@ var KMud;
                 }
             }
         };
+        Game.prototype.search = function (message) {
+            if (message.FoundCash.length == 0 && message.FoundItems.length == 0) {
+                this.mainOutput("Your search revealed nothing.", "search");
+                return;
+            }
+            var items = [];
+            for (var i = 0; i < message.FoundCash.length; i++) {
+                items.push(message.FoundCash[i].Amount + " " + message.FoundCash[i].Name);
+            }
+            if (message.FoundItems.length > 0) {
+                var groups = KMud.Linq(message.FoundItems).groupBy(function (x) { return x.TemplateId + "|" + x.Name; });
+                KMud.pushRange(items, groups.select(function (x) { return (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name; }).toArray());
+            }
+            this.mainOutput("You notice " + items.join(", ") + " here.", "search-found");
+        };
         Game.prototype.addElements = function (target, elements) {
             var scrolledToBottom = (target.scrollHeight - target.scrollTop === target.offsetHeight);
             for (var i = 0; i < elements.length; i++) {
@@ -370,11 +387,11 @@ var KMud;
                     this.mainOutput(message.CannotSeeMessage, "cannot-see");
                 }
                 else {
-                    if (message.LightLevel == -10000 /* Nothing */)
+                    if (message.LightLevel == KMud.LightLevel.Nothing)
                         this.mainOutput("The room is darker than anything you've ever seen before - you can't see anything", "cannot-see");
-                    if (message.LightLevel == -500 /* PitchBlack */)
+                    if (message.LightLevel == KMud.LightLevel.PitchBlack)
                         this.mainOutput("The room is pitch black - you can't see anything", "cannot-see");
-                    if (message.LightLevel == -250 /* VeryDark */)
+                    if (message.LightLevel == KMud.LightLevel.VeryDark)
                         this.mainOutput("The room is very dark - you can't see anything", "cannot-see");
                 }
             }
@@ -383,18 +400,23 @@ var KMud;
                 if (StringUtilities.notEmpty(message.Description)) {
                     this.mainOutput(message.Description, "room-desc");
                 }
-                var items = "";
+                var items = [];
                 if (message.VisibleCash.length > 0) {
-                    items = KMud.Linq(message.VisibleCash).select(function (x) { return String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : ""); }).toArray().join(", ");
+                    KMud.pushRange(items, KMud.Linq(message.VisibleCash).select(function (x) { return String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : ""); }).toArray());
+                }
+                if (message.FoundCash.length > 0) {
+                    KMud.pushRange(items, KMud.Linq(message.FoundCash).select(function (x) { return String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "") + " (*)"; }).toArray());
                 }
                 if (message.VisibleItems.length > 0) {
-                    if (items.length > 0)
-                        items += ", ";
                     var groups = KMud.Linq(message.VisibleItems).groupBy(function (x) { return x.TemplateId + "|" + x.Name; });
-                    items += groups.select(function (x) { return (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name; }).toArray().join(", ");
+                    KMud.pushRange(items, groups.select(function (x) { return (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name; }).toArray());
+                }
+                if (message.FoundItems.length > 0) {
+                    var groups = KMud.Linq(message.VisibleItems).groupBy(function (x) { return x.TemplateId + "|" + x.Name; });
+                    KMud.pushRange(items, groups.select(function (x) { return (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name + " (*)"; }).toArray());
                 }
                 if (items.length > 0) {
-                    this.mainOutput("You notice " + items + " here.", "items");
+                    this.mainOutput("You notice " + items.join(", ") + " here.", "items");
                 }
                 if (message.Actors.length > 1) {
                     var actors = message.Actors.filter(function (x) { return x.Id != _this.currentPlayer.Id; });
@@ -406,18 +428,18 @@ var KMud;
                 else {
                     this.mainOutput("Obvious exits: NONE!!!", "exits");
                 }
-                if (message.LightLevel == -200 /* BarelyVisible */)
+                if (message.LightLevel == KMud.LightLevel.BarelyVisible)
                     this.mainOutput("The room is barely visible", "dimly-lit");
-                if (message.LightLevel == -150 /* DimlyLit */)
+                if (message.LightLevel == KMud.LightLevel.DimlyLit)
                     this.mainOutput("The room is dimly lit", "dimly-lit");
             }
         };
         Game.prototype.showCommunication = function (message) {
             switch (message.Type) {
-                case 0 /* Gossip */:
+                case KMud.CommunicationType.Gossip:
                     this.mainOutput(message.ActorName + " gossips: " + message.Message, "gossip");
                     break;
-                case 2 /* Say */:
+                case KMud.CommunicationType.Say:
                     if (message.ActorId == this.currentPlayer.Id) {
                         this.mainOutput("You say \"" + message.Message + "\"", "say");
                     }
@@ -425,7 +447,7 @@ var KMud;
                         this.mainOutput(message.ActorName + " says \"" + message.Message + "\"", "say");
                     }
                     break;
-                case 8 /* Telepath */:
+                case KMud.CommunicationType.Telepath:
                     this.mainOutput(message.ActorName + " telepaths " + message.Message, "telepath");
                     break;
             }
