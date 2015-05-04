@@ -23,8 +23,8 @@ namespace KatanaMUD.Messages
                 foreach(var item in actor.Room.Items.Where(x => x.HiddenTime != null && !x.UsersWhoFoundMe.Contains(actor)).ToList())
                 {
                     //TODO: Figure out if this fomula needs tweaking
-                    var span = new TimeSpan(item.HiddenTime.Value);
-                    var chance = 100.0 / ((span.TotalDays + 30.0) / 30.0);
+                    var span = Game.GameTime.Subtract(new TimeSpan(item.HiddenTime.Value));
+                    var chance = 100.0 - (100.0 / ((span.TotalDays + 30.0) / 30.0));
                     chance = ((double)perception - chance) / 100.0;
 
                     if(Game.Random.NextDouble() < chance)
@@ -35,28 +35,30 @@ namespace KatanaMUD.Messages
                 }
 
                 var foundCash = new List<CurrencyDescription>();
-                var cash = actor.Room.GetTotalCashUserCanSee(actor);
-                foreach (var currency in cash)
+                var cash = actor.Room.GetTotalCash();
+                foreach (var total in cash)
                 {
+                    var known = actor.Room.GetTotalCashUserCanSee(total.Currency, actor);
+
                     // user already knows about all cash in the room.
-                    if (currency.Visible == currency.Total)
+                    if (total.Total == known.Total)
                         continue;
 
-                    var remaining = currency.Total - currency.Visible;
+                    var remaining = total.Total - known.Total;
 
                     // perform a roll to see if the user finds any. 
-                    // TODO: The search value is pegged at 50%. We may need to tweak this.
-                    var chance = ((double)perception - 50.0) / 100.0;
+                    // TODO: tweak this.
+                    var chance = (double)perception / 100.0;
 
                     if (Game.Random.NextDouble() < chance)
                     {
-                        // now figure out how much the user finds. 
+                        // now figure out how much the user finds. Roughly 1/3rd chance the user finds all of it (remaining * 1.5).
                         //TODO: tweak
                         //TODO: integer overflow?
-                        var amount = Game.Random.Next(1, (int)remaining + 1);
+                        var amount = Math.Min(remaining, Game.Random.Next(1, (int)(remaining * 1.5)));
 
-                        actor.Room.FoundCash(actor, currency.Currency, amount);
-                        foundCash.Add(new CurrencyDescription(currency.Currency, amount));
+                        actor.Room.FoundCash(actor, total.Currency, amount);
+                        foundCash.Add(new CurrencyDescription(total.Currency, amount));
                     }
                 }
 

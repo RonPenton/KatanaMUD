@@ -465,7 +465,7 @@ module KMud {
                 }
 
                 if (message.FoundCash.length > 0) {
-                    pushRange(items, Linq(message.FoundCash).select(x => String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "") + " (*)").toArray());
+                    pushRange(items, Linq(message.FoundCash).select(x => String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "") + "†").toArray());
                 }
 
                 if (message.VisibleItems.length > 0) {
@@ -474,8 +474,8 @@ module KMud {
                 }
 
                 if (message.FoundItems.length > 0) {
-                    var groups = Linq(message.VisibleItems).groupBy(x => x.TemplateId + "|" + x.Name);
-                    pushRange(items, groups.select(x => (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name + " (*)").toArray());
+                    var groups = Linq(message.FoundItems).groupBy(x => x.TemplateId + "|" + x.Name);
+                    pushRange(items, groups.select(x => (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name + "†").toArray());
                 }
 
                 if (items.length > 0) {

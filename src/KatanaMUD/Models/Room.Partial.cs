@@ -112,6 +112,11 @@ namespace KatanaMUD.Models
             return new CashInformation() { Currency = currency, Visible = GetCash(currency), KnownHidden = GetHiddenCash(currency) };
         }
 
+        public IEnumerable<CashInformation> GetTotalCash()
+        {
+            return Game.Data.AllCurrencies.Select(x => GetTotalCash(x));
+        }
+
         public long GetCash(Currency currency) => KatanaMUD.Models.Currency.Get(currency, this.Cash);
 
         public long GetHiddenCash(Currency currency) => KatanaMUD.Models.Currency.Get(currency, this.HiddenCash);

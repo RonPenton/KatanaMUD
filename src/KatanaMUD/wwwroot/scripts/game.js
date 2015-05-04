@@ -405,15 +405,15 @@ var KMud;
                     KMud.pushRange(items, KMud.Linq(message.VisibleCash).select(function (x) { return String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : ""); }).toArray());
                 }
                 if (message.FoundCash.length > 0) {
-                    KMud.pushRange(items, KMud.Linq(message.FoundCash).select(function (x) { return String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "") + " (*)"; }).toArray());
+                    KMud.pushRange(items, KMud.Linq(message.FoundCash).select(function (x) { return String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "") + "†"; }).toArray());
                 }
                 if (message.VisibleItems.length > 0) {
                     var groups = KMud.Linq(message.VisibleItems).groupBy(function (x) { return x.TemplateId + "|" + x.Name; });
                     KMud.pushRange(items, groups.select(function (x) { return (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name; }).toArray());
                 }
                 if (message.FoundItems.length > 0) {
-                    var groups = KMud.Linq(message.VisibleItems).groupBy(function (x) { return x.TemplateId + "|" + x.Name; });
-                    KMud.pushRange(items, groups.select(function (x) { return (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name + " (*)"; }).toArray());
+                    var groups = KMud.Linq(message.FoundItems).groupBy(function (x) { return x.TemplateId + "|" + x.Name; });
+                    KMud.pushRange(items, groups.select(function (x) { return (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name + "†"; }).toArray());
                 }
                 if (items.length > 0) {
                     this.mainOutput("You notice " + items.join(", ") + " here.", "items");
