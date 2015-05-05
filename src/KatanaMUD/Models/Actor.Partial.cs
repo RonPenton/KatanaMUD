@@ -106,7 +106,7 @@ namespace KatanaMUD.Models
             var illumination = room.Illumination + Illumination;
             message.LightLevel = LightLevels.Get(illumination);
 
-            
+
             if (LightLevels.IsTooDarkToSee(message.LightLevel))
             {
                 // Too dark to see. Send the light information and that's it.
@@ -162,6 +162,12 @@ namespace KatanaMUD.Models
             return new Validation();
         }
 
+        /// <summary>
+        /// Determines if a user can get cash.
+        /// </summary>
+        /// <param name="currency"></param>
+        /// <param name="quantity">The quantity requested, or leave empty to get it all.</param>
+        /// <returns></returns>
         public Validation CanGetCash(Currency currency, long? quantity)
         {
             var q = Room.GetTotalCashUserCanSee(currency, this);
@@ -193,6 +199,7 @@ namespace KatanaMUD.Models
             item.Actor = this;
             item.Room = null;
             item.HiddenTime = null;
+            item.EquippedSlot = null;
         }
 
         /// <summary>
@@ -252,6 +259,7 @@ namespace KatanaMUD.Models
         {
             item.Actor = null;
             item.Room = Room;
+            item.EquippedSlot = null;
 
             if (hide)
             {
@@ -295,7 +303,148 @@ namespace KatanaMUD.Models
                 Room.ClearFoundHiddenCash(currency);
         }
 
+        /// <summary>
+        /// Returns a list of all items the Actor owns which are currently equipped.
+        /// </summary>
         public IEnumerable<Item> EquippedItems => Items.Where(x => x.EquippedSlot != null);
+
+        /// <summary>
+        /// Determines if an item can be removed from its equipped state.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public Validation CanRemoveItem(Item item)
+        {
+            if (item.Actor != this)
+                return new Validation("You do not own that!");
+
+            if (item.EquipmentSlot == null)
+                return new Validation("You do not have that equipped!");
+
+            // TODO: Ask the item if it can be removed
+
+            return new Validation();
+        }
+
+        /// <summary>
+        /// Removes an item from the Actors equipped list.
+        /// </summary>
+        /// <param name="item"></param>
+        public void RemoveItem(Item item)
+        {
+            if (item.Actor != this)
+                throw new InvalidOperationException("Item does not belong to Actor");
+
+            item.EquipmentSlot = null;
+        }
+
+        /// <summary>
+        /// Determines if the Actor currently has an equipment slot open.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public bool IsSlotOpen(Item item)
+        {
+            if (item.ItemTemplate.EquipmentSlot == null)
+                throw new InvalidOperationException("Item has no slot");
+
+            var slot = item.ItemTemplate.EquipmentSlot.Value;
+
+            // Offhand is a special case.
+            if (slot == EquipmentSlot.Offhand)
+            {
+                var offhand = Items.Where(x => x.EquipmentSlot == EquipmentSlot.Offhand);
+                if (offhand.Any())
+                    return false;
+
+                var weapon = Items.Where(x => x.EquipmentSlot == EquipmentSlot.Weapon);
+                if (!weapon.Any())
+                    return true;
+
+                if (weapon.First().WeaponType.IsTwoHanded())
+                    return false;
+
+                return true;
+            }
+            else if(slot == EquipmentSlot.Weapon)
+            {
+                var weapon = Items.Where(x => x.EquipmentSlot == EquipmentSlot.Weapon);
+                var offhand = Items.Where(x => x.EquipmentSlot == EquipmentSlot.Offhand);
+
+                if (item.WeaponType.IsTwoHanded() && weapon.Any() && offhand.Any())
+                    return false;
+
+                //TODO: Check for ability "DualWield".
+                return weapon.Any();
+            }
+
+            var items = Items.Where(x => x.EquipmentSlot == slot);
+
+            // two-slot items
+            if (slot.In(EquipmentSlot.Ears, EquipmentSlot.Wrists, EquipmentSlot.Fingers))
+                return items.Count() < 2;
+
+            // everything else is 1-slot.
+            return !items.Any();
+        }
+
+        /// <summary>
+        /// Determines if the user is able to equip the given item. Please note that if there is no slot open, this will throw
+        /// a validation error at you. It is assumed that you figure out which item to unequip in order to equip a new one. 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public Validation CanEquipItem(Item item)
+        {
+            if (item.Actor != this)
+                return new Validation("You do not own that item!");
+
+            if (item.ItemTemplate.EquipmentSlot == null)
+                return new Validation("You may not wear that item!");
+
+            if (!IsSlotOpen(item))
+                return new Validation("You currently have an item equipped in that slot!");
+
+            // TODO: Validate Weapon Type/Armour Type
+            // TODO: ask item if it can be equipped
+
+            return new Validation();
+        }
+
+        /// <summary>
+        /// Equips an item. Note: This will not unequip an item first, but will rather throw an exception. It is up to the caller
+        /// To call IsSlotOpen() and CanEquipItem() first. 
+        /// </summary>
+        /// <param name="item"></param>
+        public void EquipItem(Item item)
+        {
+            if (item.Actor != this)
+                throw new InvalidOperationException("Item is not owned by Actor.");
+
+            if (item.ItemTemplate.EquipmentSlot == null)
+                throw new InvalidOperationException("Item cannot be worn.");
+
+            if (!IsSlotOpen(item))
+                throw new InvalidOperationException("There is no slot open for the item.");
+
+
+            // Special case. Dual Wielding.
+            if (item.ItemTemplate.EquipmentSlot == EquipmentSlot.Weapon)
+            {
+                //TODO: Check for ability "DualWield".
+
+                // Arm the weapon offhand if they already have a weapon equipped. 
+                var weapon = Items.Where(x => x.EquipmentSlot == EquipmentSlot.Weapon);
+                if (weapon.Any())
+                    item.EquipmentSlot = EquipmentSlot.Offhand;
+                else
+                    item.EquipmentSlot = EquipmentSlot.Weapon;
+
+                return;
+            }
+
+            item.EquipmentSlot = item.ItemTemplate.EquipmentSlot;
+        }
     }
 
     /// <summary>

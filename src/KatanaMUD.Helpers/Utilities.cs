@@ -22,5 +22,10 @@ namespace KatanaMUD
             }
             return target;
         }
+
+        public static bool In<T>(this T item, params T[] items)
+        {
+            return items.Any(x => x.Equals(item));
+        }
     }
 }
