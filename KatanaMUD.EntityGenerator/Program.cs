@@ -15,8 +15,14 @@ namespace KatanaMUD.EntityGenerator
         static string location = "..\\..\\..\\src\\KatanaMUD\\Models\\";
 
 
+
         static void Main(string[] args)
         {
+            AddTypeOverride("Item", "EquippedSlot", "EquipmentSlot?");
+            AddTypeOverride("ItemTemplate", "WeaponType", "WeaponType?");
+            AddTypeOverride("ItemTemplate", "EquipType", "EquipmentSlot?");
+
+
             string connectionString = "Data Source=(local);Initial Catalog=KatanaMUD;Integrated Security=true";
             List<ColumnMetadata> columns = null;
 
@@ -203,11 +209,11 @@ namespace {0}
                 {
                     builder.AppendFormat("            {0} = new JsonContainer(this);\r\n", column.Column.Substring(4));
                 }
-                foreach(var child in table.Children)
+                foreach (var child in table.Children)
                 {
                     builder.AppendFormat("            {0} = new ParentChildRelationshipContainer<{1}, {2}, {3}>(this, child => child.{1}, (child, parent) => child.{1}= parent);\r\n", child.PluralName, table.Name, child.Name, child.PrimaryKey.TypeName);
                 }
-                foreach(var linkTable in table.LinkEntities)
+                foreach (var linkTable in table.LinkEntities)
                 {
                     var link = linkTable.FirstLink;
                     if (link.Name == table.Name)
@@ -222,12 +228,22 @@ namespace {0}
 
                 foreach (var column in table.NormalColumns)
                 {
-                    builder.AppendFormat("        public {0} {1} {{ get {{ return _{1}; }} set {{ _{1} = value; this.Changed(); }} }}\r\n", column.TypeName, column.Column);
+                    var alteredType = GetTypeOverride(table.Name, column.Column);
+                    var access = GetAccessOverride(table.Name, column.Column);
+                    if (alteredType == null)
+                    {
+                        builder.AppendFormat("        {2} {0} {1} {{ get {{ return _{1}; }} set {{ _{1} = value; this.Changed(); }} }}\r\n", column.TypeName, column.Column, access);
+                    }
+                    else
+                    {
+                        builder.AppendFormat("        {2} {0} {1} {{ get {{ return ({0})_{1}; }} set {{ _{1} = ({3})value; this.Changed(); }} }}\r\n", alteredType, column.Column, access, column.TypeName);
+                    }
                 }
 
                 foreach (var column in table.JsonColumns)
                 {
-                    builder.AppendFormat("        public dynamic {0} {{ get; private set; }}\r\n", column.Column.Substring(4));
+                    var access = GetAccessOverride(table.Name, column.Column);
+                    builder.AppendFormat("        {1} dynamic {0} {{ get; private set; }}\r\n", column.Column.Substring(4), access);
                 }
 
                 foreach (var relationship in table.Relationships)
@@ -247,12 +263,12 @@ namespace {0}
 ", relationship.Column.ForeignKeyTable, table.Name, table.PluralName);
                 }
 
-                foreach(var child in table.Children)
+                foreach (var child in table.Children)
                 {
                     builder.AppendFormat("        public ICollection<{0}> {1} {{ get; private set; }}\r\n",
                         child.Name, child.PluralName);
                 }
-                foreach(var link in table.LinkEntities)
+                foreach (var link in table.LinkEntities)
                 {
                     var other = link.FirstLink;
                     if (other.Name == table.Name)
@@ -292,7 +308,7 @@ namespace {0}
         {{
 ", table.Name);
 
-                foreach(var relationship in table.Relationships)
+                foreach (var relationship in table.Relationships)
                 {
                     builder.AppendFormat("            {0} = Context.{1}.Single{3}(x => x.Id == _{2});\r\n",
                         relationship.Column.ForeignKeyTable, relationship.ParentTable.PluralName, relationship.Column.Column,
@@ -305,7 +321,7 @@ namespace {0}
                     var secondItem = "Item1";
                     var first = link.FirstLink;
                     var second = link.SecondLink;
-                    if(second.Name == table.Name)
+                    if (second.Name == table.Name)
                     {
                         firstItem = "Item1";
                         secondItem = "Item2";
@@ -445,7 +461,7 @@ namespace {0}
         }
 
 
-    private static List<ColumnMetadata> GetColumns(SqlConnection connection)
+        private static List<ColumnMetadata> GetColumns(SqlConnection connection)
         {
             string query = @"use [KatanaMUD]
 select o.name as [Table], 
@@ -481,6 +497,58 @@ order by o.name, c.column_id";
                 }
             }
             return list;
+        }
+
+        static Dictionary<string, Dictionary<string, string>> _typeOverrides = new Dictionary<string, Dictionary<string, string>>();
+        static Dictionary<string, Dictionary<string, string>> _accessOverrides = new Dictionary<string, Dictionary<string, string>>();
+
+
+        static void AddTypeOverride(string table, string column, string typeName)
+        {
+            Dictionary<string, string> td;
+            if (!_typeOverrides.TryGetValue(table, out td))
+            {
+                _typeOverrides[table] = td = new Dictionary<string, string>();
+            }
+
+            td[column] = typeName;
+        }
+
+        static void AddAccessOverride(string table, string column, string typeName)
+        {
+            Dictionary<string, string> td;
+            if (!_accessOverrides.TryGetValue(table, out td))
+            {
+                _accessOverrides[table] = td = new Dictionary<string, string>();
+            }
+
+            td[column] = typeName;
+        }
+
+        static string GetTypeOverride(string table, string column)
+        {
+            Dictionary<string, string> td;
+            if (_typeOverrides.TryGetValue(table, out td))
+            {
+                string value;
+                if (td.TryGetValue(column, out value))
+                    return value;
+            }
+
+            return null;
+        }
+
+        static string GetAccessOverride(string table, string column)
+        {
+            Dictionary<string, string> td;
+            if (_accessOverrides.TryGetValue(table, out td))
+            {
+                string value;
+                if (td.TryGetValue(column, out value))
+                    return value;
+            }
+
+            return "public";
         }
     }
 }

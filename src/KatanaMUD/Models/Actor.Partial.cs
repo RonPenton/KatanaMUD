@@ -318,7 +318,7 @@ namespace KatanaMUD.Models
             if (item.Actor != this)
                 return new Validation("You do not own that!");
 
-            if (item.EquipmentSlot == null)
+            if (item.EquippedSlot == null)
                 return new Validation("You do not have that equipped!");
 
             // TODO: Ask the item if it can be removed
@@ -335,7 +335,7 @@ namespace KatanaMUD.Models
             if (item.Actor != this)
                 throw new InvalidOperationException("Item does not belong to Actor");
 
-            item.EquipmentSlot = null;
+            item.EquippedSlot = null;
         }
 
         /// <summary>
@@ -345,19 +345,19 @@ namespace KatanaMUD.Models
         /// <returns></returns>
         public bool IsSlotOpen(Item item)
         {
-            if (item.ItemTemplate.EquipmentSlot == null)
+            if (item.ItemTemplate.EquipType == null)
                 throw new InvalidOperationException("Item has no slot");
 
-            var slot = item.ItemTemplate.EquipmentSlot.Value;
+            var slot = item.ItemTemplate.EquipType.Value;
 
             // Offhand is a special case.
             if (slot == EquipmentSlot.Offhand)
             {
-                var offhand = Items.Where(x => x.EquipmentSlot == EquipmentSlot.Offhand);
+                var offhand = Items.Where(x => x.EquippedSlot == EquipmentSlot.Offhand);
                 if (offhand.Any())
                     return false;
 
-                var weapon = Items.Where(x => x.EquipmentSlot == EquipmentSlot.Weapon);
+                var weapon = Items.Where(x => x.EquippedSlot == EquipmentSlot.Weapon);
                 if (!weapon.Any())
                     return true;
 
@@ -368,8 +368,8 @@ namespace KatanaMUD.Models
             }
             else if(slot == EquipmentSlot.Weapon)
             {
-                var weapon = Items.Where(x => x.EquipmentSlot == EquipmentSlot.Weapon);
-                var offhand = Items.Where(x => x.EquipmentSlot == EquipmentSlot.Offhand);
+                var weapon = Items.Where(x => x.EquippedSlot == EquipmentSlot.Weapon);
+                var offhand = Items.Where(x => x.EquippedSlot == EquipmentSlot.Offhand);
 
                 if (item.WeaponType.IsTwoHanded() && weapon.Any() && offhand.Any())
                     return false;
@@ -378,7 +378,7 @@ namespace KatanaMUD.Models
                 return weapon.Any();
             }
 
-            var items = Items.Where(x => x.EquipmentSlot == slot);
+            var items = Items.Where(x => x.EquippedSlot == slot);
 
             // two-slot items
             if (slot.In(EquipmentSlot.Ears, EquipmentSlot.Wrists, EquipmentSlot.Fingers))
@@ -399,7 +399,7 @@ namespace KatanaMUD.Models
             if (item.Actor != this)
                 return new Validation("You do not own that item!");
 
-            if (item.ItemTemplate.EquipmentSlot == null)
+            if (item.ItemTemplate.EquipType == null)
                 return new Validation("You may not wear that item!");
 
             if (!IsSlotOpen(item))
@@ -421,7 +421,7 @@ namespace KatanaMUD.Models
             if (item.Actor != this)
                 throw new InvalidOperationException("Item is not owned by Actor.");
 
-            if (item.ItemTemplate.EquipmentSlot == null)
+            if (item.ItemTemplate.EquipType == null)
                 throw new InvalidOperationException("Item cannot be worn.");
 
             if (!IsSlotOpen(item))
@@ -429,21 +429,21 @@ namespace KatanaMUD.Models
 
 
             // Special case. Dual Wielding.
-            if (item.ItemTemplate.EquipmentSlot == EquipmentSlot.Weapon)
+            if (item.ItemTemplate.EquipType == EquipmentSlot.Weapon)
             {
                 //TODO: Check for ability "DualWield".
 
                 // Arm the weapon offhand if they already have a weapon equipped. 
-                var weapon = Items.Where(x => x.EquipmentSlot == EquipmentSlot.Weapon);
+                var weapon = Items.Where(x => x.EquippedSlot == EquipmentSlot.Weapon);
                 if (weapon.Any())
-                    item.EquipmentSlot = EquipmentSlot.Offhand;
+                    item.EquippedSlot = EquipmentSlot.Offhand;
                 else
-                    item.EquipmentSlot = EquipmentSlot.Weapon;
+                    item.EquippedSlot = EquipmentSlot.Weapon;
 
                 return;
             }
 
-            item.EquipmentSlot = item.ItemTemplate.EquipmentSlot;
+            item.EquippedSlot = item.ItemTemplate.EquipType;
         }
     }
 

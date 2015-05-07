@@ -13,7 +13,5 @@ namespace KatanaMUD.Models
             item.ItemTemplate = this;
             return item;
         }
-
-        public EquipmentSlot? EquipmentSlot => EquipType == null ? null : (EquipmentSlot?)EquipType;
     }
 }

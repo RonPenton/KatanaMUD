@@ -30,7 +30,7 @@ namespace KatanaMUD.Models
         public Guid Id { get { return _Id; } set { _Id = value; this.Changed(); } }
         public String CustomName { get { return _CustomName; } set { _CustomName = value; this.Changed(); } }
         public Boolean Modified { get { return _Modified; } set { _Modified = value; this.Changed(); } }
-        public Int32? EquippedSlot { get { return _EquippedSlot; } set { _EquippedSlot = value; this.Changed(); } }
+        public EquipmentSlot? EquippedSlot { get { return (EquipmentSlot?)_EquippedSlot; } set { _EquippedSlot = (Int32?)value; this.Changed(); } }
         public Int64? HiddenTime { get { return _HiddenTime; } set { _HiddenTime = value; this.Changed(); } }
         public dynamic Stats { get; private set; }
         partial void OnItemTemplateChanging(ItemTemplate oldValue, ItemTemplate newValue);

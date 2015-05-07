@@ -44,12 +44,6 @@ namespace KatanaMUD.Models
                 UsersWhoFoundMe.Clear();
         }
 
-        public EquipmentSlot? EquipmentSlot
-        {
-            get { return EquippedSlot == null ? null : (EquipmentSlot?)EquippedSlot; }
-            set { EquippedSlot = (int?)value; }
-        }
-
         public WeaponType? WeaponType => ItemTemplate.WeaponType == null ? null : (WeaponType?)ItemTemplate.WeaponType;
     }
 

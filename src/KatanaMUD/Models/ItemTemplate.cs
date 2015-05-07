@@ -35,8 +35,8 @@ namespace KatanaMUD.Models
         public String Name { get { return _Name; } set { _Name = value; this.Changed(); } }
         public String Description { get { return _Description; } set { _Description = value; this.Changed(); } }
         public Int32 Type { get { return _Type; } set { _Type = value; this.Changed(); } }
-        public Int32? EquipType { get { return _EquipType; } set { _EquipType = value; this.Changed(); } }
-        public Int32? WeaponType { get { return _WeaponType; } set { _WeaponType = value; this.Changed(); } }
+        public EquipmentSlot? EquipType { get { return (EquipmentSlot?)_EquipType; } set { _EquipType = (Int32?)value; this.Changed(); } }
+        public WeaponType? WeaponType { get { return (WeaponType?)_WeaponType; } set { _WeaponType = (Int32?)value; this.Changed(); } }
         public Int32? Limit { get { return _Limit; } set { _Limit = value; this.Changed(); } }
         public Boolean Fixed { get { return _Fixed; } set { _Fixed = value; this.Changed(); } }
         public Boolean NotDroppable { get { return _NotDroppable; } set { _NotDroppable = value; this.Changed(); } }
