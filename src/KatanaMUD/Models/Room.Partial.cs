@@ -117,9 +117,9 @@ namespace KatanaMUD.Models
             return Game.Data.AllCurrencies.Select(x => GetTotalCash(x));
         }
 
-        public long GetCash(Currency currency) => KatanaMUD.Models.Currency.Get(currency, this.Cash);
+        public long GetCash(Currency currency) => KatanaMUD.Models.Currency.Get(currency, this.JSONCash);
 
-        public long GetHiddenCash(Currency currency) => KatanaMUD.Models.Currency.Get(currency, this.HiddenCash);
+        public long GetHiddenCash(Currency currency) => KatanaMUD.Models.Currency.Get(currency, this.JSONHiddenCash);
 
         public IEnumerable<Item> ItemsUserCanSee(Actor actor)
         {

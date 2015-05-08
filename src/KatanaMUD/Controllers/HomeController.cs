@@ -111,7 +111,6 @@ namespace KatanaMUD.Controllers
             dbActor.CharacterPoints = 100;    // TODO: From settings?
             dbActor.RaceTemplate = KatanaMUD.Game.Data.RaceTemplates.Single(x => x.Id == actor.RaceTemplateId);
             dbActor.ClassTemplate = KatanaMUD.Game.Data.ClassTemplates.Single(x => x.Id == actor.ClassTemplateId);
-            JsonContainer.Merge(dbActor.Stats, dbActor.RaceTemplate.Stats, dbActor.ClassTemplate.Stats);
 
             return dbActor;
         }
@@ -165,12 +164,12 @@ namespace KatanaMUD.Controllers
         private void TransferStatsToDbActor(Actor dbActor, ActorModel actor, int cost)
         {
             dbActor.CharacterPoints -= cost;
-            dbActor.Stats.Strength = actor.Strength;
-            dbActor.Stats.Health = actor.Health;
-            dbActor.Stats.Willpower = actor.Willpower;
-            dbActor.Stats.Intellect = actor.Intellect;
-            dbActor.Stats.Charm = actor.Charm;
-            dbActor.Stats.Agility = actor.Agility;
+            dbActor.Stats.SetCalculatedValue("Strength", actor.Strength);
+            dbActor.Stats.SetCalculatedValue("Health", actor.Health);
+            dbActor.Stats.SetCalculatedValue("Willpower", actor.Willpower);
+            dbActor.Stats.SetCalculatedValue("Intellect", actor.Intellect);
+            dbActor.Stats.SetCalculatedValue("Charm", actor.Charm);
+            dbActor.Stats.SetCalculatedValue("Agility", actor.Agility);
         }
 
         private int ValidateCPs(Actor dbActor, ActorModel actor)
@@ -201,10 +200,10 @@ namespace KatanaMUD.Controllers
         }
         private int VerifyStat(string stat, Actor dbActor, ActorModel actor)
         {
-            var initial = (long)((dbActor.RaceTemplate.Stats as JsonContainer)[stat]);
-            var current = (long)((dbActor.Stats as JsonContainer)[stat]);
+            var initial = (long)dbActor.RaceTemplate.JSONStats[stat];
+            var current = dbActor.Stats.GetCalculatedValue<long>(stat);
             var modified = (long)(typeof(ActorModel).GetProperty(stat).GetValue(actor));
-            var cap = (long)((dbActor.Stats as JsonContainer)[stat + "Cap"]);
+            var cap = dbActor.Stats.GetCalculatedValue<long>(stat + "Cap");
 
             if (modified < current || modified > cap)
                 return Int32.MinValue;

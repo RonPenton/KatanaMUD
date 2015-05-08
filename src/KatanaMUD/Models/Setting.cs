@@ -8,6 +8,7 @@ namespace KatanaMUD.Models
 {
     public partial class Setting : Entity<String>
     {
+        partial void OnConstruct();
         public override String Key { get { return Id; } set { Id = value; } }
         private GameEntities Context => (GameEntities)__context;
         private String _Id;
@@ -15,6 +16,7 @@ namespace KatanaMUD.Models
 
         public Setting()
         {
+            OnConstruct();
         }
 
         public String Id { get { return _Id; } set { _Id = value; this.Changed(); } }

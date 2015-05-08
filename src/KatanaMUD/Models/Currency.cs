@@ -8,6 +8,7 @@ namespace KatanaMUD.Models
 {
     public partial class Currency : Entity<Int32>
     {
+        partial void OnConstruct();
         public override Int32 Key { get { return Id; } set { Id = value; } }
         private GameEntities Context => (GameEntities)__context;
         private Int32 _Id;
@@ -18,6 +19,7 @@ namespace KatanaMUD.Models
 
         public Currency()
         {
+            OnConstruct();
         }
 
         public Int32 Id { get { return _Id; } set { _Id = value; this.Changed(); } }

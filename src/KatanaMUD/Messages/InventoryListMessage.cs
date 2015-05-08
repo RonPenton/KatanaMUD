@@ -11,7 +11,7 @@ namespace KatanaMUD.Messages
         public override void Process(Actor actor)
         {
             var response = new InventoryListMessage();
-            response.Cash = Game.Data.AllCurrencies.Select(x => new CurrencyDescription(x, Currency.Get(x, actor.Cash))).Where(x => x.Amount > 0).ToArray();
+            response.Cash = Game.Data.AllCurrencies.Select(x => new CurrencyDescription(x, Currency.Get(x, actor.JSONCash))).Where(x => x.Amount > 0).ToArray();
             response.Items = actor.Items.Select(x => new ItemDescription(x)).ToArray();
             response.Encumbrance = actor.Encumbrance;
             response.MaxEncumbrance = actor.MaxEncumbrance;
@@ -170,7 +170,7 @@ namespace KatanaMUD.Messages
             if (Quantity < 0)
                 throw new InvalidOperationException("Cannot drop negative items.");
 
-            var availableCurrencies = Game.Data.AllCurrencies.Where(x => Currency.Get(x, actor.Cash) > 0).ToList();
+            var availableCurrencies = Game.Data.AllCurrencies.Where(x => Currency.Get(x, actor.JSONCash) > 0).ToList();
             var items = GetItemCommand.FindItems(availableCurrencies, actor.Items.ToList(), ItemId, ItemName, Math.Max(Quantity, 1));
 
             // Handle a cash drop.
@@ -182,7 +182,7 @@ namespace KatanaMUD.Messages
                     // In the event that no number is specified (ie 0), then we assume the user
                     // wants to drop all currency. So, we oblige them.
                     // TODO: see if this is a correct assumption. Could be dangerous?
-                    Quantity = (int)Currency.Get(currency, actor.Cash);
+                    Quantity = (int)Currency.Get(currency, actor.JSONCash);
                 }
 
                 var action = actor.CanDropCash(currency, Quantity);

@@ -8,6 +8,7 @@ namespace KatanaMUD.Models
 {
     public partial class Item : Entity<Guid>
     {
+        partial void OnConstruct();
         public override Guid Key { get { return Id; } set { Id = value; } }
         private GameEntities Context => (GameEntities)__context;
         private Guid _Id;
@@ -24,7 +25,9 @@ namespace KatanaMUD.Models
 
         public Item()
         {
-            Stats = new JsonContainer(this);
+            OnConstruct();
+            JSONStats = new JsonContainer(this);
+            JSONAttributes = new JsonContainer(this);
         }
 
         public Guid Id { get { return _Id; } set { _Id = value; this.Changed(); } }
@@ -32,7 +35,8 @@ namespace KatanaMUD.Models
         public Boolean Modified { get { return _Modified; } set { _Modified = value; this.Changed(); } }
         public EquipmentSlot? EquippedSlot { get { return (EquipmentSlot?)_EquippedSlot; } set { _EquippedSlot = (Int32?)value; this.Changed(); } }
         public Int64? HiddenTime { get { return _HiddenTime; } set { _HiddenTime = value; this.Changed(); } }
-        public dynamic Stats { get; private set; }
+        private JsonContainer JSONStats { get; set; }
+        private JsonContainer JSONAttributes { get; set; }
         partial void OnItemTemplateChanging(ItemTemplate oldValue, ItemTemplate newValue);
         public ItemTemplate ItemTemplate {
             get { return _ItemTemplate; }
@@ -78,10 +82,12 @@ namespace KatanaMUD.Models
             entity._ActorId = reader.GetSafeGuid(3);
             entity._RoomId = reader.GetSafeInt32(4);
             entity._Modified = reader.GetBoolean(5);
-            entity.Stats = new JsonContainer(entity);
-            entity.Stats.FromJson(reader.GetSafeString(6));
-            entity._EquippedSlot = reader.GetSafeInt32(7);
-            entity._HiddenTime = reader.GetSafeInt64(8);
+            entity.JSONStats = new JsonContainer(entity);
+            entity.JSONStats.FromJson(reader.GetSafeString(6));
+            entity.JSONAttributes = new JsonContainer(entity);
+            entity.JSONAttributes.FromJson(reader.GetSafeString(7));
+            entity._EquippedSlot = reader.GetSafeInt32(8);
+            entity._HiddenTime = reader.GetSafeInt64(9);
             return entity;
         }
 
@@ -101,21 +107,22 @@ namespace KatanaMUD.Models
             c.Parameters.AddWithValue("@ActorId", (object)e.Actor?.Id ?? DBNull.Value);
             c.Parameters.AddWithValue("@RoomId", (object)e.Room?.Id ?? DBNull.Value);
             c.Parameters.AddWithValue("@Modified", (object)e.Modified ?? DBNull.Value);
-            c.Parameters.AddWithValue("@JSONStats", e.Stats.ToJson());
+            c.Parameters.AddWithValue("@JSONStats", e.JSONStats.ToJson());
+            c.Parameters.AddWithValue("@JSONAttributes", e.JSONAttributes.ToJson());
             c.Parameters.AddWithValue("@EquippedSlot", (object)e.EquippedSlot ?? DBNull.Value);
             c.Parameters.AddWithValue("@HiddenTime", (object)e.HiddenTime ?? DBNull.Value);
         }
 
         public static void GenerateInsertCommand(SqlCommand c, Item e)
         {
-            c.CommandText = @"INSERT INTO [Item]([Id], [ItemTemplateId], [CustomName], [ActorId], [RoomId], [Modified], [JSONStats], [EquippedSlot], [HiddenTime])
-                              VALUES (@Id, @ItemTemplateId, @CustomName, @ActorId, @RoomId, @Modified, @JSONStats, @EquippedSlot, @HiddenTime)";
+            c.CommandText = @"INSERT INTO [Item]([Id], [ItemTemplateId], [CustomName], [ActorId], [RoomId], [Modified], [JSONStats], [JSONAttributes], [EquippedSlot], [HiddenTime])
+                              VALUES (@Id, @ItemTemplateId, @CustomName, @ActorId, @RoomId, @Modified, @JSONStats, @JSONAttributes, @EquippedSlot, @HiddenTime)";
             AddSqlParameters(c, e);
         }
 
         public static void GenerateUpdateCommand(SqlCommand c, Item e)
         {
-            c.CommandText = @"UPDATE [Item] SET [Id] = @Id, [ItemTemplateId] = @ItemTemplateId, [CustomName] = @CustomName, [ActorId] = @ActorId, [RoomId] = @RoomId, [Modified] = @Modified, [JSONStats] = @JSONStats, [EquippedSlot] = @EquippedSlot, [HiddenTime] = @HiddenTime WHERE [Id] = @Id";
+            c.CommandText = @"UPDATE [Item] SET [Id] = @Id, [ItemTemplateId] = @ItemTemplateId, [CustomName] = @CustomName, [ActorId] = @ActorId, [RoomId] = @RoomId, [Modified] = @Modified, [JSONStats] = @JSONStats, [JSONAttributes] = @JSONAttributes, [EquippedSlot] = @EquippedSlot, [HiddenTime] = @HiddenTime WHERE [Id] = @Id";
             AddSqlParameters(c, e);
         }
 

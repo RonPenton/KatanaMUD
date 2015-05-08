@@ -22,6 +22,11 @@ namespace KatanaMUD.EntityGenerator
             AddTypeOverride("ItemTemplate", "WeaponType", "WeaponType?");
             AddTypeOverride("ItemTemplate", "EquipType", "EquipmentSlot?");
 
+            AddAccessOverride("Item", "JSONStats", "private");
+            AddAccessOverride("Item", "JSONAttributes", "private");
+
+            AddAccessOverride("Actor", "JSONStats", "private");
+            AddAccessOverride("Actor", "JSONAttributes", "private");
 
             string connectionString = "Data Source=(local);Initial Catalog=KatanaMUD;Integrated Security=true";
             List<ColumnMetadata> columns = null;
@@ -190,6 +195,7 @@ namespace {0}
 {{
 ", namespaceName);
                 builder.AppendFormat("    public partial class {0} : Entity<{1}>\r\n    {{\r\n", table.Name, table.PrimaryKey.TypeName);
+                builder.Append("        partial void OnConstruct();\r\n");
                 builder.AppendFormat("        public override {0} Key {{ get {{ return {1}; }} set {{ {1} = value; }} }}\r\n", table.PrimaryKey.TypeName, table.PrimaryKey.Column);
                 builder.AppendFormat("        private {0} Context => ({0})__context;\r\n", className);
 
@@ -205,9 +211,10 @@ namespace {0}
                 }
 
                 builder.AppendFormat("\r\n        public {0}()\r\n        {{\r\n", table.Name);
+                builder.Append("            OnConstruct();\r\n");
                 foreach (var column in table.JsonColumns)
                 {
-                    builder.AppendFormat("            {0} = new JsonContainer(this);\r\n", column.Column.Substring(4));
+                    builder.AppendFormat("            {0} = new JsonContainer(this);\r\n", column.Column);
                 }
                 foreach (var child in table.Children)
                 {
@@ -243,7 +250,10 @@ namespace {0}
                 foreach (var column in table.JsonColumns)
                 {
                     var access = GetAccessOverride(table.Name, column.Column);
-                    builder.AppendFormat("        {1} dynamic {0} {{ get; private set; }}\r\n", column.Column.Substring(4), access);
+                    string setAccess = "private ";
+                    if (access == "private")
+                        setAccess = "";
+                    builder.AppendFormat("        {1} JsonContainer {0} {{ get; {2}set; }}\r\n", column.Column, access, setAccess);
                 }
 
                 foreach (var relationship in table.Relationships)
@@ -295,7 +305,7 @@ namespace {0}
                     {
                         builder.AppendFormat(@"            entity.{0} = new JsonContainer(entity);
             entity.{0}.FromJson(reader.GetSafeString({1}));
-", column.Column.Substring(4), i);
+", column.Column, i);
                     }
 
                     i++;
@@ -346,7 +356,7 @@ namespace {0}
                 {
                     if (column.Column.StartsWith("JSON", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        builder.AppendFormat("            c.Parameters.AddWithValue(\"@{0}\", e.{1}.ToJson());\r\n", column.Column, column.Column.Substring(4));
+                        builder.AppendFormat("            c.Parameters.AddWithValue(\"@{0}\", e.{1}.ToJson());\r\n", column.Column, column.Column);
                     }
                     else if (column.ForeignKeyTable != null)
                     {
@@ -514,7 +524,7 @@ order by o.name, c.column_id";
             td[column] = typeName;
         }
 
-        static void AddAccessOverride(string table, string column, string typeName)
+        static void AddAccessOverride(string table, string column, string accessName)
         {
             Dictionary<string, string> td;
             if (!_accessOverrides.TryGetValue(table, out td))
@@ -522,7 +532,7 @@ order by o.name, c.column_id";
                 _accessOverrides[table] = td = new Dictionary<string, string>();
             }
 
-            td[column] = typeName;
+            td[column] = accessName;
         }
 
         static string GetTypeOverride(string table, string column)

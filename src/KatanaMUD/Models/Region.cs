@@ -8,6 +8,7 @@ namespace KatanaMUD.Models
 {
     public partial class Region : Entity<Int32>
     {
+        partial void OnConstruct();
         public override Int32 Key { get { return Id; } set { Id = value; } }
         private GameEntities Context => (GameEntities)__context;
         private Int32 _Id;
@@ -15,6 +16,7 @@ namespace KatanaMUD.Models
 
         public Region()
         {
+            OnConstruct();
             Rooms = new ParentChildRelationshipContainer<Region, Room, Int32>(this, child => child.Region, (child, parent) => child.Region= parent);
         }
 

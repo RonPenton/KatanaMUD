@@ -8,6 +8,7 @@ namespace KatanaMUD.Models
 {
     public partial class ItemTemplate : Entity<Int32>
     {
+        partial void OnConstruct();
         public override Int32 Key { get { return Id; } set { Id = value; } }
         private GameEntities Context => (GameEntities)__context;
         private Int32 _Id;
@@ -26,8 +27,10 @@ namespace KatanaMUD.Models
 
         public ItemTemplate()
         {
-            Stats = new JsonContainer(this);
-            Requirements = new JsonContainer(this);
+            OnConstruct();
+            JSONStats = new JsonContainer(this);
+            JSONRequirements = new JsonContainer(this);
+            JSONAttributes = new JsonContainer(this);
             Items = new ParentChildRelationshipContainer<ItemTemplate, Item, Guid>(this, child => child.ItemTemplate, (child, parent) => child.ItemTemplate= parent);
         }
 
@@ -44,8 +47,9 @@ namespace KatanaMUD.Models
         public Boolean NotRobable { get { return _NotRobable; } set { _NotRobable = value; this.Changed(); } }
         public Int64 Cost { get { return _Cost; } set { _Cost = value; this.Changed(); } }
         public Int32 Level { get { return _Level; } set { _Level = value; this.Changed(); } }
-        public dynamic Stats { get; private set; }
-        public dynamic Requirements { get; private set; }
+        public JsonContainer JSONStats { get; private set; }
+        public JsonContainer JSONRequirements { get; private set; }
+        public JsonContainer JSONAttributes { get; private set; }
         public ICollection<Item> Items { get; private set; }
         public static ItemTemplate Load(SqlDataReader reader)
         {
@@ -63,10 +67,12 @@ namespace KatanaMUD.Models
             entity._NotRobable = reader.GetBoolean(10);
             entity._Cost = reader.GetInt64(11);
             entity._Level = reader.GetInt32(12);
-            entity.Stats = new JsonContainer(entity);
-            entity.Stats.FromJson(reader.GetSafeString(13));
-            entity.Requirements = new JsonContainer(entity);
-            entity.Requirements.FromJson(reader.GetSafeString(14));
+            entity.JSONStats = new JsonContainer(entity);
+            entity.JSONStats.FromJson(reader.GetSafeString(13));
+            entity.JSONRequirements = new JsonContainer(entity);
+            entity.JSONRequirements.FromJson(reader.GetSafeString(14));
+            entity.JSONAttributes = new JsonContainer(entity);
+            entity.JSONAttributes.FromJson(reader.GetSafeString(15));
             return entity;
         }
 
@@ -90,20 +96,21 @@ namespace KatanaMUD.Models
             c.Parameters.AddWithValue("@NotRobable", (object)e.NotRobable ?? DBNull.Value);
             c.Parameters.AddWithValue("@Cost", (object)e.Cost ?? DBNull.Value);
             c.Parameters.AddWithValue("@Level", (object)e.Level ?? DBNull.Value);
-            c.Parameters.AddWithValue("@JSONStats", e.Stats.ToJson());
-            c.Parameters.AddWithValue("@JSONRequirements", e.Requirements.ToJson());
+            c.Parameters.AddWithValue("@JSONStats", e.JSONStats.ToJson());
+            c.Parameters.AddWithValue("@JSONRequirements", e.JSONRequirements.ToJson());
+            c.Parameters.AddWithValue("@JSONAttributes", e.JSONAttributes.ToJson());
         }
 
         public static void GenerateInsertCommand(SqlCommand c, ItemTemplate e)
         {
-            c.CommandText = @"INSERT INTO [ItemTemplate]([Id], [Name], [Description], [Type], [EquipType], [WeaponType], [Limit], [Fixed], [NotDroppable], [DestroyOnDeath], [NotRobable], [Cost], [Level], [JSONStats], [JSONRequirements])
-                              VALUES (@Id, @Name, @Description, @Type, @EquipType, @WeaponType, @Limit, @Fixed, @NotDroppable, @DestroyOnDeath, @NotRobable, @Cost, @Level, @JSONStats, @JSONRequirements)";
+            c.CommandText = @"INSERT INTO [ItemTemplate]([Id], [Name], [Description], [Type], [EquipType], [WeaponType], [Limit], [Fixed], [NotDroppable], [DestroyOnDeath], [NotRobable], [Cost], [Level], [JSONStats], [JSONRequirements], [JSONAttributes])
+                              VALUES (@Id, @Name, @Description, @Type, @EquipType, @WeaponType, @Limit, @Fixed, @NotDroppable, @DestroyOnDeath, @NotRobable, @Cost, @Level, @JSONStats, @JSONRequirements, @JSONAttributes)";
             AddSqlParameters(c, e);
         }
 
         public static void GenerateUpdateCommand(SqlCommand c, ItemTemplate e)
         {
-            c.CommandText = @"UPDATE [ItemTemplate] SET [Id] = @Id, [Name] = @Name, [Description] = @Description, [Type] = @Type, [EquipType] = @EquipType, [WeaponType] = @WeaponType, [Limit] = @Limit, [Fixed] = @Fixed, [NotDroppable] = @NotDroppable, [DestroyOnDeath] = @DestroyOnDeath, [NotRobable] = @NotRobable, [Cost] = @Cost, [Level] = @Level, [JSONStats] = @JSONStats, [JSONRequirements] = @JSONRequirements WHERE [Id] = @Id";
+            c.CommandText = @"UPDATE [ItemTemplate] SET [Id] = @Id, [Name] = @Name, [Description] = @Description, [Type] = @Type, [EquipType] = @EquipType, [WeaponType] = @WeaponType, [Limit] = @Limit, [Fixed] = @Fixed, [NotDroppable] = @NotDroppable, [DestroyOnDeath] = @DestroyOnDeath, [NotRobable] = @NotRobable, [Cost] = @Cost, [Level] = @Level, [JSONStats] = @JSONStats, [JSONRequirements] = @JSONRequirements, [JSONAttributes] = @JSONAttributes WHERE [Id] = @Id";
             AddSqlParameters(c, e);
         }
 

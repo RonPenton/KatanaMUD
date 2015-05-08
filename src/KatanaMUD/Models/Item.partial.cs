@@ -8,28 +8,20 @@ namespace KatanaMUD.Models
     {
         public string Name => CustomName ?? ItemTemplate.Name;
 
-        /// <summary>
-        /// Gets a stat from the item. Tries to pick it off local item first, then falls back to item template.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="name"></param>
-        /// <param name="defaultValue"></param>
-        /// <returns></returns>
-        public T GetStat<T>(string name, T defaultValue)
-        {
-            object value;
-            if (!((JsonContainer)Stats).GetValue(name, out value))
-            {
-                if (!((JsonContainer)ItemTemplate.Stats).GetValue(name, out value))
-                {
-                    return defaultValue;
-                }
-            }
+        public AddingContainer Stats;
 
-            return (T)Convert.ChangeType(value, typeof(T));
+        partial void OnConstruct()
+        {
+            Stats = new AddingContainer(this.JSONStats, GetStatContainers);
         }
 
-        public long Weight => GetStat<long>("Weight", 0);
+        private IEnumerable<IDictionaryStore> GetStatContainers()
+        {
+            yield return this.JSONStats;
+            yield return this.ItemTemplate.JSONStats;
+        }
+
+        public long Weight => Stats.GetCalculatedValue<long>("Weight");
 
         /// <summary>
         /// A list of users who currently know of my existence. 

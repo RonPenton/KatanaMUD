@@ -7,23 +7,28 @@ namespace KatanaMUD.Models
 {
     public partial class Actor
     {
-        public T GetStat<T>(string name, T baseValue, bool includePercent = true)
-        {
-            List<JsonContainer> containers = new List<JsonContainer>();
+        /*
+            Values taken from: http://www.mudinfo.net/viewtopic.php?f=4&t=1647
 
-            containers.Add((JsonContainer)Stats);
-            containers.AddRange(EquippedItems.Select(x => (JsonContainer)x.Stats));
-            //TODO: Buffs here
+            NOTE: If values are different, then they may have been tweaked from the original formula for balance changes.
 
-            return JsonContainer.Calculate<T>(containers, name, baseValue, includePercent);
-        }
+            Ability: For every 10 pts added:
+
+            * Strength: 480 Encumberance, +1 Damage
+            * Agility: +2.5 A/C*, +1 Accuracy, +2.5 Stealth
+            * Intellect: +1 Critical Hit, +6 Perception, +1 Stealth, +1.5 Thievery, +2 Traps, +3 Picklocks, +2 Tracking, +2 M/R, +5 S/C (Mage), +3.5 S/C (Druid), +1.6 S/C (Priest)
+            * Willpower: +2 Perception, +1 Tracking, +7 M/R, +2 S/C (Mage), +3.5 S/C (Druid), +5 S/C (Priest), +2 S/C (Bard)
+            * Health: +4 Hit Points
+            * Charm: +1 Perception, +2.5 Stealth, +1.5 Thievery, +3 Traps, +1 Tracking, +5 S/C (Bard), +1 Critical Hit, +1.2 Accuracy, +1 Dodge
+        */
+
 
         public long MaxEncumbrance
         {
             get
             {
-                var strength = GetStat<long>("Strength", 0);
-                return GetStat<long>("MaxEncumbrance", strength * 48);
+                var strength = Stats.GetCalculatedValue<long>("Strength");
+                return Stats.GetCalculatedValue<long>("MaxEncumbrance") + (strength * 50);
             }
         }
 
@@ -32,7 +37,7 @@ namespace KatanaMUD.Models
             get
             {
                 long enc = Items.Sum(x => x.Weight);
-                enc += Game.Data.Currencies.Select(x => (long)(x.Weight * (long)Currency.Get(x, this.Cash))).Sum();
+                enc += Game.Data.Currencies.Select(x => (long)(x.Weight * (long)Currency.Get(x, this.JSONCash))).Sum();
                 return enc;
             }
         }
@@ -47,9 +52,9 @@ namespace KatanaMUD.Models
                 // This is the best approximation I've found for MajorMUD. If anyone knows a better formula, feel free to update it.'
                 // To be honest, we may just end up rebalancing this anyway.
                 return (long)Math.Floor(
-                                ((double)GetStat<long>("Intellect", 0) * (9.0 / 14.0)) +
-                                ((double)GetStat<long>("Willpower", 0) * (1.0 / 4.0)) +
-                                ((double)GetStat<long>("Charm", 0) * (1.0 / 8.0)));
+                                ((double)Stats.GetCalculatedValue<long>("Intellect") * (9.0 / 14.0)) +
+                                ((double)Stats.GetCalculatedValue<long>("Willpower") * (1.0 / 4.0)) +
+                                ((double)Stats.GetCalculatedValue<long>("Charm") * (1.0 / 8.0)));
             }
         }
 
@@ -67,9 +72,9 @@ namespace KatanaMUD.Models
             }
         }
 
-        public long NightVision => GetStat<long>("NightVision", 0, true);
+        public long NightVision => Stats.GetCalculatedValue<long>("NightVision");
 
         // TODO: Get illumination from buffs and equipped light sources.
-        public long Illumination => GetStat<long>("Illumination", 0);
+        public long Illumination => Stats.GetCalculatedValue<long>("Illumination");
     }
 }

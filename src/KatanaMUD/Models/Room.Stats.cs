@@ -10,7 +10,10 @@ namespace KatanaMUD.Models
     {
         public T GetStat<T>(string name, T baseValue, bool includePercent = true)
         {
-            return JsonContainer.Calculate<T>(new List<JsonContainer>() { (JsonContainer)Stats }, name, baseValue, includePercent);
+            T t;
+            if (JSONStats.TryGetValue(name, out t))
+                return t;
+            return baseValue;
         }
 
         public long Illumination

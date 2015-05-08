@@ -8,6 +8,7 @@ namespace KatanaMUD.Models
 {
     public partial class TextBlock : Entity<Int32>
     {
+        partial void OnConstruct();
         public override Int32 Key { get { return Id; } set { Id = value; } }
         private GameEntities Context => (GameEntities)__context;
         private Int32 _Id;
@@ -15,6 +16,7 @@ namespace KatanaMUD.Models
 
         public TextBlock()
         {
+            OnConstruct();
             Rooms = new ParentChildRelationshipContainer<TextBlock, Room, Int32>(this, child => child.TextBlock, (child, parent) => child.TextBlock= parent);
         }
 

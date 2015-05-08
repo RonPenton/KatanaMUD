@@ -8,6 +8,7 @@ namespace KatanaMUD.Models
 {
     public partial class Room : Entity<Int32>
     {
+        partial void OnConstruct();
         public override Int32 Key { get { return Id; } set { Id = value; } }
         private GameEntities Context => (GameEntities)__context;
         private Int32 _Id;
@@ -29,9 +30,10 @@ namespace KatanaMUD.Models
 
         public Room()
         {
-            Cash = new JsonContainer(this);
-            HiddenCash = new JsonContainer(this);
-            Stats = new JsonContainer(this);
+            OnConstruct();
+            JSONCash = new JsonContainer(this);
+            JSONHiddenCash = new JsonContainer(this);
+            JSONStats = new JsonContainer(this);
             Actors = new ParentChildRelationshipContainer<Room, Actor, Guid>(this, child => child.Room, (child, parent) => child.Room= parent);
             Items = new ParentChildRelationshipContainer<Room, Item, Guid>(this, child => child.Room, (child, parent) => child.Room= parent);
         }
@@ -48,9 +50,9 @@ namespace KatanaMUD.Models
         public Int32? SouthWestExit { get { return _SouthWestExit; } set { _SouthWestExit = value; this.Changed(); } }
         public Int32? UpExit { get { return _UpExit; } set { _UpExit = value; this.Changed(); } }
         public Int32? DownExit { get { return _DownExit; } set { _DownExit = value; this.Changed(); } }
-        public dynamic Cash { get; private set; }
-        public dynamic HiddenCash { get; private set; }
-        public dynamic Stats { get; private set; }
+        public JsonContainer JSONCash { get; private set; }
+        public JsonContainer JSONHiddenCash { get; private set; }
+        public JsonContainer JSONStats { get; private set; }
         partial void OnRegionChanging(Region oldValue, Region newValue);
         public Region Region {
             get { return _Region; }
@@ -94,12 +96,12 @@ namespace KatanaMUD.Models
             entity._SouthWestExit = reader.GetSafeInt32(11);
             entity._UpExit = reader.GetSafeInt32(12);
             entity._DownExit = reader.GetSafeInt32(13);
-            entity.Cash = new JsonContainer(entity);
-            entity.Cash.FromJson(reader.GetSafeString(14));
-            entity.HiddenCash = new JsonContainer(entity);
-            entity.HiddenCash.FromJson(reader.GetSafeString(15));
-            entity.Stats = new JsonContainer(entity);
-            entity.Stats.FromJson(reader.GetSafeString(16));
+            entity.JSONCash = new JsonContainer(entity);
+            entity.JSONCash.FromJson(reader.GetSafeString(14));
+            entity.JSONHiddenCash = new JsonContainer(entity);
+            entity.JSONHiddenCash.FromJson(reader.GetSafeString(15));
+            entity.JSONStats = new JsonContainer(entity);
+            entity.JSONStats.FromJson(reader.GetSafeString(16));
             return entity;
         }
 
@@ -126,9 +128,9 @@ namespace KatanaMUD.Models
             c.Parameters.AddWithValue("@SouthWestExit", (object)e.SouthWestExit ?? DBNull.Value);
             c.Parameters.AddWithValue("@UpExit", (object)e.UpExit ?? DBNull.Value);
             c.Parameters.AddWithValue("@DownExit", (object)e.DownExit ?? DBNull.Value);
-            c.Parameters.AddWithValue("@JSONCash", e.Cash.ToJson());
-            c.Parameters.AddWithValue("@JSONHiddenCash", e.HiddenCash.ToJson());
-            c.Parameters.AddWithValue("@JSONStats", e.Stats.ToJson());
+            c.Parameters.AddWithValue("@JSONCash", e.JSONCash.ToJson());
+            c.Parameters.AddWithValue("@JSONHiddenCash", e.JSONHiddenCash.ToJson());
+            c.Parameters.AddWithValue("@JSONStats", e.JSONStats.ToJson());
         }
 
         public static void GenerateInsertCommand(SqlCommand c, Room e)

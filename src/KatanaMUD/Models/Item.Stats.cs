@@ -11,7 +11,8 @@ namespace KatanaMUD.Models
         {
             get
             {
-                return GetStat<long>("Illumination", 0);
+                //TODO: See if item is equipped and return equipped illumination as well.
+                return Stats.GetCalculatedValue<long>("Illumination");
             }
         }
     }

@@ -8,6 +8,7 @@ namespace KatanaMUD.Models
 {
     public partial class User : Entity<String>
     {
+        partial void OnConstruct();
         public override String Key { get { return Id; } set { Id = value; } }
         private GameEntities Context => (GameEntities)__context;
         private String _Id;
@@ -18,6 +19,7 @@ namespace KatanaMUD.Models
 
         public User()
         {
+            OnConstruct();
             Actors = new ParentChildRelationshipContainer<User, Actor, Guid>(this, child => child.User, (child, parent) => child.User= parent);
         }
 

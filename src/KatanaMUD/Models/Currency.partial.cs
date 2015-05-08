@@ -13,7 +13,7 @@ namespace KatanaMUD.Models
 
 
             object value;
-            container.GetValue(currency.ShortName, out value);
+            container.TryGetValue(currency.ShortName, out value);
             if (value == null)
                 return 0;
             return Convert.ToInt64(value);
@@ -32,7 +32,7 @@ namespace KatanaMUD.Models
                 throw new InvalidOperationException("Not a JsonContainer");
 
 
-            container.SetValue(currency.ShortName, amount);
+            container[currency.ShortName] = amount;
         }
     }
 }
