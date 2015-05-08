@@ -17,18 +17,18 @@ namespace KatanaMUD.Models
 
         public ClassTemplate()
         {
-            OnConstruct();
-            JSONStats = new JsonContainer(this);
+            Stats = new JsonContainer(this);
             Actors = new ParentChildRelationshipContainer<ClassTemplate, Actor, Guid>(this, child => child.ClassTemplate, (child, parent) => child.ClassTemplate= parent);
             RaceTemplates = new ObservableHashSet<RaceTemplate>();
             RaceTemplates.ItemsAdded += RaceTemplates_ItemsAdded;
             RaceTemplates.ItemsRemoved += RaceTemplates_ItemsRemoved;
+            OnConstruct();
         }
 
         public Int32 Id { get { return _Id; } set { _Id = value; this.Changed(); } }
         public String Name { get { return _Name; } set { _Name = value; this.Changed(); } }
         public String Description { get { return _Description; } set { _Description = value; this.Changed(); } }
-        public JsonContainer JSONStats { get; private set; }
+        public JsonContainer Stats { get; private set; }
         public ICollection<Actor> Actors { get; private set; }
         public ObservableHashSet<RaceTemplate> RaceTemplates { get; private set; }
         public static ClassTemplate Load(SqlDataReader reader)
@@ -37,8 +37,8 @@ namespace KatanaMUD.Models
             entity._Id = reader.GetInt32(0);
             entity._Name = reader.GetString(1);
             entity._Description = reader.GetSafeString(2);
-            entity.JSONStats = new JsonContainer(entity);
-            entity.JSONStats.FromJson(reader.GetSafeString(3));
+            entity.Stats = new JsonContainer(entity);
+            entity.Stats.FromJson(reader.GetSafeString(3));
             return entity;
         }
 
@@ -53,7 +53,7 @@ namespace KatanaMUD.Models
             c.Parameters.AddWithValue("@Id", (object)e.Id ?? DBNull.Value);
             c.Parameters.AddWithValue("@Name", (object)e.Name ?? DBNull.Value);
             c.Parameters.AddWithValue("@Description", (object)e.Description ?? DBNull.Value);
-            c.Parameters.AddWithValue("@JSONStats", e.JSONStats.ToJson());
+            c.Parameters.AddWithValue("@JSONStats", e.Stats.ToJson());
         }
 
         public static void GenerateInsertCommand(SqlCommand c, ClassTemplate e)

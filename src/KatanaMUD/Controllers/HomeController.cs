@@ -200,7 +200,7 @@ namespace KatanaMUD.Controllers
         }
         private int VerifyStat(string stat, Actor dbActor, ActorModel actor)
         {
-            var initial = (long)dbActor.RaceTemplate.JSONStats[stat];
+            var initial = (long)dbActor.RaceTemplate.Stats[stat];
             var current = dbActor.Stats.GetCalculatedValue<long>(stat);
             var modified = (long)(typeof(ActorModel).GetProperty(stat).GetValue(actor));
             var cap = dbActor.Stats.GetCalculatedValue<long>(stat + "Cap");

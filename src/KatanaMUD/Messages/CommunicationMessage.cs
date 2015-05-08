@@ -29,16 +29,28 @@ namespace KatanaMUD.Messages
         private void Telepath(Actor actor)
         {
             var playerActors = Game.Connections.GetConnections().Select(x => x.Actor);
-            var target = playerActors.FindByName(this.ActorName, x => x.Name, true, false);
+            var targets = playerActors.FindByName(this.ActorName, x => x.Name, true, false);
 
+            if(targets.Count() > 1)
+            {
+                var message = new AmbiguousActorMessage() { Actors = targets.Select(x => new ActorDescription(x)).ToArray() };
+                return;
+            }
+
+            var target = targets.FirstOrDefault();
             if (target != null)
             {
                 ActorName = actor.Name;
                 ActorId = actor.Id;
                 target.SendMessage(this);
+
+                var message = new GenericMessage() { Class = "telepath", Message = "--- Telepath Sent to " + target.Name + " ---" };
+                actor.SendMessage(message);
+                return;
             }
 
-            //TODO: send acknowledgement and or failure message.
+            actor.SendMessage(new ActionNotAllowedMessage() { Message = "Cannot find user!" });
+
             //TODO: block list. 
         }
 

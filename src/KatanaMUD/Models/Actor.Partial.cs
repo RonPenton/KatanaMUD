@@ -22,8 +22,8 @@ namespace KatanaMUD.Models
         private IEnumerable<IDictionaryStore> GetStatContainers()
         {
             yield return this.JSONStats;
-            yield return this.ClassTemplate.JSONStats;
-            yield return this.RaceTemplate.JSONStats;
+            yield return this.ClassTemplate.Stats;
+            yield return this.RaceTemplate.Stats;
             foreach(var item in EquippedItems)
             {
                 yield return item.Stats;
@@ -242,9 +242,9 @@ namespace KatanaMUD.Models
             var visible = Math.Min(quantity.Value, q.Visible);
             var hidden = quantity.Value - visible;
 
-            Currency.Add(currency, JSONCash, quantity.Value);
-            Currency.Add(currency, Room.JSONCash, -visible);
-            Currency.Add(currency, Room.JSONHiddenCash, -hidden);
+            Currency.Add(currency, Cash, quantity.Value);
+            Currency.Add(currency, Room.Cash, -visible);
+            Currency.Add(currency, Room.HiddenCash, -hidden);
             Room.ClearFoundHiddenCash(currency);
         }
 
@@ -290,7 +290,7 @@ namespace KatanaMUD.Models
 
         public Validation CanDropCash(Currency currency, long? quantity)
         {
-            var q = Currency.Get(currency, JSONCash);
+            var q = Currency.Get(currency, Cash);
             if (quantity == null)
                 quantity = q;
 
@@ -302,18 +302,18 @@ namespace KatanaMUD.Models
 
         public void DropCash(Currency currency, long? quantity, bool hide)
         {
-            var q = Currency.Get(currency, JSONCash);
+            var q = Currency.Get(currency, Cash);
             if (quantity == null)
                 quantity = q;
 
             if (quantity > q)
                 quantity = q;
 
-            var container = Room.JSONCash;
+            var container = Room.Cash;
             if (hide == true)
-                container = Room.JSONHiddenCash;
+                container = Room.HiddenCash;
 
-            Currency.Add(currency, JSONCash, -quantity.Value);
+            Currency.Add(currency, Cash, -quantity.Value);
             Currency.Add(currency, container, quantity.Value);
 
             if (hide == true)

@@ -42,8 +42,8 @@ namespace KatanaMUD.Importer.Structures
 
             cls.Id = Number;
             cls.Name = new string(Name).Replace("\0", "").Trim();
-            cls.Stats.HpMin = MinHp;
-            cls.Stats.HpRange = MaxHp;
+            cls.Stats.SetValue("HpMin", (long)MinHp);
+            cls.Stats.SetValue("HpRange", (long)MaxHp);
 
             return cls;
         }

@@ -58,7 +58,8 @@ namespace KatanaMUD.Models
         Pocket,
         Waist,
         Legs,
-        Feet
+        Feet,
+        Light
     }
 
     // TODO: Consider making weapon types Data-Driven

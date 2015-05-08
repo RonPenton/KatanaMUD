@@ -69,10 +69,23 @@ namespace KatanaMUD.Messages
 
         public ItemDescription(Item item)
         {
-            this.Name = item.CustomName ?? item.ItemTemplate.Name;
+            this.Name = item.Name;
             this.Id = item.Id;
             this.TemplateId = item.ItemTemplate.Id;
             this.Modified = item.Modified;
+        }
+
+        public ItemDescription(ItemTemplate template)
+        {
+            this.Name = template.Name;
+            this.Id = Guid.Empty;
+            this.TemplateId = template.Id;
+        }
+
+        public ItemDescription(IItem item)
+        {
+            this.Name = item.Name;
+            this.Id = Guid.Empty;
         }
     }
 

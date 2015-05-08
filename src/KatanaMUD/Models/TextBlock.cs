@@ -16,8 +16,8 @@ namespace KatanaMUD.Models
 
         public TextBlock()
         {
-            OnConstruct();
             Rooms = new ParentChildRelationshipContainer<TextBlock, Room, Int32>(this, child => child.TextBlock, (child, parent) => child.TextBlock= parent);
+            OnConstruct();
         }
 
         public Int32 Id { get { return _Id; } set { _Id = value; this.Changed(); } }

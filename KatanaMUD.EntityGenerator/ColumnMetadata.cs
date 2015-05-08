@@ -20,6 +20,7 @@ namespace KatanaMUD.EntityGenerator
         public bool Identity { get; set; }
         public bool Computed { get; set; }
         public bool PrimaryKey { get; set; }
+        public string CodeName { get; set; }
 
         public string ForeignKeyTable { get; set; }
         public string ForeignKeyColumn { get; set; }
@@ -45,6 +46,8 @@ namespace KatanaMUD.EntityGenerator
 
             ForeignKeyTable = reader.GetSafeString(11);
             ForeignKeyColumn = reader.GetSafeString(12);
+
+            CodeName = Program.GetNameOverride(Table, Column);
         }
 
         public string TypeName

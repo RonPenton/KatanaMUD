@@ -51,19 +51,20 @@ namespace KatanaMUD.Importer.Structures
 
             race.Id = Number;
             race.Name = new string(Name).Replace("\0", "").Trim();
-            race.Stats.Strength = MinStr;
-            race.Stats.Agility = MinAgl;
-            race.Stats.Health = MinHea;
-            race.Stats.Intellect = MinInt;
-            race.Stats.Willpower = MinWil;
-            race.Stats.Charm = MinChm;
-            race.Stats.StrengthCap = MaxStr;
-            race.Stats.AgilityCap = MaxAgl;
-            race.Stats.HealthCap = MaxHea;
-            race.Stats.IntellectCap = MaxInt;
-            race.Stats.WillpowerCap = MaxWil;
-            race.Stats.CharmCap = MaxChm;
-            race.Stats.HpMin = HPBonus;
+
+            race.Stats.SetValue("Strength", (long)MinStr);
+            race.Stats.SetValue("Agility", (long)MinAgl);
+            race.Stats.SetValue("Health", (long)MinHea);
+            race.Stats.SetValue("Intellect", (long)MinInt);
+            race.Stats.SetValue("Willpower", (long)MinWil);
+            race.Stats.SetValue("Charm", (long)MinStr);
+            race.Stats.SetValue("StrengthCap", (long)MinChm);
+            race.Stats.SetValue("AgilityCap", (long)MaxAgl);
+            race.Stats.SetValue("HealthCap", (long)MaxHea);
+            race.Stats.SetValue("IntellectCap", (long)MaxInt);
+            race.Stats.SetValue("WillpowerCap", (long)MaxWil);
+            race.Stats.SetValue("CharmCap", (long)MaxChm);
+            race.Stats.SetValue("HpMin", (long)HPBonus);
 
             return race;
         }

@@ -21,12 +21,18 @@ namespace KatanaMUD.EntityGenerator
             AddTypeOverride("Item", "EquippedSlot", "EquipmentSlot?");
             AddTypeOverride("ItemTemplate", "WeaponType", "WeaponType?");
             AddTypeOverride("ItemTemplate", "EquipType", "EquipmentSlot?");
+            AddTypeOverride("User", "AccessLevel", "AccessLevel");
 
             AddAccessOverride("Item", "JSONStats", "private");
             AddAccessOverride("Item", "JSONAttributes", "private");
-
             AddAccessOverride("Actor", "JSONStats", "private");
             AddAccessOverride("Actor", "JSONAttributes", "private");
+
+            AddNameOverride("Actor", "JSONCash", "Cash");
+            AddNameOverride("Room", "JSONCash", "Cash");
+            AddNameOverride("Room", "JSONHiddenCash", "HiddenCash");
+            AddNameOverride("ClassTemplate", "JSONStats", "Stats");
+            AddNameOverride("RaceTemplate", "JSONStats", "Stats");
 
             string connectionString = "Data Source=(local);Initial Catalog=KatanaMUD;Integrated Security=true";
             List<ColumnMetadata> columns = null;
@@ -196,12 +202,12 @@ namespace {0}
 ", namespaceName);
                 builder.AppendFormat("    public partial class {0} : Entity<{1}>\r\n    {{\r\n", table.Name, table.PrimaryKey.TypeName);
                 builder.Append("        partial void OnConstruct();\r\n");
-                builder.AppendFormat("        public override {0} Key {{ get {{ return {1}; }} set {{ {1} = value; }} }}\r\n", table.PrimaryKey.TypeName, table.PrimaryKey.Column);
+                builder.AppendFormat("        public override {0} Key {{ get {{ return {1}; }} set {{ {1} = value; }} }}\r\n", table.PrimaryKey.TypeName, table.PrimaryKey.CodeName);
                 builder.AppendFormat("        private {0} Context => ({0})__context;\r\n", className);
 
                 foreach (var column in table.NormalColumns)
                 {
-                    builder.AppendFormat("        private {0} _{1};\r\n", column.TypeName, column.Column);
+                    builder.AppendFormat("        private {0} _{1};\r\n", column.TypeName, column.CodeName);
                 }
 
                 foreach (var relationship in table.Relationships)
@@ -211,10 +217,9 @@ namespace {0}
                 }
 
                 builder.AppendFormat("\r\n        public {0}()\r\n        {{\r\n", table.Name);
-                builder.Append("            OnConstruct();\r\n");
                 foreach (var column in table.JsonColumns)
                 {
-                    builder.AppendFormat("            {0} = new JsonContainer(this);\r\n", column.Column);
+                    builder.AppendFormat("            {0} = new JsonContainer(this);\r\n", column.CodeName);
                 }
                 foreach (var child in table.Children)
                 {
@@ -231,6 +236,7 @@ namespace {0}
             {0}.ItemsRemoved += {0}_ItemsRemoved;
 ", link.PluralName, link.Name);
                 }
+                builder.Append("            OnConstruct();\r\n");
                 builder.Append("        }\r\n\r\n");
 
                 foreach (var column in table.NormalColumns)
@@ -239,11 +245,11 @@ namespace {0}
                     var access = GetAccessOverride(table.Name, column.Column);
                     if (alteredType == null)
                     {
-                        builder.AppendFormat("        {2} {0} {1} {{ get {{ return _{1}; }} set {{ _{1} = value; this.Changed(); }} }}\r\n", column.TypeName, column.Column, access);
+                        builder.AppendFormat("        {2} {0} {1} {{ get {{ return _{1}; }} set {{ _{1} = value; this.Changed(); }} }}\r\n", column.TypeName, column.CodeName, access);
                     }
                     else
                     {
-                        builder.AppendFormat("        {2} {0} {1} {{ get {{ return ({0})_{1}; }} set {{ _{1} = ({3})value; this.Changed(); }} }}\r\n", alteredType, column.Column, access, column.TypeName);
+                        builder.AppendFormat("        {2} {0} {1} {{ get {{ return ({0})_{1}; }} set {{ _{1} = ({3})value; this.Changed(); }} }}\r\n", alteredType, column.CodeName, access, column.TypeName);
                     }
                 }
 
@@ -253,7 +259,7 @@ namespace {0}
                     string setAccess = "private ";
                     if (access == "private")
                         setAccess = "";
-                    builder.AppendFormat("        {1} JsonContainer {0} {{ get; {2}set; }}\r\n", column.Column, access, setAccess);
+                    builder.AppendFormat("        {1} JsonContainer {0} {{ get; {2}set; }}\r\n", column.CodeName, access, setAccess);
                 }
 
                 foreach (var relationship in table.Relationships)
@@ -299,13 +305,13 @@ namespace {0}
                 {
                     if (!column.Column.StartsWith("JSON", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        builder.AppendFormat("            entity._{0} = reader.Get{1}({2});\r\n", column.Column, GetSqlName(column), i);
+                        builder.AppendFormat("            entity._{0} = reader.Get{1}({2});\r\n", column.CodeName, GetSqlName(column), i);
                     }
                     else
                     {
                         builder.AppendFormat(@"            entity.{0} = new JsonContainer(entity);
             entity.{0}.FromJson(reader.GetSafeString({1}));
-", column.Column, i);
+", column.CodeName, i);
                     }
 
                     i++;
@@ -321,7 +327,7 @@ namespace {0}
                 foreach (var relationship in table.Relationships)
                 {
                     builder.AppendFormat("            {0} = Context.{1}.Single{3}(x => x.Id == _{2});\r\n",
-                        relationship.Column.ForeignKeyTable, relationship.ParentTable.PluralName, relationship.Column.Column,
+                        relationship.Column.ForeignKeyTable, relationship.ParentTable.PluralName, relationship.Column.CodeName,
                         relationship.Column.Nullable ? "OrDefault" : "");
                 }
 
@@ -356,7 +362,7 @@ namespace {0}
                 {
                     if (column.Column.StartsWith("JSON", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        builder.AppendFormat("            c.Parameters.AddWithValue(\"@{0}\", e.{1}.ToJson());\r\n", column.Column, column.Column);
+                        builder.AppendFormat("            c.Parameters.AddWithValue(\"@{0}\", e.{1}.ToJson());\r\n", column.Column, column.CodeName);
                     }
                     else if (column.ForeignKeyTable != null)
                     {
@@ -364,7 +370,7 @@ namespace {0}
                     }
                     else
                     {
-                        builder.AppendFormat("            c.Parameters.AddWithValue(\"@{0}\", (object)e.{0} ?? DBNull.Value);\r\n", column.Column);
+                        builder.AppendFormat("            c.Parameters.AddWithValue(\"@{0}\", (object)e.{0} ?? DBNull.Value);\r\n", column.CodeName);
                     }
                 }
 
@@ -398,7 +404,7 @@ namespace {0}
             c.Parameters.Clear();
             c.Parameters.AddWithValue(""@Id"", e.{1});
         }}
-", table.Name, table.PrimaryKey.Column);
+", table.Name, table.PrimaryKey.CodeName);
 
                 foreach (var link in table.LinkEntities)
                 {
@@ -511,6 +517,7 @@ order by o.name, c.column_id";
 
         static Dictionary<string, Dictionary<string, string>> _typeOverrides = new Dictionary<string, Dictionary<string, string>>();
         static Dictionary<string, Dictionary<string, string>> _accessOverrides = new Dictionary<string, Dictionary<string, string>>();
+        static Dictionary<string, Dictionary<string, string>> _nameOverrides = new Dictionary<string, Dictionary<string, string>>();
 
 
         static void AddTypeOverride(string table, string column, string typeName)
@@ -559,6 +566,30 @@ order by o.name, c.column_id";
             }
 
             return "public";
+        }
+
+        static void AddNameOverride(string table, string column, string name)
+        {
+            Dictionary<string, string> td;
+            if (!_nameOverrides.TryGetValue(table, out td))
+            {
+                _nameOverrides[table] = td = new Dictionary<string, string>();
+            }
+
+            td[column] = name;
+        }
+
+        public static string GetNameOverride(string table, string column)
+        {
+            Dictionary<string, string> td;
+            if (_nameOverrides.TryGetValue(table, out td))
+            {
+                string value;
+                if (td.TryGetValue(column, out value))
+                    return value;
+            }
+
+            return column;
         }
     }
 }

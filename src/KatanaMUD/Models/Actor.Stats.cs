@@ -37,7 +37,7 @@ namespace KatanaMUD.Models
             get
             {
                 long enc = Items.Sum(x => x.Weight);
-                enc += Game.Data.Currencies.Select(x => (long)(x.Weight * (long)Currency.Get(x, this.JSONCash))).Sum();
+                enc += Game.Data.Currencies.Select(x => (long)(x.Weight * (long)Currency.Get(x, this.Cash))).Sum();
                 return enc;
             }
         }

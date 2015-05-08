@@ -11,7 +11,7 @@ namespace KatanaMUD.Messages
         public override void Process(Actor actor)
         {
             var response = new InventoryListMessage();
-            response.Cash = Game.Data.AllCurrencies.Select(x => new CurrencyDescription(x, Currency.Get(x, actor.JSONCash))).Where(x => x.Amount > 0).ToArray();
+            response.Cash = Game.Data.AllCurrencies.Select(x => new CurrencyDescription(x, Currency.Get(x, actor.Cash))).Where(x => x.Amount > 0).ToArray();
             response.Items = actor.Items.Select(x => new ItemDescription(x)).ToArray();
             response.Encumbrance = actor.Encumbrance;
             response.MaxEncumbrance = actor.MaxEncumbrance;
@@ -40,7 +40,13 @@ namespace KatanaMUD.Messages
                 throw new InvalidOperationException("Cannot drop negative items.");
 
             var availableCurrencies = Game.Data.AllCurrencies.Where(x => actor.Room.GetTotalCashUserCanSee(x, actor).Total > 0).ToList();
-            var items = FindItems(availableCurrencies, actor.Room.ItemsUserCanSee(actor).ToList(), ItemId, ItemName, Math.Max(Quantity, 1));
+            bool isAmbiguous;
+            var items = FindItems(availableCurrencies, actor.Room.ItemsUserCanSee(actor).ToList(), ItemId, ItemName, Math.Max(Quantity, 1), out isAmbiguous);
+            if (isAmbiguous)
+            {
+                actor.SendMessage(new AmbiguousItemMessage() { Items = items.Select(x => new ItemDescription(x)).ToArray() });
+                return;
+            }
 
             // Handle a cash get.
             if (items.Count() == 1 && items.First() is Currency)
@@ -118,8 +124,9 @@ namespace KatanaMUD.Messages
             }
         }
 
-        public static IEnumerable<IItem> FindItems(IEnumerable<Currency> availableCurrencies, IEnumerable<Item> availableItems, Guid? itemId, string itemName, int quantity)
+        public static IEnumerable<IItem> FindItems(IEnumerable<Currency> availableCurrencies, IEnumerable<Item> availableItems, Guid? itemId, string itemName, int quantity, out bool isAmbiguous)
         {
+            isAmbiguous = false;
             if (itemId != null)
             {
                 // ID search, just return the requested item, assuming the user can see it. 
@@ -132,11 +139,19 @@ namespace KatanaMUD.Messages
                 var seenItems = availableItems.ToList();
                 var items = cash.Concat(seenItems);
 
-                var iitem = items.FindByName(itemName, x => x.Name, true, true);
+                var list = items.FindByName(itemName, x => x.Name, true, true);
 
                 // no match, return empty list.
-                if (iitem == null)
+                if (!list.Any())
                     return new List<IItem>();
+
+                if (list.Count() > 1)
+                {
+                    isAmbiguous = true;
+                    return list;
+                }
+
+                var iitem = list.FirstOrDefault();
 
                 // Item is currency, just return it.
                 if (iitem is Currency)
@@ -170,8 +185,15 @@ namespace KatanaMUD.Messages
             if (Quantity < 0)
                 throw new InvalidOperationException("Cannot drop negative items.");
 
-            var availableCurrencies = Game.Data.AllCurrencies.Where(x => Currency.Get(x, actor.JSONCash) > 0).ToList();
-            var items = GetItemCommand.FindItems(availableCurrencies, actor.Items.ToList(), ItemId, ItemName, Math.Max(Quantity, 1));
+            var availableCurrencies = Game.Data.AllCurrencies.Where(x => Currency.Get(x, actor.Cash) > 0).ToList();
+            bool isAmbiguous;
+            var items = GetItemCommand.FindItems(availableCurrencies, actor.Items.ToList(), ItemId, ItemName, Math.Max(Quantity, 1), out isAmbiguous);
+
+            if (isAmbiguous)
+            {
+                actor.SendMessage(new AmbiguousItemMessage() { Items = items.Select(x => new ItemDescription(x)).ToArray() });
+                return;
+            }
 
             // Handle a cash drop.
             if (items.Count() == 1 && items.First() is Currency)
@@ -182,7 +204,7 @@ namespace KatanaMUD.Messages
                     // In the event that no number is specified (ie 0), then we assume the user
                     // wants to drop all currency. So, we oblige them.
                     // TODO: see if this is a correct assumption. Could be dangerous?
-                    Quantity = (int)Currency.Get(currency, actor.JSONCash);
+                    Quantity = (int)Currency.Get(currency, actor.Cash);
                 }
 
                 var action = actor.CanDropCash(currency, Quantity);

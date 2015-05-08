@@ -25,9 +25,9 @@ namespace KatanaMUD.Models
 
         public Item()
         {
-            OnConstruct();
             JSONStats = new JsonContainer(this);
             JSONAttributes = new JsonContainer(this);
+            OnConstruct();
         }
 
         public Guid Id { get { return _Id; } set { _Id = value; this.Changed(); } }

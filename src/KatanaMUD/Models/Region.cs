@@ -16,8 +16,8 @@ namespace KatanaMUD.Models
 
         public Region()
         {
-            OnConstruct();
             Rooms = new ParentChildRelationshipContainer<Region, Room, Int32>(this, child => child.Region, (child, parent) => child.Region= parent);
+            OnConstruct();
         }
 
         public Int32 Id { get { return _Id; } set { _Id = value; this.Changed(); } }

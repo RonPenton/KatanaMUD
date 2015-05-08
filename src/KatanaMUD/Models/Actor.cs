@@ -27,12 +27,12 @@ namespace KatanaMUD.Models
 
         public Actor()
         {
-            OnConstruct();
             JSONStats = new JsonContainer(this);
             JSONAttributes = new JsonContainer(this);
-            JSONCash = new JsonContainer(this);
+            Cash = new JsonContainer(this);
             JSONAbilities = new JsonContainer(this);
             Items = new ParentChildRelationshipContainer<Actor, Item, Guid>(this, child => child.Actor, (child, parent) => child.Actor= parent);
+            OnConstruct();
         }
 
         public Guid Id { get { return _Id; } set { _Id = value; this.Changed(); } }
@@ -42,7 +42,7 @@ namespace KatanaMUD.Models
         public Int32 CharacterPoints { get { return _CharacterPoints; } set { _CharacterPoints = value; this.Changed(); } }
         private JsonContainer JSONStats { get; set; }
         private JsonContainer JSONAttributes { get; set; }
-        public JsonContainer JSONCash { get; private set; }
+        public JsonContainer Cash { get; private set; }
         public JsonContainer JSONAbilities { get; private set; }
         partial void OnUserChanging(User oldValue, User newValue);
         public User User {
@@ -109,8 +109,8 @@ namespace KatanaMUD.Models
             entity.JSONStats.FromJson(reader.GetSafeString(9));
             entity.JSONAttributes = new JsonContainer(entity);
             entity.JSONAttributes.FromJson(reader.GetSafeString(10));
-            entity.JSONCash = new JsonContainer(entity);
-            entity.JSONCash.FromJson(reader.GetSafeString(11));
+            entity.Cash = new JsonContainer(entity);
+            entity.Cash.FromJson(reader.GetSafeString(11));
             entity.JSONAbilities = new JsonContainer(entity);
             entity.JSONAbilities.FromJson(reader.GetSafeString(12));
             return entity;
@@ -138,7 +138,7 @@ namespace KatanaMUD.Models
             c.Parameters.AddWithValue("@CharacterPoints", (object)e.CharacterPoints ?? DBNull.Value);
             c.Parameters.AddWithValue("@JSONStats", e.JSONStats.ToJson());
             c.Parameters.AddWithValue("@JSONAttributes", e.JSONAttributes.ToJson());
-            c.Parameters.AddWithValue("@JSONCash", e.JSONCash.ToJson());
+            c.Parameters.AddWithValue("@JSONCash", e.Cash.ToJson());
             c.Parameters.AddWithValue("@JSONAbilities", e.JSONAbilities.ToJson());
         }
 

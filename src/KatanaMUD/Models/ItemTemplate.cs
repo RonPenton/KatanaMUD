@@ -27,11 +27,11 @@ namespace KatanaMUD.Models
 
         public ItemTemplate()
         {
-            OnConstruct();
             JSONStats = new JsonContainer(this);
             JSONRequirements = new JsonContainer(this);
             JSONAttributes = new JsonContainer(this);
             Items = new ParentChildRelationshipContainer<ItemTemplate, Item, Guid>(this, child => child.ItemTemplate, (child, parent) => child.ItemTemplate= parent);
+            OnConstruct();
         }
 
         public Int32 Id { get { return _Id; } set { _Id = value; this.Changed(); } }

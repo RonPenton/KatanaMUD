@@ -14,7 +14,11 @@ namespace KatanaMUD.Messages
 
         public override void Process(Actor actor)
         {
-            //TODO: Verify sysop access here.
+            if (actor.User?.AccessLevel != AccessLevel.Sysop)
+            {
+                actor.SendMessage(new ActionNotAllowedMessage() { Message = "You do not have sysop access." });
+                return;
+            }
 
             Regex regex = new Regex("\\s+");
 
@@ -23,17 +27,27 @@ namespace KatanaMUD.Messages
             if(tokens[0] == "spawn")
             {
                 var tail = String.Join(" ", tokens.Skip(1));
-                var template = Game.Data.ItemTemplates.FindByName(tail, x => x.Name, true, true);
-                if(template == null)
+                var templates = Game.Data.ItemTemplates.FindByName(tail, x => x.Name, true, true);
+                if(!templates.Any())
                 {
                     actor.SendMessage(new ActionNotAllowedMessage() { Message = "Item not found" });
                     return;
                 }
+                if(templates.Count() > 1)
+                {
+                    actor.SendMessage(new AmbiguousItemMessage() { Items = templates.Select(x => new ItemDescription(x)).ToArray() });
+                    return;
+                }
 
 
-                var item = template.SpawnInstance();
+                var item = templates.First().SpawnInstance();
                 item.Actor = actor;
                 actor.SendMessage(new GenericMessage() { Message = "Spawned new " + item.Name });
+            }
+            if(tokens[0] == "minify")
+            {
+                Currency.Minify(actor.Cash);
+                actor.SendMessage(new GenericMessage() { Message = "Cash minified." });
             }
         }
     }

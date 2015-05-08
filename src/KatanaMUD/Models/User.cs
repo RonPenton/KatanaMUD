@@ -16,11 +16,12 @@ namespace KatanaMUD.Models
         private DateTime? _LockoutEnd;
         private String _PasswordHash;
         private Boolean _IsConfirmed;
+        private Int32 _AccessLevel;
 
         public User()
         {
-            OnConstruct();
             Actors = new ParentChildRelationshipContainer<User, Actor, Guid>(this, child => child.User, (child, parent) => child.User= parent);
+            OnConstruct();
         }
 
         public String Id { get { return _Id; } set { _Id = value; this.Changed(); } }
@@ -28,6 +29,7 @@ namespace KatanaMUD.Models
         public DateTime? LockoutEnd { get { return _LockoutEnd; } set { _LockoutEnd = value; this.Changed(); } }
         public String PasswordHash { get { return _PasswordHash; } set { _PasswordHash = value; this.Changed(); } }
         public Boolean IsConfirmed { get { return _IsConfirmed; } set { _IsConfirmed = value; this.Changed(); } }
+        public AccessLevel AccessLevel { get { return (AccessLevel)_AccessLevel; } set { _AccessLevel = (Int32)value; this.Changed(); } }
         public ICollection<Actor> Actors { get; private set; }
         public static User Load(SqlDataReader reader)
         {
@@ -37,6 +39,7 @@ namespace KatanaMUD.Models
             entity._LockoutEnd = reader.GetSafeDateTime(2);
             entity._PasswordHash = reader.GetSafeString(3);
             entity._IsConfirmed = reader.GetBoolean(4);
+            entity._AccessLevel = reader.GetInt32(5);
             return entity;
         }
 
@@ -52,18 +55,19 @@ namespace KatanaMUD.Models
             c.Parameters.AddWithValue("@LockoutEnd", (object)e.LockoutEnd ?? DBNull.Value);
             c.Parameters.AddWithValue("@PasswordHash", (object)e.PasswordHash ?? DBNull.Value);
             c.Parameters.AddWithValue("@IsConfirmed", (object)e.IsConfirmed ?? DBNull.Value);
+            c.Parameters.AddWithValue("@AccessLevel", (object)e.AccessLevel ?? DBNull.Value);
         }
 
         public static void GenerateInsertCommand(SqlCommand c, User e)
         {
-            c.CommandText = @"INSERT INTO [User]([Id], [AccessFailedCount], [LockoutEnd], [PasswordHash], [IsConfirmed])
-                              VALUES (@Id, @AccessFailedCount, @LockoutEnd, @PasswordHash, @IsConfirmed)";
+            c.CommandText = @"INSERT INTO [User]([Id], [AccessFailedCount], [LockoutEnd], [PasswordHash], [IsConfirmed], [AccessLevel])
+                              VALUES (@Id, @AccessFailedCount, @LockoutEnd, @PasswordHash, @IsConfirmed, @AccessLevel)";
             AddSqlParameters(c, e);
         }
 
         public static void GenerateUpdateCommand(SqlCommand c, User e)
         {
-            c.CommandText = @"UPDATE [User] SET [Id] = @Id, [AccessFailedCount] = @AccessFailedCount, [LockoutEnd] = @LockoutEnd, [PasswordHash] = @PasswordHash, [IsConfirmed] = @IsConfirmed WHERE [Id] = @Id";
+            c.CommandText = @"UPDATE [User] SET [Id] = @Id, [AccessFailedCount] = @AccessFailedCount, [LockoutEnd] = @LockoutEnd, [PasswordHash] = @PasswordHash, [IsConfirmed] = @IsConfirmed, [AccessLevel] = @AccessLevel WHERE [Id] = @Id";
             AddSqlParameters(c, e);
         }
 
