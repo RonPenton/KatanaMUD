@@ -126,6 +126,8 @@ var KMud;
             this.messageHandlers[KMud.SearchMessage.ClassName] = function (message) { return _this.search(message); };
             this.messageHandlers[KMud.ActionNotAllowedMessage.ClassName] = function (message) { return _this.mainOutput(message.Message, "action-not-allowed"); };
             this.messageHandlers[KMud.GenericMessage.ClassName] = function (message) { return _this.mainOutput(message.Message, message.Class); };
+            this.messageHandlers[KMud.AmbiguousActorMessage.ClassName] = function (message) { return _this.ambiguousActors(message); };
+            this.messageHandlers[KMud.AmbiguousItemMessage.ClassName] = function (message) { return _this.ambiguousItems(message); };
         };
         Game.prototype.registerCommandHandlers = function () {
             var _this = this;
@@ -477,6 +479,18 @@ var KMud;
                 category = "None";
             var str = "Encumbrance: " + message.Encumbrance + " / " + message.MaxEncumbrance + " - " + category + "[" + pct + "%]";
             this.mainOutput(str, "inventory");
+        };
+        Game.prototype.ambiguousActors = function (message) {
+            this.mainOutput("Please be more specific.  You could have meant any of these:", "error");
+            for (var i = 0; i < message.Actors.length; i++) {
+                this.mainOutput("-- " + message.Actors[i].Name);
+            }
+        };
+        Game.prototype.ambiguousItems = function (message) {
+            this.mainOutput("Please be more specific.  You could have meant any of these:", "error");
+            for (var i = 0; i < message.Items.length; i++) {
+                this.mainOutput("-- " + message.Items[i].Name);
+            }
         };
         return Game;
     })();

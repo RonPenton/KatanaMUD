@@ -145,6 +145,8 @@ module KMud {
             this.messageHandlers[SearchMessage.ClassName] = (message: SearchMessage) => this.search(message);
             this.messageHandlers[ActionNotAllowedMessage.ClassName] = (message: ActionNotAllowedMessage) => this.mainOutput(message.Message, "action-not-allowed");
             this.messageHandlers[GenericMessage.ClassName] = (message: GenericMessage) => this.mainOutput(message.Message, message.Class);
+            this.messageHandlers[AmbiguousActorMessage.ClassName] = (message: AmbiguousActorMessage) => this.ambiguousActors(message);
+            this.messageHandlers[AmbiguousItemMessage.ClassName] = (message: AmbiguousItemMessage) => this.ambiguousItems(message);
         }
 
         private registerCommandHandlers() {
@@ -372,7 +374,7 @@ module KMud {
                 this.mainOutput("Your search revealed nothing.", "search");
                 return;
             }
-            
+
             var items = [];
             for (var i = 0; i < message.FoundCash.length; i++) {
                 items.push(message.FoundCash[i].Amount + " " + message.FoundCash[i].Name);
@@ -388,7 +390,7 @@ module KMud {
 
         private addElements(target: HTMLElement, elements: HTMLElement[]) {
             var scrolledToBottom = (target.scrollHeight - target.scrollTop === target.offsetHeight);
-            
+
             for (var i = 0; i < elements.length; i++) {
                 target.appendChild(elements[i]);
             }
@@ -420,7 +422,7 @@ module KMud {
 
         private runJoin(items: string[], separator: string, itemClass: string, separatorClass: string): string[][] {
             var output: string[][] = [];
-            
+
             for (var i = 0; i < items.length - 1; i++) {
                 output.push([items[i], itemClass]);
                 output.push([separator, separatorClass]);
@@ -553,6 +555,20 @@ module KMud {
 
             var str = "Encumbrance: " + message.Encumbrance + " / " + message.MaxEncumbrance + " - " + category + "[" + pct + "%]";
             this.mainOutput(str, "inventory");
+        }
+
+        private ambiguousActors(message: AmbiguousActorMessage) {
+            this.mainOutput("Please be more specific.  You could have meant any of these:", "error");
+            for (var i = 0; i < message.Actors.length; i++) {
+                this.mainOutput("-- " + message.Actors[i].Name);
+            }
+        }
+
+        private ambiguousItems(message: AmbiguousItemMessage) {
+            this.mainOutput("Please be more specific.  You could have meant any of these:", "error");
+            for (var i = 0; i < message.Items.length; i++) {
+                this.mainOutput("-- " + message.Items[i].Name);
+            }
         }
     }
 

@@ -16,9 +16,9 @@ namespace KatanaMUD.Messages
             if (ItemId == null)
             {
                 var items = actor.Items.FindByName(ItemName, x => x.Name, true, true);
+                
             }
 
-            Item item;
 
 
         }

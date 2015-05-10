@@ -24,6 +24,24 @@ var KMud;
         return ActorInformationMessage;
     })(KMud.MessageBase);
     KMud.ActorInformationMessage = ActorInformationMessage;
+    var AmbiguousItemMessage = (function (_super) {
+        __extends(AmbiguousItemMessage, _super);
+        function AmbiguousItemMessage() {
+            _super.call(this, 'AmbiguousItemMessage');
+        }
+        AmbiguousItemMessage.ClassName = 'AmbiguousItemMessage';
+        return AmbiguousItemMessage;
+    })(KMud.MessageBase);
+    KMud.AmbiguousItemMessage = AmbiguousItemMessage;
+    var AmbiguousActorMessage = (function (_super) {
+        __extends(AmbiguousActorMessage, _super);
+        function AmbiguousActorMessage() {
+            _super.call(this, 'AmbiguousActorMessage');
+        }
+        AmbiguousActorMessage.ClassName = 'AmbiguousActorMessage';
+        return AmbiguousActorMessage;
+    })(KMud.MessageBase);
+    KMud.AmbiguousActorMessage = AmbiguousActorMessage;
     var CommunicationMessage = (function (_super) {
         __extends(CommunicationMessage, _super);
         function CommunicationMessage() {
@@ -33,6 +51,15 @@ var KMud;
         return CommunicationMessage;
     })(KMud.MessageBase);
     KMud.CommunicationMessage = CommunicationMessage;
+    var EquipMessage = (function (_super) {
+        __extends(EquipMessage, _super);
+        function EquipMessage() {
+            _super.call(this, 'EquipMessage');
+        }
+        EquipMessage.ClassName = 'EquipMessage';
+        return EquipMessage;
+    })(KMud.MessageBase);
+    KMud.EquipMessage = EquipMessage;
     var GenericMessage = (function (_super) {
         __extends(GenericMessage, _super);
         function GenericMessage() {
@@ -204,12 +231,6 @@ var KMud;
         return SysopMessage;
     })(KMud.MessageBase);
     KMud.SysopMessage = SysopMessage;
-    var CurrencyDescription = (function () {
-        function CurrencyDescription() {
-        }
-        return CurrencyDescription;
-    })();
-    KMud.CurrencyDescription = CurrencyDescription;
     var ItemDescription = (function () {
         function ItemDescription() {
         }
@@ -222,6 +243,12 @@ var KMud;
         return ActorDescription;
     })();
     KMud.ActorDescription = ActorDescription;
+    var CurrencyDescription = (function () {
+        function CurrencyDescription() {
+        }
+        return CurrencyDescription;
+    })();
+    KMud.CurrencyDescription = CurrencyDescription;
     var ExitDescription = (function () {
         function ExitDescription() {
         }

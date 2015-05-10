@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using Spam;
+using System.Linq;
 
 namespace KatanaMUD.Models
 {
-    public partial class Item : IItem
+    public partial class Item
     {
         public string Name => CustomName ?? ItemTemplate.Name;
 
@@ -37,6 +38,13 @@ namespace KatanaMUD.Models
         }
 
         public WeaponType? WeaponType => ItemTemplate.WeaponType == null ? null : (WeaponType?)ItemTemplate.WeaponType;
+    }
+
+    public class ItemGroup : IItem
+    {
+        public IEnumerable<Item> Items { get; set; }
+        public string Name => Items?.FirstOrDefault()?.Name ?? null;
+        public int Quantity => Items?.Count() ?? 0;
     }
 
     public enum EquipmentSlot

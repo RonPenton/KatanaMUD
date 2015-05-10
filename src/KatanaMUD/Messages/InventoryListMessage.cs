@@ -37,19 +37,26 @@ namespace KatanaMUD.Messages
         public override void Process(Actor actor)
         {
             if (Quantity < 0)
-                throw new InvalidOperationException("Cannot drop negative items.");
-
-            var availableCurrencies = Game.Data.AllCurrencies.Where(x => actor.Room.GetTotalCashUserCanSee(x, actor).Total > 0).ToList();
-            bool isAmbiguous;
-            var items = FindItems(availableCurrencies, actor.Room.ItemsUserCanSee(actor).ToList(), ItemId, ItemName, Math.Max(Quantity, 1), out isAmbiguous);
-            if (isAmbiguous)
             {
-                actor.SendMessage(new AmbiguousItemMessage() { Items = items.Select(x => new ItemDescription(x)).ToArray() });
+                actor.SendMessage(new ActionNotAllowedMessage() { Message = "Cannot get negative items." });
                 return;
             }
 
+            var availableCurrencies = Game.Data.AllCurrencies.Where(x => actor.Room.GetTotalCashUserCanSee(x, actor).Total > 0).ToList();
+
+            IEnumerable<IItem> items;
+
+            if (ItemId != null)
+            {
+                items = actor.Room.Items.Where(x => x.Id == ItemId).Group();
+            }
+            else
+            {
+                items = FindItems(availableCurrencies, actor.Room.ItemsUserCanSee(actor).ToList(), ItemName);
+            }
+
             // Handle a cash get.
-            if (items.Count() == 1 && items.First() is Currency)
+            if (items.FirstOrDefault() is Currency)
             {
                 var currency = items.First() as Currency;
                 if (Quantity == 0)
@@ -80,14 +87,15 @@ namespace KatanaMUD.Messages
             }
 
             // Handle a regular get
-            if (items.Any())
+            if (items.FirstOrDefault() is ItemGroup)
             {
+                var group = items.First() as ItemGroup;
                 Quantity = Math.Max(Quantity, 1);   // 0 is valid in the event that no number is specified. In that instance, we assume 1 instead.
 
                 List<Item> successes = new List<Item>();
                 List<string> failures = new List<string>();
 
-                foreach (var item in items.Cast<Item>())
+                foreach (var item in group.Items.Take(Quantity))
                 {
                     var action = actor.CanGetItem(item);
 
@@ -117,59 +125,26 @@ namespace KatanaMUD.Messages
                     // You know someone will do it...
                     failures.Distinct().ForEach(x => actor.SendMessage(new ActionNotAllowedMessage() { Message = x }));
                 }
+                return;
             }
-            else
-            {
-                actor.SendMessage(new ActionNotAllowedMessage() { Message = "Cannot find item!" });
-            }
+
+            actor.SendMessage(new ActionNotAllowedMessage() { Message = "Cannot find item!" });
         }
 
-        public static IEnumerable<IItem> FindItems(IEnumerable<Currency> availableCurrencies, IEnumerable<Item> availableItems, Guid? itemId, string itemName, int quantity, out bool isAmbiguous)
+        /// <summary>
+        /// Finds items based on supplied item name. Returns all items that match the given name. Currencies are returned as currnecy objects, 
+        /// items are returned in ItemGroup objects.
+        /// </summary>
+        /// <param name="availableCurrencies"></param>
+        /// <param name="availableItems"></param>
+        /// <param name="itemName"></param>
+        /// <param name="quantity"></param>
+        /// <returns></returns>
+        public static IEnumerable<IItem> FindItems(IEnumerable<Currency> availableCurrencies, IEnumerable<Item> availableItems, string itemName)
         {
-            isAmbiguous = false;
-            if (itemId != null)
-            {
-                // ID search, just return the requested item, assuming the user can see it. 
-                return availableItems.Where(x => x.Id == itemId.Value);
-            }
-            else
-            {
-                var cash = availableCurrencies.Cast<IItem>();
-
-                var seenItems = availableItems.ToList();
-                var items = cash.Concat(seenItems);
-
-                var list = items.FindByName(itemName, x => x.Name, true, true);
-
-                // no match, return empty list.
-                if (!list.Any())
-                    return new List<IItem>();
-
-                if (list.Count() > 1)
-                {
-                    isAmbiguous = true;
-                    return list;
-                }
-
-                var iitem = list.FirstOrDefault();
-
-                // Item is currency, just return it.
-                if (iitem is Currency)
-                    return new List<IItem>() { iitem };
-
-                // now test for quantity, to see if there are even enough items.
-                var item = iitem as Item;
-                var allMatches = seenItems.Where(x => x.ItemTemplate == x.ItemTemplate && x.Name == item.Name).Take(quantity).ToList();
-
-                if (allMatches.Count() < quantity)
-                {
-                    // can't match the requested quantity, so error out with an empty list. 
-                    // I really am not sure if this is the best way, but 
-                    return new List<IItem>();
-                }
-
-                return allMatches;
-            }
+            IEnumerable<IItem> list;
+            list = availableCurrencies.Cast<IItem>().Concat(availableItems.Group());
+            return list.FindByName(itemName, x => x.Name, true, true);
         }
     }
 
@@ -183,20 +158,28 @@ namespace KatanaMUD.Messages
         public override void Process(Actor actor)
         {
             if (Quantity < 0)
-                throw new InvalidOperationException("Cannot drop negative items.");
+            {
+                actor.SendMessage(new ActionNotAllowedMessage() { Message = "Cannot get negative items." });
+                return;
+            }
 
             var availableCurrencies = Game.Data.AllCurrencies.Where(x => Currency.Get(x, actor.Cash) > 0).ToList();
-            bool isAmbiguous;
-            var items = GetItemCommand.FindItems(availableCurrencies, actor.Items.ToList(), ItemId, ItemName, Math.Max(Quantity, 1), out isAmbiguous);
+            var items = GetItemCommand.FindItems(availableCurrencies, actor.Items.ToList(), ItemName);
 
-            if (isAmbiguous)
+            if (items.Count() > 1)
             {
                 actor.SendMessage(new AmbiguousItemMessage() { Items = items.Select(x => new ItemDescription(x)).ToArray() });
                 return;
             }
 
+            if (!items.Any())
+            {
+                actor.SendMessage(new ActionNotAllowedMessage() { Message = "Cannot find item!" });
+                return;
+            }
+
             // Handle a cash drop.
-            if (items.Count() == 1 && items.First() is Currency)
+            if (items.First() is Currency)
             {
                 var currency = items.First() as Currency;
                 if (Quantity == 0)
@@ -236,54 +219,48 @@ namespace KatanaMUD.Messages
             }
 
             // Handle a regular drop
-            if (items.Any())
+            Quantity = Math.Max(Quantity, 1);   // 0 is valid in the event that no number is specified. In that instance, we assume 1 instead.
+
+            var group = items.First() as ItemGroup;
+            List<Item> successes = new List<Item>();
+            List<string> failures = new List<string>();
+
+            foreach (var item in group.Items)
             {
-                Quantity = Math.Max(Quantity, 1);   // 0 is valid in the event that no number is specified. In that instance, we assume 1 instead.
+                var action = actor.CanDropItem(item);
 
-                List<Item> successes = new List<Item>();
-                List<string> failures = new List<string>();
-
-                foreach (var item in items.Cast<Item>())
+                if (action.Allowed)
                 {
-                    var action = actor.CanDropItem(item);
-
-                    if (action.Allowed)
-                    {
-                        actor.DropItem(item, Hide);
-                        successes.Add(item);
-                    }
-                    else
-                    {
-                        failures.Add(action.Reason);
-                    }
+                    actor.DropItem(item, Hide);
+                    successes.Add(item);
                 }
-
-                if (successes.Any())
+                else
                 {
-                    var message = new ItemOwnershipMessage()
-                    {
-                        Giver = new ActorDescription(actor),
-                        Items = successes.Select(x => new ItemDescription(x)).ToArray(),
-                        Hide = Hide
-                    };
-
-                    if (Hide == false)
-                    {
-                        actor.Room.ActiveActors.ForEach(x => x.SendMessage(message));
-                    }
-                    else
-                    {
-                        actor.SendMessage(message);
-                    }
-                }
-                if (failures.Any())
-                {
-                    failures.Distinct().ForEach(x => actor.SendMessage(new ActionNotAllowedMessage() { Message = x }));
+                    failures.Add(action.Reason);
                 }
             }
-            else
+
+            if (successes.Any())
             {
-                actor.SendMessage(new ActionNotAllowedMessage() { Message = "Cannot find item!" });
+                var message = new ItemOwnershipMessage()
+                {
+                    Giver = new ActorDescription(actor),
+                    Items = successes.Select(x => new ItemDescription(x)).ToArray(),
+                    Hide = Hide
+                };
+
+                if (Hide == false)
+                {
+                    actor.Room.ActiveActors.ForEach(x => x.SendMessage(message));
+                }
+                else
+                {
+                    actor.SendMessage(message);
+                }
+            }
+            if (failures.Any())
+            {
+                failures.Distinct().ForEach(x => actor.SendMessage(new ActionNotAllowedMessage() { Message = x }));
             }
         }
     }

@@ -11,6 +11,16 @@ module KMud {
         public IsYou: boolean;
         public static ClassName: string = 'ActorInformationMessage';
     }
+    export class AmbiguousItemMessage extends MessageBase {
+        constructor() { super('AmbiguousItemMessage'); }
+        public Items: ItemDescription[];
+        public static ClassName: string = 'AmbiguousItemMessage';
+    }
+    export class AmbiguousActorMessage extends MessageBase {
+        constructor() { super('AmbiguousActorMessage'); }
+        public Actors: ActorDescription[];
+        public static ClassName: string = 'AmbiguousActorMessage';
+    }
     export class CommunicationMessage extends MessageBase {
         constructor() { super('CommunicationMessage'); }
         public Message: string;
@@ -19,6 +29,12 @@ module KMud {
         public ActorName: string;
         public ActorId: string;
         public static ClassName: string = 'CommunicationMessage';
+    }
+    export class EquipMessage extends MessageBase {
+        constructor() { super('EquipMessage'); }
+        public ItemId: string;
+        public ItemName: string;
+        public static ClassName: string = 'EquipMessage';
     }
     export class GenericMessage extends MessageBase {
         constructor() { super('GenericMessage'); }
@@ -154,10 +170,6 @@ module KMud {
         public Command: string;
         public static ClassName: string = 'SysopMessage';
     }
-    export class CurrencyDescription {
-        public Name: string;
-        public Amount: number;
-    }
     export class ItemDescription {
         public Name: string;
         public Id: string;
@@ -167,6 +179,10 @@ module KMud {
     export class ActorDescription {
         public Name: string;
         public Id: string;
+    }
+    export class CurrencyDescription {
+        public Name: string;
+        public Amount: number;
     }
     export class ExitDescription {
         public Direction: Direction;

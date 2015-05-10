@@ -26,7 +26,6 @@ namespace KatanaMUD.Models
             collection[currency.ShortName] = amount;
         }
 
-
         public static long GetValue(JsonContainer container) => Game.Data.AllCurrencies.Sum(x => Currency.Get(x, container) * x.Value);
 
         public static void Clear(JsonContainer container) => Game.Data.AllCurrencies.ForEach(x => Currency.Set(x, container, 0));
