@@ -147,6 +147,8 @@ module KMud {
             this.messageHandlers[GenericMessage.ClassName] = (message: GenericMessage) => this.mainOutput(message.Message, message.Class);
             this.messageHandlers[AmbiguousActorMessage.ClassName] = (message: AmbiguousActorMessage) => this.ambiguousActors(message);
             this.messageHandlers[AmbiguousItemMessage.ClassName] = (message: AmbiguousItemMessage) => this.ambiguousItems(message);
+
+            this.messageHandlers[ItemEquippedChangedMessage.ClassName] = (message: ItemEquippedChangedMessage) => this.equipChanged(message);
         }
 
         private registerCommandHandlers() {
@@ -169,6 +171,8 @@ module KMud {
             this.commandHandlers["drop"] = this.commandHandlers["dr"] = (words, tail) => this.drop(tail, false);
             this.commandHandlers["hide"] = this.commandHandlers["hid"] = (words, tail) => this.drop(tail, true);
             this.commandHandlers["search"] = this.commandHandlers["sea"] = (words, tail) => this.SendMessage(new SearchCommand());
+            this.commandHandlers["equip"] = this.commandHandlers["eq"] = (words, tail) => this.SendMessage(new EquipCommand(null, tail));
+            this.commandHandlers["remove"] = this.commandHandlers["rem"] = (words, tail) => this.SendMessage(new RemoveCommand(null, tail));
 
 
             this.commandHandlers["gos"] = this.commandHandlers["gossip"] = (words, tail) => this.talk(tail, CommunicationType.Gossip);
@@ -569,6 +573,26 @@ module KMud {
             for (var i = 0; i < message.Items.length; i++) {
                 this.mainOutput("-- " + message.Items[i].Name);
             }
+        }
+
+        private equipChanged(message: ItemEquippedChangedMessage) {
+
+            if (message.Equipped) {
+                if (message.Actor.Id == this.currentPlayer.Id) {
+                    this.mainOutput("You are now wearing " + message.Item.Name + ".", "equip");
+                }
+                else {
+                    this.mainOutput(message.Actor.Name + " wears " + message.Item.Name + "!", "equip");
+                }
+            }
+            else {
+                if (message.Actor.Id == this.currentPlayer.Id) {
+                    this.mainOutput("You have removed " + message.Item.Name + ".", "equip");
+                }
+                else {
+                    this.mainOutput(message.Actor.Name + " removes " + message.Item.Name + "!", "equip");
+                }
+            }           
         }
     }
 

@@ -34,13 +34,23 @@ namespace KatanaMUD.MessageGenerator
                     foreach (var message in messages)
                     {
                         writer.WriteLine(String.Format("    export class {0} extends MessageBase {{", message.Name));
-                        writer.WriteLine(String.Format("        constructor() {{ super('{0}'); }}", message.Name));
+                        writer.Write("        constructor(");
 
                         var properties = message.GetProperties().Where(x => x.Name != "MessageName" && x.Name != "MessageTime");
+
+                        var constructorList = new List<string>();
                         foreach (var property in properties)
                         {
-                            writer.WriteLine(String.Format("        public {1}: {0};", GetPropertyType(property.PropertyType), property.Name));
+                            constructorList.Add(String.Format("public {0}?: {1}", property.Name, GetPropertyType(property.PropertyType)));
                         }
+                        writer.Write(String.Join(", ", constructorList));
+                        writer.WriteLine(String.Format(") {{ super('{0}'); }}", message.Name));
+
+
+                        //foreach (var property in properties)
+                        //{
+                        //    writer.WriteLine(String.Format("        public {1}: {0};", GetPropertyType(property.PropertyType), property.Name));
+                        //}
 
                         writer.WriteLine(String.Format("        public static ClassName: string = '{0}';", message.Name));
                         writer.WriteLine("    }");

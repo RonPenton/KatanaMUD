@@ -128,6 +128,7 @@ var KMud;
             this.messageHandlers[KMud.GenericMessage.ClassName] = function (message) { return _this.mainOutput(message.Message, message.Class); };
             this.messageHandlers[KMud.AmbiguousActorMessage.ClassName] = function (message) { return _this.ambiguousActors(message); };
             this.messageHandlers[KMud.AmbiguousItemMessage.ClassName] = function (message) { return _this.ambiguousItems(message); };
+            this.messageHandlers[KMud.ItemEquippedChangedMessage.ClassName] = function (message) { return _this.equipChanged(message); };
         };
         Game.prototype.registerCommandHandlers = function () {
             var _this = this;
@@ -148,6 +149,8 @@ var KMud;
             this.commandHandlers["drop"] = this.commandHandlers["dr"] = function (words, tail) { return _this.drop(tail, false); };
             this.commandHandlers["hide"] = this.commandHandlers["hid"] = function (words, tail) { return _this.drop(tail, true); };
             this.commandHandlers["search"] = this.commandHandlers["sea"] = function (words, tail) { return _this.SendMessage(new KMud.SearchCommand()); };
+            this.commandHandlers["equip"] = this.commandHandlers["eq"] = function (words, tail) { return _this.SendMessage(new KMud.EquipCommand(null, tail)); };
+            this.commandHandlers["remove"] = this.commandHandlers["rem"] = function (words, tail) { return _this.SendMessage(new KMud.RemoveCommand(null, tail)); };
             this.commandHandlers["gos"] = this.commandHandlers["gossip"] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Gossip); };
             this.commandHandlers["say"] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Say); };
             this.commandHandlers["sys"] = this.commandHandlers["sysop"] = function (words, tail) {
@@ -490,6 +493,24 @@ var KMud;
             this.mainOutput("Please be more specific.  You could have meant any of these:", "error");
             for (var i = 0; i < message.Items.length; i++) {
                 this.mainOutput("-- " + message.Items[i].Name);
+            }
+        };
+        Game.prototype.equipChanged = function (message) {
+            if (message.Equipped) {
+                if (message.Actor.Id == this.currentPlayer.Id) {
+                    this.mainOutput("You are now wearing " + message.Item.Name + ".", "equip");
+                }
+                else {
+                    this.mainOutput(message.Actor.Name + " wears " + message.Item.Name + "!", "equip");
+                }
+            }
+            else {
+                if (message.Actor.Id == this.currentPlayer.Id) {
+                    this.mainOutput("You have removed " + message.Item.Name + ".", "equip");
+                }
+                else {
+                    this.mainOutput(message.Actor.Name + " removes " + message.Item.Name + "!", "equip");
+                }
             }
         };
         return Game;

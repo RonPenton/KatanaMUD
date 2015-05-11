@@ -1,45 +1,38 @@
 module KMud {
     export class ActionNotAllowedMessage extends MessageBase {
-        constructor() { super('ActionNotAllowedMessage'); }
-        public Message: string;
+        constructor(public Message?: string) { super('ActionNotAllowedMessage'); }
         public static ClassName: string = 'ActionNotAllowedMessage';
     }
     export class ActorInformationMessage extends MessageBase {
-        constructor() { super('ActorInformationMessage'); }
-        public Name: string;
-        public Id: string;
-        public IsYou: boolean;
+        constructor(public Name?: string, public Id?: string, public IsYou?: boolean) { super('ActorInformationMessage'); }
         public static ClassName: string = 'ActorInformationMessage';
     }
     export class AmbiguousItemMessage extends MessageBase {
-        constructor() { super('AmbiguousItemMessage'); }
-        public Items: ItemDescription[];
+        constructor(public Items?: ItemDescription[]) { super('AmbiguousItemMessage'); }
         public static ClassName: string = 'AmbiguousItemMessage';
     }
     export class AmbiguousActorMessage extends MessageBase {
-        constructor() { super('AmbiguousActorMessage'); }
-        public Actors: ActorDescription[];
+        constructor(public Actors?: ActorDescription[]) { super('AmbiguousActorMessage'); }
         public static ClassName: string = 'AmbiguousActorMessage';
     }
     export class CommunicationMessage extends MessageBase {
-        constructor() { super('CommunicationMessage'); }
-        public Message: string;
-        public Type: CommunicationType;
-        public Chatroom: string;
-        public ActorName: string;
-        public ActorId: string;
+        constructor(public Message?: string, public Type?: CommunicationType, public Chatroom?: string, public ActorName?: string, public ActorId?: string) { super('CommunicationMessage'); }
         public static ClassName: string = 'CommunicationMessage';
     }
-    export class EquipMessage extends MessageBase {
-        constructor() { super('EquipMessage'); }
-        public ItemId: string;
-        public ItemName: string;
-        public static ClassName: string = 'EquipMessage';
+    export class RemoveCommand extends MessageBase {
+        constructor(public ItemId?: string, public ItemName?: string) { super('RemoveCommand'); }
+        public static ClassName: string = 'RemoveCommand';
+    }
+    export class EquipCommand extends MessageBase {
+        constructor(public ItemId?: string, public ItemName?: string) { super('EquipCommand'); }
+        public static ClassName: string = 'EquipCommand';
+    }
+    export class ItemEquippedChangedMessage extends MessageBase {
+        constructor(public Actor?: ActorDescription, public Item?: ItemDescription, public Equipped?: boolean) { super('ItemEquippedChangedMessage'); }
+        public static ClassName: string = 'ItemEquippedChangedMessage';
     }
     export class GenericMessage extends MessageBase {
-        constructor() { super('GenericMessage'); }
-        public Message: string;
-        public Class: string;
+        constructor(public Message?: string, public Class?: string) { super('GenericMessage'); }
         public static ClassName: string = 'GenericMessage';
     }
     export class InventoryCommand extends MessageBase {
@@ -47,127 +40,71 @@ module KMud {
         public static ClassName: string = 'InventoryCommand';
     }
     export class InventoryListMessage extends MessageBase {
-        constructor() { super('InventoryListMessage'); }
-        public Cash: CurrencyDescription[];
-        public Items: ItemDescription[];
-        public Encumbrance: number;
-        public MaxEncumbrance: number;
+        constructor(public Cash?: CurrencyDescription[], public Items?: ItemDescription[], public Encumbrance?: number, public MaxEncumbrance?: number) { super('InventoryListMessage'); }
         public static ClassName: string = 'InventoryListMessage';
     }
     export class GetItemCommand extends MessageBase {
-        constructor() { super('GetItemCommand'); }
-        public ItemId: string;
-        public ItemName: string;
-        public Quantity: number;
+        constructor(public ItemId?: string, public ItemName?: string, public Quantity?: number) { super('GetItemCommand'); }
         public static ClassName: string = 'GetItemCommand';
     }
     export class DropItemCommand extends MessageBase {
-        constructor() { super('DropItemCommand'); }
-        public ItemId: string;
-        public ItemName: string;
-        public Quantity: number;
-        public Hide: boolean;
+        constructor(public ItemId?: string, public ItemName?: string, public Quantity?: number, public Hide?: boolean) { super('DropItemCommand'); }
         public static ClassName: string = 'DropItemCommand';
     }
     export class ItemOwnershipMessage extends MessageBase {
-        constructor() { super('ItemOwnershipMessage'); }
-        public Items: ItemDescription[];
-        public Giver: ActorDescription;
-        public Taker: ActorDescription;
-        public Hide: boolean;
+        constructor(public Items?: ItemDescription[], public Giver?: ActorDescription, public Taker?: ActorDescription, public Hide?: boolean) { super('ItemOwnershipMessage'); }
         public static ClassName: string = 'ItemOwnershipMessage';
     }
     export class CashTransferMessage extends MessageBase {
-        constructor() { super('CashTransferMessage'); }
-        public Currency: CurrencyDescription;
-        public Quantity: number;
-        public Giver: ActorDescription;
-        public Taker: ActorDescription;
-        public Hide: boolean;
+        constructor(public Currency?: CurrencyDescription, public Quantity?: number, public Giver?: ActorDescription, public Taker?: ActorDescription, public Hide?: boolean) { super('CashTransferMessage'); }
         public static ClassName: string = 'CashTransferMessage';
     }
     export class LoginRejected extends MessageBase {
-        constructor() { super('LoginRejected'); }
-        public RejectionMessage: string;
-        public NoCharacter: boolean;
+        constructor(public RejectionMessage?: string, public NoCharacter?: boolean) { super('LoginRejected'); }
         public static ClassName: string = 'LoginRejected';
     }
     export class LoginStateMessage extends MessageBase {
-        constructor() { super('LoginStateMessage'); }
-        public Actor: ActorDescription;
-        public Login: boolean;
+        constructor(public Actor?: ActorDescription, public Login?: boolean) { super('LoginStateMessage'); }
         public static ClassName: string = 'LoginStateMessage';
     }
     export class LookMessage extends MessageBase {
-        constructor() { super('LookMessage'); }
-        public Direction: Direction;
-        public Actor: number;
-        public Item: number;
-        public YouFigureItOut: string;
-        public Brief: boolean;
+        constructor(public Direction?: Direction, public Actor?: number, public Item?: number, public YouFigureItOut?: string, public Brief?: boolean) { super('LookMessage'); }
         public static ClassName: string = 'LookMessage';
     }
     export class MoveMessage extends MessageBase {
-        constructor() { super('MoveMessage'); }
-        public Direction: Direction;
-        public Portal: number;
+        constructor(public Direction?: Direction, public Portal?: number) { super('MoveMessage'); }
         public static ClassName: string = 'MoveMessage';
     }
     export class PartyMovementMessage extends MessageBase {
-        constructor() { super('PartyMovementMessage'); }
-        public Leader: ActorDescription;
-        public Actors: ActorDescription[];
-        public Direction: Direction;
-        public Enter: boolean;
-        public CustomText: string;
+        constructor(public Leader?: ActorDescription, public Actors?: ActorDescription[], public Direction?: Direction, public Enter?: boolean, public CustomText?: string) { super('PartyMovementMessage'); }
         public static ClassName: string = 'PartyMovementMessage';
     }
     export class PingMessage extends MessageBase {
-        constructor() { super('PingMessage'); }
-        public SendTime: Date;
+        constructor(public SendTime?: Date) { super('PingMessage'); }
         public static ClassName: string = 'PingMessage';
     }
     export class PongMessage extends MessageBase {
-        constructor() { super('PongMessage'); }
-        public SendTime: Date;
+        constructor(public SendTime?: Date) { super('PongMessage'); }
         public static ClassName: string = 'PongMessage';
     }
     export class RoomDescriptionMessage extends MessageBase {
-        constructor() { super('RoomDescriptionMessage'); }
-        public RoomId: number;
-        public Name: string;
-        public Description: string;
-        public Actors: ActorDescription[];
-        public VisibleItems: ItemDescription[];
-        public FoundItems: ItemDescription[];
-        public VisibleCash: CurrencyDescription[];
-        public FoundCash: CurrencyDescription[];
-        public Exits: ExitDescription[];
-        public IsCurrentRoom: boolean;
-        public CannotSee: boolean;
-        public CannotSeeMessage: string;
-        public LightLevel: LightLevel;
+        constructor(public RoomId?: number, public Name?: string, public Description?: string, public Actors?: ActorDescription[], public VisibleItems?: ItemDescription[], public FoundItems?: ItemDescription[], public VisibleCash?: CurrencyDescription[], public FoundCash?: CurrencyDescription[], public Exits?: ExitDescription[], public IsCurrentRoom?: boolean, public CannotSee?: boolean, public CannotSeeMessage?: string, public LightLevel?: LightLevel) { super('RoomDescriptionMessage'); }
         public static ClassName: string = 'RoomDescriptionMessage';
     }
     export class SearchCommand extends MessageBase {
-        constructor() { super('SearchCommand'); }
-        public Direction: Direction;
+        constructor(public Direction?: Direction) { super('SearchCommand'); }
         public static ClassName: string = 'SearchCommand';
     }
     export class SearchMessage extends MessageBase {
-        constructor() { super('SearchMessage'); }
-        public FoundItems: ItemDescription[];
-        public FoundCash: CurrencyDescription[];
+        constructor(public FoundItems?: ItemDescription[], public FoundCash?: CurrencyDescription[]) { super('SearchMessage'); }
         public static ClassName: string = 'SearchMessage';
     }
     export class ServerMessage extends MessageBase {
-        constructor() { super('ServerMessage'); }
-        public Contents: string;
+        constructor(public Contents?: string) { super('ServerMessage'); }
         public static ClassName: string = 'ServerMessage';
     }
     export class SysopMessage extends MessageBase {
-        constructor() { super('SysopMessage'); }
-        public Command: string;
+        constructor(public Command?: string) { super('SysopMessage'); }
         public static ClassName: string = 'SysopMessage';
     }
     export class ItemDescription {

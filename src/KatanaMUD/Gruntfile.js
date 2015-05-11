@@ -9,7 +9,6 @@
                 }
             }
         },
-        // Add this JSON object:
         less: {
             development: {
                 options: {
@@ -20,16 +19,26 @@
                         'wwwroot/css/*.less'
                     ],
                     expand: true,
-                    rename: function(dest, src) { return dest + src.replace('.less', '.css') },
+                    rename: function (dest, src) { return dest + src.replace('.less', '.css') },
                     dest: ''
                 }]
             },
-        }
+        },
+        typescript: {
+            base: {
+                src: ['Scripts/**/*.ts'],
+                dest: 'wwwroot/app.js',
+                options: {
+                    module: 'amd',
+                    target: 'es5'
+                }
+            }
+        },
     });
 
     grunt.registerTask("default", ["bower:install"]);
 
     grunt.loadNpmTasks("grunt-bower-task");
-    // Add this line:
     grunt.loadNpmTasks("grunt-contrib-less");
+    grunt.loadNpmTasks("grunt-typescript");
 };

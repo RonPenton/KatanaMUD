@@ -51,15 +51,33 @@ var KMud;
         return CommunicationMessage;
     })(KMud.MessageBase);
     KMud.CommunicationMessage = CommunicationMessage;
-    var EquipMessage = (function (_super) {
-        __extends(EquipMessage, _super);
-        function EquipMessage() {
-            _super.call(this, 'EquipMessage');
+    var RemoveCommand = (function (_super) {
+        __extends(RemoveCommand, _super);
+        function RemoveCommand() {
+            _super.call(this, 'RemoveCommand');
         }
-        EquipMessage.ClassName = 'EquipMessage';
-        return EquipMessage;
+        RemoveCommand.ClassName = 'RemoveCommand';
+        return RemoveCommand;
     })(KMud.MessageBase);
-    KMud.EquipMessage = EquipMessage;
+    KMud.RemoveCommand = RemoveCommand;
+    var EquipCommand = (function (_super) {
+        __extends(EquipCommand, _super);
+        function EquipCommand() {
+            _super.call(this, 'EquipCommand');
+        }
+        EquipCommand.ClassName = 'EquipCommand';
+        return EquipCommand;
+    })(KMud.MessageBase);
+    KMud.EquipCommand = EquipCommand;
+    var ItemEquippedChangedMessage = (function (_super) {
+        __extends(ItemEquippedChangedMessage, _super);
+        function ItemEquippedChangedMessage() {
+            _super.call(this, 'ItemEquippedChangedMessage');
+        }
+        ItemEquippedChangedMessage.ClassName = 'ItemEquippedChangedMessage';
+        return ItemEquippedChangedMessage;
+    })(KMud.MessageBase);
+    KMud.ItemEquippedChangedMessage = ItemEquippedChangedMessage;
     var GenericMessage = (function (_super) {
         __extends(GenericMessage, _super);
         function GenericMessage() {
