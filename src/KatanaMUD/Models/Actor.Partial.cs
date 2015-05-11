@@ -360,7 +360,7 @@ namespace KatanaMUD.Models
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public bool IsSlotOpen(Item item)
+        public SlotOpenResult IsSlotOpen(Item item)
         {
             if (item.ItemTemplate.EquipType == null)
                 throw new InvalidOperationException("Item has no slot");
@@ -370,39 +370,55 @@ namespace KatanaMUD.Models
             // Offhand is a special case.
             if (slot == EquipmentSlot.Offhand)
             {
+                // Already an offhand equipped
                 var offhand = Items.Where(x => x.EquippedSlot == EquipmentSlot.Offhand);
                 if (offhand.Any())
-                    return false;
+                    return new SlotOpenResult(offhand.ToArray());
 
+                // no weapons equipped and no offhands equipped, which means the offhand slot is open.
                 var weapon = Items.Where(x => x.EquippedSlot == EquipmentSlot.Weapon);
                 if (!weapon.Any())
-                    return true;
+                    return new SlotOpenResult();
 
+                // there's a weapon, and it's two-handed
                 if (weapon.First().WeaponType.IsTwoHanded())
-                    return false;
+                    return new SlotOpenResult(weapon.ToArray());
 
-                return true;
+                // Only weapons equipped are 1H, so offhand is allowed.
+                return new SlotOpenResult();
             }
             else if(slot == EquipmentSlot.Weapon)
             {
                 var weapon = Items.Where(x => x.EquippedSlot == EquipmentSlot.Weapon);
                 var offhand = Items.Where(x => x.EquippedSlot == EquipmentSlot.Offhand);
 
+                // Trying to equip a 2H weapon, but we have either a weapon or an offhand equipped.
                 if (item.WeaponType.IsTwoHanded() && weapon.Any() && offhand.Any())
-                    return false;
+                    return new SlotOpenResult(weapon.Concat(offhand).ToArray());
 
                 //TODO: Check for ability "DualWield".
-                return weapon.Any();
+                if (weapon.Any())
+                    return new SlotOpenResult(weapon.First());
+
+                return new SlotOpenResult();
             }
 
             var items = Items.Where(x => x.EquippedSlot == slot);
 
             // two-slot items
             if (slot.In(EquipmentSlot.Ears, EquipmentSlot.Wrists, EquipmentSlot.Fingers))
-                return items.Count() < 2;
+            {
+                if(items.Count() >= 2)
+                {
+                    return new SlotOpenResult(items.First());
+                }
+                return new SlotOpenResult();
+            }
 
             // everything else is 1-slot.
-            return !items.Any();
+            if (items.Any())
+                return new SlotOpenResult(items.First());
+            return new SlotOpenResult();
         }
 
         /// <summary>
@@ -419,8 +435,12 @@ namespace KatanaMUD.Models
             if (item.ItemTemplate.EquipType == null)
                 return new Validation("You may not wear that item!");
 
-            if (!IsSlotOpen(item))
+            var open = IsSlotOpen(item);
+            if(!open.IsOpen && open.ItemsToRemove.Any())
                 return new Validation("You currently have an item equipped in that slot!");
+
+            if (!open.IsOpen && !String.IsNullOrEmpty(open.FailureReason))
+                return new Validation(open.FailureReason);
 
             // TODO: Validate Weapon Type/Armour Type
             // TODO: ask item if it can be equipped
@@ -441,8 +461,12 @@ namespace KatanaMUD.Models
             if (item.ItemTemplate.EquipType == null)
                 throw new InvalidOperationException("Item cannot be worn.");
 
-            if (!IsSlotOpen(item))
+            var open = IsSlotOpen(item);
+            if(!open.IsOpen && open.ItemsToRemove.Any())
                 throw new InvalidOperationException("There is no slot open for the item.");
+
+            if (!open.IsOpen && !String.IsNullOrEmpty(open.FailureReason))
+                throw new InvalidOperationException(open.FailureReason);
 
 
             // Special case. Dual Wielding.
@@ -608,5 +632,31 @@ namespace KatanaMUD.Models
                 x.SendRoomDescription(newRoom);
             });
         }
+    }
+
+    public class SlotOpenResult
+    {
+        /// <summary>
+        /// A boolean representing whether the slot is open or not.
+        /// </summary>
+        public bool IsOpen { get; set; }
+
+        /// <summary>
+        /// If the slot is not open, but items may be (attempted to be) removed in order to free up the slot,
+        /// then this collection will contain the list of items that can be removed to free it up.
+        /// </summary>
+        public IEnumerable<Item> ItemsToRemove { get; set; }
+
+        /// <summary>
+        /// If the slot simply cannot be filled at the present time, then this string will contain the reason
+        /// why the slot cannot be filled. 
+        /// </summary>
+        public string FailureReason { get; set; }
+
+        public SlotOpenResult() { IsOpen = true; }
+
+        public SlotOpenResult(params Item[] toRemove) { ItemsToRemove = toRemove; }
+
+        public SlotOpenResult(string reason) { FailureReason = reason; }
     }
 }
