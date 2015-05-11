@@ -233,8 +233,12 @@ namespace KatanaMUD.Controllers
         }
 
 
-        public static void EditControl(IHtmlHelper html, long initial, long max, long current, string label)
+        public static void EditControl(IHtmlHelper html, Actor actor, string stat)
         {
+            var label = stat;
+            var initial = actor.RaceTemplate.Stats.Get<long>(stat);
+            var current = actor.Stats.GetCalculatedValue<long>(stat);
+            var max = actor.Stats.GetCalculatedValue<long>(stat + "Cap");
 
             html.ViewContext.Writer.Write(html.Raw("<div class=\"statrow\">"));
             html.ViewContext.Writer.Write(html.Raw("<label>" + label + "</label>"));
@@ -249,5 +253,5 @@ namespace KatanaMUD.Controllers
             html.ViewContext.Writer.Write(html.Raw("<input type=\"button\" class=\"max\" value=\"Max\" tabindex=\"-100\" />"));
             html.ViewContext.Writer.Write(html.Raw("</div>"));
         }
-}
+    }
 }

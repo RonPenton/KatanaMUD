@@ -52,19 +52,19 @@ namespace KatanaMUD.Importer.Structures
             race.Id = Number;
             race.Name = new string(Name).Replace("\0", "").Trim();
 
-            race.Stats.SetValue("Strength", (long)MinStr);
-            race.Stats.SetValue("Agility", (long)MinAgl);
-            race.Stats.SetValue("Health", (long)MinHea);
-            race.Stats.SetValue("Intellect", (long)MinInt);
-            race.Stats.SetValue("Willpower", (long)MinWil);
-            race.Stats.SetValue("Charm", (long)MinStr);
-            race.Stats.SetValue("StrengthCap", (long)MinChm);
-            race.Stats.SetValue("AgilityCap", (long)MaxAgl);
-            race.Stats.SetValue("HealthCap", (long)MaxHea);
-            race.Stats.SetValue("IntellectCap", (long)MaxInt);
-            race.Stats.SetValue("WillpowerCap", (long)MaxWil);
-            race.Stats.SetValue("CharmCap", (long)MaxChm);
-            race.Stats.SetValue("HpMin", (long)HPBonus);
+            race.Stats.Set("Strength", (long)MinStr);
+            race.Stats.Set("Agility", (long)MinAgl);
+            race.Stats.Set("Health", (long)MinHea);
+            race.Stats.Set("Intellect", (long)MinInt);
+            race.Stats.Set("Willpower", (long)MinWil);
+            race.Stats.Set("Charm", (long)MinStr);
+            race.Stats.Set("StrengthCap", (long)MinChm);
+            race.Stats.Set("AgilityCap", (long)MaxAgl);
+            race.Stats.Set("HealthCap", (long)MaxHea);
+            race.Stats.Set("IntellectCap", (long)MaxInt);
+            race.Stats.Set("WillpowerCap", (long)MaxWil);
+            race.Stats.Set("CharmCap", (long)MaxChm);
+            race.Stats.Set("HpMin", (long)HPBonus);
 
             return race;
         }

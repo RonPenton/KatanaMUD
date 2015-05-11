@@ -30,6 +30,7 @@ namespace KatanaMUD.Importer
 
             //var races = Btrieve.GetAllRaces(new FileInfo(@"C:\Users\spsadmin\Documents\MMUDDats\wccrace2.dat").FullName, context.RaceTemplates);
             //var classes = Btrieve.GetAllClasses(new FileInfo(@"C:\Users\spsadmin\Documents\MMUDDats\wccclas2.dat").FullName, context.ClassTemplates);
+            var items = Btrieve.GetAllItems(new FileInfo(@"C:\CleanP\wccitem2.dat").FullName, context.ItemTemplates);
 
 
             //var rooms = Btrieve.GetAllRooms(new FileInfo(@"C:\CleanP\wccmp002.dat").FullName);
@@ -56,16 +57,17 @@ namespace KatanaMUD.Importer
             //}
 
 
-            var items = Btrieve.GetAllItems(new FileInfo(@"C:\CleanP\wccitem2.dat").FullName);
 
-            var notdrop = items.Where(x => x.NotDroppable != 0).ToList();
-            var retain = items.Where(x => x.RetainAfterUses != 0).ToList();
-            var destroy = items.Where(x => x.DestroyOnDeath != 0).ToList();
+
+            //var notdrop = items.Where(x => x.NotDroppable != 0).ToList();
+            //var retain = items.Where(x => x.RetainAfterUses != 0).ToList();
+            //var destroy = items.Where(x => x.DestroyOnDeath != 0).ToList();
 
 
 
             //context.RaceTemplates.AddRange(races, true);
             //context.ClassTemplates.AddRange(classes, true);
+            //context.ItemTemplates.AddRange(items, true);
             context.SaveChanges();
         }
     }

@@ -49,24 +49,28 @@ namespace KatanaMUD.Models
 
     public enum EquipmentSlot
     {
+        Weapon,         // x2, with rules: only 1h weapons, and only if Offhand is empty
+        Offhand,
+
         Head,
+        Chest,
+        Legs,
+        Hands,
+        Feet,
+
         Face,
+        Arms,
+        Shoulders,
+        Back,
+        Pocket,
+        Waist,
+
         Eyes,
         Ears,           // x2
         Neck,
-        Shoulders,
-        Chest,
-        Back,
-        Arms,
         Wrists,         // x2
-        Hands,
-        Weapon,         // x2, with rules: only 1h weapons, and only if Offhand is empty
-        Offhand,
         Fingers,        // x2
-        Pocket,
-        Waist,
-        Legs,
-        Feet,
+
         Light
     }
 

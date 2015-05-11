@@ -171,7 +171,7 @@ module KMud {
             this.commandHandlers["drop"] = this.commandHandlers["dr"] = (words, tail) => this.drop(tail, false);
             this.commandHandlers["hide"] = this.commandHandlers["hid"] = (words, tail) => this.drop(tail, true);
             this.commandHandlers["search"] = this.commandHandlers["sea"] = (words, tail) => this.SendMessage(new SearchCommand());
-            this.commandHandlers["equip"] = this.commandHandlers["eq"] = (words, tail) => this.SendMessage(new EquipCommand(null, tail));
+            this.commandHandlers["equip"] = this.commandHandlers["eq"] = this.commandHandlers["arm"] = this.commandHandlers["ar"] = (words, tail) => this.SendMessage(new EquipCommand(null, tail));
             this.commandHandlers["remove"] = this.commandHandlers["rem"] = (words, tail) => this.SendMessage(new RemoveCommand(null, tail));
 
 
@@ -530,23 +530,37 @@ module KMud {
 
         private showInventory(message: InventoryListMessage) {
 
-            var groups = Linq(message.Items).groupBy(x => x.TemplateId + "|" + x.Name);
+            var equipped = Linq(message.Items).where(x => x.EquippedSlot != null).orderBy(x => x.EquippedSlot);
+            var groups = Linq(message.Items).where(x => x.EquippedSlot == null).groupBy(x => x.TemplateId + "|" + x.Name).orderBy(x => x.first().Name);
 
-            var items: string = "";
+            var items: string[] = [];
+
             if (message.Cash.length > 0) {
-                items = Linq(message.Cash).select(x => String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "")).toArray().join(", ");
+                Linq(message.Cash).forEach(x=> items.push(String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "")));
             }
-            if (message.Items.length > 0) {
-                if (items.length > 0)
-                    items += ", ";
-                items += groups.select(x => (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name).toArray().join(", ");
+            if (equipped.areAny()) {
+                equipped.forEach(x => items.push(x.Name + " (" + EquipmentSlot[x.EquippedSlot] + ")"));
+            }
+            if (groups.areAny()) {
+                groups.forEach(x => items.push((x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name));
             }
 
-            var str = "You are carrying " + items;
-            this.mainOutput(str, "inventory");
+            var itemStr = "Nothing!";
+            if (items.length > 0) {
+                itemStr = items.join(", ");
+            }
+
+            this.mainOutputRuns([
+                ["You are carrying:", "inventory-label"],
+                [itemStr, "inventory-list"]
+            ]);
 
             //TODO: You have no keys.
-            //TODO: Wealth: 500 copper farthings
+
+            this.mainOutputRuns([
+                ["Wealth:", "wealth-label"],
+                [StringUtilities.formatMoney(message.TotalCash.Amount) + " " + message.TotalCash.Name + "s", "wealth-amount"]
+            ]);
 
             var pct = Math.round((message.Encumbrance / message.MaxEncumbrance) * 100);
             var category = "Heavy";
@@ -557,8 +571,10 @@ module KMud {
             else if (pct <= 15)
                 category = "None";
 
-            var str = "Encumbrance: " + message.Encumbrance + " / " + message.MaxEncumbrance + " - " + category + "[" + pct + "%]";
-            this.mainOutput(str, "inventory");
+            this.mainOutputRuns([
+                ["Encumbrance:", "encumbrance-label"],
+                [message.Encumbrance + "/" + message.MaxEncumbrance + " - " + category + " [" + pct + "%]", "encumbrance-value"]
+            ]);
         }
 
         private ambiguousActors(message: AmbiguousActorMessage) {
@@ -579,10 +595,20 @@ module KMud {
 
             if (message.Equipped) {
                 if (message.Actor.Id == this.currentPlayer.Id) {
-                    this.mainOutput("You are now wearing " + message.Item.Name + ".", "equip");
+                    if (message.Item.EquippedSlot == EquipmentSlot.Weapon || message.Item.EquippedSlot == EquipmentSlot.Offhand || message.Item.EquippedSlot == EquipmentSlot.Light) {
+                        this.mainOutput("You are now holding " + message.Item.Name + ".", "equip");
+                    }
+                    else {
+                        this.mainOutput("You are now wearing " + message.Item.Name + ".", "equip");
+                    }
                 }
                 else {
-                    this.mainOutput(message.Actor.Name + " wears " + message.Item.Name + "!", "equip");
+                    if (message.Item.EquippedSlot == EquipmentSlot.Weapon || message.Item.EquippedSlot == EquipmentSlot.Offhand || message.Item.EquippedSlot == EquipmentSlot.Light) {
+                        this.mainOutput(message.Actor.Name + " readies " + message.Item.Name + "!", "equip");
+                    }
+                    else {
+                        this.mainOutput(message.Actor.Name + " wears " + message.Item.Name + "!", "equip");
+                    }
                 }
             }
             else {
@@ -597,6 +623,10 @@ module KMud {
     }
 
     export class StringUtilities {
+        public static formatMoney(n: number) {
+            return n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
         public static notEmpty(s: string): boolean {
             return !this.isNullOrWhitespace(s);
         }

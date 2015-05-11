@@ -41,7 +41,7 @@ namespace KatanaMUD
                 var connection = _connections[user];
                 if (connection.Disconnected)
                     return;
-                Console.WriteLine(String.Format("[{3}] User ({0}/{1}/{2}) Disconnected", connection.User.Id, connection.Actor.Name, connection.IP, DateTime.Now.ToShortTimeString()));
+                Console.WriteLine(String.Format("[{3}] User ({0}/{1}/{2}) Disconnected", connection.User.Id, connection.Actor.Name, connection.IP, DateTime.Now.ToLongTimeString()));
                 _connections.Remove(user);
                 _pendingDisconnections.Add(connection);
             }
@@ -51,7 +51,7 @@ namespace KatanaMUD
         {
             if (connection.Disconnected)
                 return;
-            Console.WriteLine(String.Format("[{3}] User ({0}/{1}/{2}) Disconnected", connection.User.Id, connection.Actor.Name, connection.IP, DateTime.Now.ToShortTimeString()));
+            Console.WriteLine(String.Format("[{3}] User ({0}/{1}/{2}) Disconnected", connection.User.Id, connection.Actor.Name, connection.IP, DateTime.Now.ToLongTimeString()));
             connection.Actor.UnhandledDisconnection = true;
             lock (syncRoot)
             {
@@ -62,7 +62,7 @@ namespace KatanaMUD
 
         internal Connection Connect(WebSocket socket, User user, Actor actor, string ip)
         {
-            Console.WriteLine(String.Format("[{3}] User ({0}/{1}/{2}) Connected", user.Id, actor.Name, ip, DateTime.Now.ToShortTimeString()));
+            Console.WriteLine(String.Format("[{3}] User ({0}/{1}/{2}) Connected", user.Id, actor.Name, ip, DateTime.Now.ToLongTimeString()));
             var connection = new Connection(socket, user, actor, ip);
             lock (syncRoot)
             {
@@ -115,7 +115,6 @@ namespace KatanaMUD
                     //TODO: Load Server message
 
                     connection.Actor.SendMessage(new ServerMessage() { Contents = "Auto-sensing... Just kidding!" });
-                    connection.Actor.SendMessage(new ServerMessage() { Contents = "Welcome to KatanaMUD. A MUD on the Web. Because I'm apparently insane. Dear lord." });
                     connection.Actor.SendMessage(ActorInformationMessage.CreateFirstPerson(connection.Actor));
                     connection.Actor.SendRoomDescription(connection.Actor.Room);
                 }

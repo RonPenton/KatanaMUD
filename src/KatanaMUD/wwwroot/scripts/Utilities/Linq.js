@@ -189,6 +189,8 @@ var KMud;
          * Returns true if any items in the array evaluate to true using the predicate function.
          */
         LinqContainer.prototype.areAny = function (predicate) {
+            if (predicate === undefined)
+                return this.values.length > 0;
             for (var i = 0; i < this.values.length; i++) {
                 if (predicate(this.values[i]))
                     return true;

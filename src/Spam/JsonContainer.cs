@@ -62,6 +62,17 @@ namespace Spam
             value = default(T);
             return false;
         }
+
+        public T Get<T>(string name)
+        {
+            object o = _dictionary[name];
+            return (T)Convert.ChangeType(o, typeof(T));
+        }
+
+        public void Set<T>(string name, T value)
+        {
+            this[name] = value;
+        }
     }
 
     public class AddingContainer : IDictionaryStore

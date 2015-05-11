@@ -205,7 +205,10 @@
         /**
          * Returns true if any items in the array evaluate to true using the predicate function.
          */
-        public areAny(predicate: Func1<T, boolean>): boolean {
+        public areAny(predicate?: Func1<T, boolean>): boolean {
+            if (predicate === undefined)
+                return this.values.length > 0;
+
             for (var i = 0; i < this.values.length; i++) {
                 if (predicate(this.values[i]))
                     return true;

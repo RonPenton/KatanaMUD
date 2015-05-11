@@ -10,6 +10,9 @@ namespace KatanaMUD
     {
         public static IEnumerable<T> FindByName<T>(this IEnumerable<T> items, string name, Func<T, string> getter, bool includeStartsWith = false, bool includeSubstring = false)
         {
+            if (String.IsNullOrWhiteSpace(name))
+                return new List<T>();
+
             // First look for an exact match.
             var found = items.Where(x => getter(x).Equals(name, StringComparison.InvariantCultureIgnoreCase));
             if (!found.Any() && includeStartsWith)

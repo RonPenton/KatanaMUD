@@ -178,11 +178,12 @@ namespace KatanaMUD.Importer
             ushort keyLength, ushort keyNum);
 
 
-        public static List<ItemBuffer> GetAllItems(string fileName)
+        public static List<ItemTemplate> GetAllItems(string fileName, IEnumerable<ItemTemplate> items)
         {
             var dataBuffer = new ItemBuffer();
             var list = new List<ItemBuffer>();
             Func<ItemBuffer> newFunc = () => new ItemBuffer();
+            Func<ItemBuffer, ItemTemplate> convert = x => x.ToItemTemplate(items.SingleOrDefault(y => y.Id == x.Number));
 
             // Yes, yes. Copied Code. How horrible. There's really no good alternative to DllImport-interfacing code though. Dynamic doesn't work,
             // templates don't work, etc. So. Given that the MajorMUD database format will never change in the future (it's been dead 10 years!),
@@ -218,7 +219,7 @@ namespace KatanaMUD.Importer
                 throw new InvalidOperationException(ErrorCode(status));
             }
 
-            return list;
+            return list.Select(x => convert(x)).ToList();
         }
 
 

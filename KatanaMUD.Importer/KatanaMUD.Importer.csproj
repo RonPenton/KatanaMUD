@@ -65,14 +65,14 @@
       <HintPath>..\artifacts\bin\KatanaMUD\Debug\dnx451\KatanaMUD.dll</HintPath>
     </Reference>
     <Reference Include="KatanaMUD.Helpers">
-      <HintPath>..\artifacts\bin\KatanaMUD.Helpers\Debug\aspnet50\KatanaMUD.Helpers.dll</HintPath>
+      <HintPath>..\artifacts\bin\KatanaMUD.Helpers\Debug\dnx451\KatanaMUD.Helpers.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.7.0.1-beta2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Spam">
-      <HintPath>..\artifacts\bin\Spam\Debug\aspnet50\Spam.dll</HintPath>
+      <HintPath>..\artifacts\bin\Spam\Debug\dnx451\Spam.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />

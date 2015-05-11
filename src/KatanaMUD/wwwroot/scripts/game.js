@@ -149,7 +149,7 @@ var KMud;
             this.commandHandlers["drop"] = this.commandHandlers["dr"] = function (words, tail) { return _this.drop(tail, false); };
             this.commandHandlers["hide"] = this.commandHandlers["hid"] = function (words, tail) { return _this.drop(tail, true); };
             this.commandHandlers["search"] = this.commandHandlers["sea"] = function (words, tail) { return _this.SendMessage(new KMud.SearchCommand()); };
-            this.commandHandlers["equip"] = this.commandHandlers["eq"] = function (words, tail) { return _this.SendMessage(new KMud.EquipCommand(null, tail)); };
+            this.commandHandlers["equip"] = this.commandHandlers["eq"] = this.commandHandlers["arm"] = this.commandHandlers["ar"] = function (words, tail) { return _this.SendMessage(new KMud.EquipCommand(null, tail)); };
             this.commandHandlers["remove"] = this.commandHandlers["rem"] = function (words, tail) { return _this.SendMessage(new KMud.RemoveCommand(null, tail)); };
             this.commandHandlers["gos"] = this.commandHandlers["gossip"] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Gossip); };
             this.commandHandlers["say"] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Say); };
@@ -458,20 +458,31 @@ var KMud;
             }
         };
         Game.prototype.showInventory = function (message) {
-            var groups = KMud.Linq(message.Items).groupBy(function (x) { return x.TemplateId + "|" + x.Name; });
-            var items = "";
+            var equipped = KMud.Linq(message.Items).where(function (x) { return x.EquippedSlot != null; }).orderBy(function (x) { return x.EquippedSlot; });
+            var groups = KMud.Linq(message.Items).where(function (x) { return x.EquippedSlot == null; }).groupBy(function (x) { return x.TemplateId + "|" + x.Name; }).orderBy(function (x) { return x.first().Name; });
+            var items = [];
             if (message.Cash.length > 0) {
-                items = KMud.Linq(message.Cash).select(function (x) { return String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : ""); }).toArray().join(", ");
+                KMud.Linq(message.Cash).forEach(function (x) { return items.push(String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "")); });
             }
-            if (message.Items.length > 0) {
-                if (items.length > 0)
-                    items += ", ";
-                items += groups.select(function (x) { return (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name; }).toArray().join(", ");
+            if (equipped.areAny()) {
+                equipped.forEach(function (x) { return items.push(x.Name + " (" + KMud.EquipmentSlot[x.EquippedSlot] + ")"); });
             }
-            var str = "You are carrying " + items;
-            this.mainOutput(str, "inventory");
+            if (groups.areAny()) {
+                groups.forEach(function (x) { return items.push((x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name); });
+            }
+            var itemStr = "Nothing!";
+            if (items.length > 0) {
+                itemStr = items.join(", ");
+            }
+            this.mainOutputRuns([
+                ["You are carrying:", "inventory-label"],
+                [itemStr, "inventory-list"]
+            ]);
             //TODO: You have no keys.
-            //TODO: Wealth: 500 copper farthings
+            this.mainOutputRuns([
+                ["Wealth:", "wealth-label"],
+                [StringUtilities.formatMoney(message.TotalCash.Amount) + " " + message.TotalCash.Name + "s", "wealth-amount"]
+            ]);
             var pct = Math.round((message.Encumbrance / message.MaxEncumbrance) * 100);
             var category = "Heavy";
             if (pct <= 66)
@@ -480,8 +491,10 @@ var KMud;
                 category = "Light";
             else if (pct <= 15)
                 category = "None";
-            var str = "Encumbrance: " + message.Encumbrance + " / " + message.MaxEncumbrance + " - " + category + "[" + pct + "%]";
-            this.mainOutput(str, "inventory");
+            this.mainOutputRuns([
+                ["Encumbrance:", "encumbrance-label"],
+                [message.Encumbrance + "/" + message.MaxEncumbrance + " - " + category + " [" + pct + "%]", "encumbrance-value"]
+            ]);
         };
         Game.prototype.ambiguousActors = function (message) {
             this.mainOutput("Please be more specific.  You could have meant any of these:", "error");
@@ -498,10 +511,20 @@ var KMud;
         Game.prototype.equipChanged = function (message) {
             if (message.Equipped) {
                 if (message.Actor.Id == this.currentPlayer.Id) {
-                    this.mainOutput("You are now wearing " + message.Item.Name + ".", "equip");
+                    if (message.Item.EquippedSlot == KMud.EquipmentSlot.Weapon || message.Item.EquippedSlot == KMud.EquipmentSlot.Offhand || message.Item.EquippedSlot == KMud.EquipmentSlot.Light) {
+                        this.mainOutput("You are now holding " + message.Item.Name + ".", "equip");
+                    }
+                    else {
+                        this.mainOutput("You are now wearing " + message.Item.Name + ".", "equip");
+                    }
                 }
                 else {
-                    this.mainOutput(message.Actor.Name + " wears " + message.Item.Name + "!", "equip");
+                    if (message.Item.EquippedSlot == KMud.EquipmentSlot.Weapon || message.Item.EquippedSlot == KMud.EquipmentSlot.Offhand || message.Item.EquippedSlot == KMud.EquipmentSlot.Light) {
+                        this.mainOutput(message.Actor.Name + " readies " + message.Item.Name + "!", "equip");
+                    }
+                    else {
+                        this.mainOutput(message.Actor.Name + " wears " + message.Item.Name + "!", "equip");
+                    }
                 }
             }
             else {
@@ -519,6 +542,9 @@ var KMud;
     var StringUtilities = (function () {
         function StringUtilities() {
         }
+        StringUtilities.formatMoney = function (n) {
+            return n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        };
         StringUtilities.notEmpty = function (s) {
             return !this.isNullOrWhitespace(s);
         };

@@ -8,8 +8,9 @@ var KMud;
 (function (KMud) {
     var ActionNotAllowedMessage = (function (_super) {
         __extends(ActionNotAllowedMessage, _super);
-        function ActionNotAllowedMessage() {
+        function ActionNotAllowedMessage(Message) {
             _super.call(this, 'ActionNotAllowedMessage');
+            this.Message = Message;
         }
         ActionNotAllowedMessage.ClassName = 'ActionNotAllowedMessage';
         return ActionNotAllowedMessage;
@@ -17,8 +18,11 @@ var KMud;
     KMud.ActionNotAllowedMessage = ActionNotAllowedMessage;
     var ActorInformationMessage = (function (_super) {
         __extends(ActorInformationMessage, _super);
-        function ActorInformationMessage() {
+        function ActorInformationMessage(Name, Id, IsYou) {
             _super.call(this, 'ActorInformationMessage');
+            this.Name = Name;
+            this.Id = Id;
+            this.IsYou = IsYou;
         }
         ActorInformationMessage.ClassName = 'ActorInformationMessage';
         return ActorInformationMessage;
@@ -26,8 +30,9 @@ var KMud;
     KMud.ActorInformationMessage = ActorInformationMessage;
     var AmbiguousItemMessage = (function (_super) {
         __extends(AmbiguousItemMessage, _super);
-        function AmbiguousItemMessage() {
+        function AmbiguousItemMessage(Items) {
             _super.call(this, 'AmbiguousItemMessage');
+            this.Items = Items;
         }
         AmbiguousItemMessage.ClassName = 'AmbiguousItemMessage';
         return AmbiguousItemMessage;
@@ -35,8 +40,9 @@ var KMud;
     KMud.AmbiguousItemMessage = AmbiguousItemMessage;
     var AmbiguousActorMessage = (function (_super) {
         __extends(AmbiguousActorMessage, _super);
-        function AmbiguousActorMessage() {
+        function AmbiguousActorMessage(Actors) {
             _super.call(this, 'AmbiguousActorMessage');
+            this.Actors = Actors;
         }
         AmbiguousActorMessage.ClassName = 'AmbiguousActorMessage';
         return AmbiguousActorMessage;
@@ -44,8 +50,13 @@ var KMud;
     KMud.AmbiguousActorMessage = AmbiguousActorMessage;
     var CommunicationMessage = (function (_super) {
         __extends(CommunicationMessage, _super);
-        function CommunicationMessage() {
+        function CommunicationMessage(Message, Type, Chatroom, ActorName, ActorId) {
             _super.call(this, 'CommunicationMessage');
+            this.Message = Message;
+            this.Type = Type;
+            this.Chatroom = Chatroom;
+            this.ActorName = ActorName;
+            this.ActorId = ActorId;
         }
         CommunicationMessage.ClassName = 'CommunicationMessage';
         return CommunicationMessage;
@@ -53,8 +64,10 @@ var KMud;
     KMud.CommunicationMessage = CommunicationMessage;
     var RemoveCommand = (function (_super) {
         __extends(RemoveCommand, _super);
-        function RemoveCommand() {
+        function RemoveCommand(ItemId, ItemName) {
             _super.call(this, 'RemoveCommand');
+            this.ItemId = ItemId;
+            this.ItemName = ItemName;
         }
         RemoveCommand.ClassName = 'RemoveCommand';
         return RemoveCommand;
@@ -62,8 +75,10 @@ var KMud;
     KMud.RemoveCommand = RemoveCommand;
     var EquipCommand = (function (_super) {
         __extends(EquipCommand, _super);
-        function EquipCommand() {
+        function EquipCommand(ItemId, ItemName) {
             _super.call(this, 'EquipCommand');
+            this.ItemId = ItemId;
+            this.ItemName = ItemName;
         }
         EquipCommand.ClassName = 'EquipCommand';
         return EquipCommand;
@@ -71,8 +86,11 @@ var KMud;
     KMud.EquipCommand = EquipCommand;
     var ItemEquippedChangedMessage = (function (_super) {
         __extends(ItemEquippedChangedMessage, _super);
-        function ItemEquippedChangedMessage() {
+        function ItemEquippedChangedMessage(Actor, Item, Equipped) {
             _super.call(this, 'ItemEquippedChangedMessage');
+            this.Actor = Actor;
+            this.Item = Item;
+            this.Equipped = Equipped;
         }
         ItemEquippedChangedMessage.ClassName = 'ItemEquippedChangedMessage';
         return ItemEquippedChangedMessage;
@@ -80,8 +98,10 @@ var KMud;
     KMud.ItemEquippedChangedMessage = ItemEquippedChangedMessage;
     var GenericMessage = (function (_super) {
         __extends(GenericMessage, _super);
-        function GenericMessage() {
+        function GenericMessage(Message, Class) {
             _super.call(this, 'GenericMessage');
+            this.Message = Message;
+            this.Class = Class;
         }
         GenericMessage.ClassName = 'GenericMessage';
         return GenericMessage;
@@ -98,8 +118,14 @@ var KMud;
     KMud.InventoryCommand = InventoryCommand;
     var InventoryListMessage = (function (_super) {
         __extends(InventoryListMessage, _super);
-        function InventoryListMessage() {
+        function InventoryListMessage(Cash, TotalCash, Items, Encumbrance, MaxEncumbrance, Currency) {
             _super.call(this, 'InventoryListMessage');
+            this.Cash = Cash;
+            this.TotalCash = TotalCash;
+            this.Items = Items;
+            this.Encumbrance = Encumbrance;
+            this.MaxEncumbrance = MaxEncumbrance;
+            this.Currency = Currency;
         }
         InventoryListMessage.ClassName = 'InventoryListMessage';
         return InventoryListMessage;
@@ -107,8 +133,11 @@ var KMud;
     KMud.InventoryListMessage = InventoryListMessage;
     var GetItemCommand = (function (_super) {
         __extends(GetItemCommand, _super);
-        function GetItemCommand() {
+        function GetItemCommand(ItemId, ItemName, Quantity) {
             _super.call(this, 'GetItemCommand');
+            this.ItemId = ItemId;
+            this.ItemName = ItemName;
+            this.Quantity = Quantity;
         }
         GetItemCommand.ClassName = 'GetItemCommand';
         return GetItemCommand;
@@ -116,8 +145,12 @@ var KMud;
     KMud.GetItemCommand = GetItemCommand;
     var DropItemCommand = (function (_super) {
         __extends(DropItemCommand, _super);
-        function DropItemCommand() {
+        function DropItemCommand(ItemId, ItemName, Quantity, Hide) {
             _super.call(this, 'DropItemCommand');
+            this.ItemId = ItemId;
+            this.ItemName = ItemName;
+            this.Quantity = Quantity;
+            this.Hide = Hide;
         }
         DropItemCommand.ClassName = 'DropItemCommand';
         return DropItemCommand;
@@ -125,8 +158,12 @@ var KMud;
     KMud.DropItemCommand = DropItemCommand;
     var ItemOwnershipMessage = (function (_super) {
         __extends(ItemOwnershipMessage, _super);
-        function ItemOwnershipMessage() {
+        function ItemOwnershipMessage(Items, Giver, Taker, Hide) {
             _super.call(this, 'ItemOwnershipMessage');
+            this.Items = Items;
+            this.Giver = Giver;
+            this.Taker = Taker;
+            this.Hide = Hide;
         }
         ItemOwnershipMessage.ClassName = 'ItemOwnershipMessage';
         return ItemOwnershipMessage;
@@ -134,8 +171,13 @@ var KMud;
     KMud.ItemOwnershipMessage = ItemOwnershipMessage;
     var CashTransferMessage = (function (_super) {
         __extends(CashTransferMessage, _super);
-        function CashTransferMessage() {
+        function CashTransferMessage(Currency, Quantity, Giver, Taker, Hide) {
             _super.call(this, 'CashTransferMessage');
+            this.Currency = Currency;
+            this.Quantity = Quantity;
+            this.Giver = Giver;
+            this.Taker = Taker;
+            this.Hide = Hide;
         }
         CashTransferMessage.ClassName = 'CashTransferMessage';
         return CashTransferMessage;
@@ -143,8 +185,10 @@ var KMud;
     KMud.CashTransferMessage = CashTransferMessage;
     var LoginRejected = (function (_super) {
         __extends(LoginRejected, _super);
-        function LoginRejected() {
+        function LoginRejected(RejectionMessage, NoCharacter) {
             _super.call(this, 'LoginRejected');
+            this.RejectionMessage = RejectionMessage;
+            this.NoCharacter = NoCharacter;
         }
         LoginRejected.ClassName = 'LoginRejected';
         return LoginRejected;
@@ -152,8 +196,10 @@ var KMud;
     KMud.LoginRejected = LoginRejected;
     var LoginStateMessage = (function (_super) {
         __extends(LoginStateMessage, _super);
-        function LoginStateMessage() {
+        function LoginStateMessage(Actor, Login) {
             _super.call(this, 'LoginStateMessage');
+            this.Actor = Actor;
+            this.Login = Login;
         }
         LoginStateMessage.ClassName = 'LoginStateMessage';
         return LoginStateMessage;
@@ -161,8 +207,13 @@ var KMud;
     KMud.LoginStateMessage = LoginStateMessage;
     var LookMessage = (function (_super) {
         __extends(LookMessage, _super);
-        function LookMessage() {
+        function LookMessage(Direction, Actor, Item, YouFigureItOut, Brief) {
             _super.call(this, 'LookMessage');
+            this.Direction = Direction;
+            this.Actor = Actor;
+            this.Item = Item;
+            this.YouFigureItOut = YouFigureItOut;
+            this.Brief = Brief;
         }
         LookMessage.ClassName = 'LookMessage';
         return LookMessage;
@@ -170,8 +221,10 @@ var KMud;
     KMud.LookMessage = LookMessage;
     var MoveMessage = (function (_super) {
         __extends(MoveMessage, _super);
-        function MoveMessage() {
+        function MoveMessage(Direction, Portal) {
             _super.call(this, 'MoveMessage');
+            this.Direction = Direction;
+            this.Portal = Portal;
         }
         MoveMessage.ClassName = 'MoveMessage';
         return MoveMessage;
@@ -179,8 +232,13 @@ var KMud;
     KMud.MoveMessage = MoveMessage;
     var PartyMovementMessage = (function (_super) {
         __extends(PartyMovementMessage, _super);
-        function PartyMovementMessage() {
+        function PartyMovementMessage(Leader, Actors, Direction, Enter, CustomText) {
             _super.call(this, 'PartyMovementMessage');
+            this.Leader = Leader;
+            this.Actors = Actors;
+            this.Direction = Direction;
+            this.Enter = Enter;
+            this.CustomText = CustomText;
         }
         PartyMovementMessage.ClassName = 'PartyMovementMessage';
         return PartyMovementMessage;
@@ -188,8 +246,9 @@ var KMud;
     KMud.PartyMovementMessage = PartyMovementMessage;
     var PingMessage = (function (_super) {
         __extends(PingMessage, _super);
-        function PingMessage() {
+        function PingMessage(SendTime) {
             _super.call(this, 'PingMessage');
+            this.SendTime = SendTime;
         }
         PingMessage.ClassName = 'PingMessage';
         return PingMessage;
@@ -197,8 +256,9 @@ var KMud;
     KMud.PingMessage = PingMessage;
     var PongMessage = (function (_super) {
         __extends(PongMessage, _super);
-        function PongMessage() {
+        function PongMessage(SendTime) {
             _super.call(this, 'PongMessage');
+            this.SendTime = SendTime;
         }
         PongMessage.ClassName = 'PongMessage';
         return PongMessage;
@@ -206,8 +266,21 @@ var KMud;
     KMud.PongMessage = PongMessage;
     var RoomDescriptionMessage = (function (_super) {
         __extends(RoomDescriptionMessage, _super);
-        function RoomDescriptionMessage() {
+        function RoomDescriptionMessage(RoomId, Name, Description, Actors, VisibleItems, FoundItems, VisibleCash, FoundCash, Exits, IsCurrentRoom, CannotSee, CannotSeeMessage, LightLevel) {
             _super.call(this, 'RoomDescriptionMessage');
+            this.RoomId = RoomId;
+            this.Name = Name;
+            this.Description = Description;
+            this.Actors = Actors;
+            this.VisibleItems = VisibleItems;
+            this.FoundItems = FoundItems;
+            this.VisibleCash = VisibleCash;
+            this.FoundCash = FoundCash;
+            this.Exits = Exits;
+            this.IsCurrentRoom = IsCurrentRoom;
+            this.CannotSee = CannotSee;
+            this.CannotSeeMessage = CannotSeeMessage;
+            this.LightLevel = LightLevel;
         }
         RoomDescriptionMessage.ClassName = 'RoomDescriptionMessage';
         return RoomDescriptionMessage;
@@ -215,8 +288,9 @@ var KMud;
     KMud.RoomDescriptionMessage = RoomDescriptionMessage;
     var SearchCommand = (function (_super) {
         __extends(SearchCommand, _super);
-        function SearchCommand() {
+        function SearchCommand(Direction) {
             _super.call(this, 'SearchCommand');
+            this.Direction = Direction;
         }
         SearchCommand.ClassName = 'SearchCommand';
         return SearchCommand;
@@ -224,8 +298,10 @@ var KMud;
     KMud.SearchCommand = SearchCommand;
     var SearchMessage = (function (_super) {
         __extends(SearchMessage, _super);
-        function SearchMessage() {
+        function SearchMessage(FoundItems, FoundCash) {
             _super.call(this, 'SearchMessage');
+            this.FoundItems = FoundItems;
+            this.FoundCash = FoundCash;
         }
         SearchMessage.ClassName = 'SearchMessage';
         return SearchMessage;
@@ -233,8 +309,9 @@ var KMud;
     KMud.SearchMessage = SearchMessage;
     var ServerMessage = (function (_super) {
         __extends(ServerMessage, _super);
-        function ServerMessage() {
+        function ServerMessage(Contents) {
             _super.call(this, 'ServerMessage');
+            this.Contents = Contents;
         }
         ServerMessage.ClassName = 'ServerMessage';
         return ServerMessage;
@@ -242,8 +319,9 @@ var KMud;
     KMud.ServerMessage = ServerMessage;
     var SysopMessage = (function (_super) {
         __extends(SysopMessage, _super);
-        function SysopMessage() {
+        function SysopMessage(Command) {
             _super.call(this, 'SysopMessage');
+            this.Command = Command;
         }
         SysopMessage.ClassName = 'SysopMessage';
         return SysopMessage;
@@ -273,6 +351,28 @@ var KMud;
         return ExitDescription;
     })();
     KMud.ExitDescription = ExitDescription;
+    (function (EquipmentSlot) {
+        EquipmentSlot[EquipmentSlot["Weapon"] = 0] = "Weapon";
+        EquipmentSlot[EquipmentSlot["Offhand"] = 1] = "Offhand";
+        EquipmentSlot[EquipmentSlot["Head"] = 2] = "Head";
+        EquipmentSlot[EquipmentSlot["Chest"] = 3] = "Chest";
+        EquipmentSlot[EquipmentSlot["Legs"] = 4] = "Legs";
+        EquipmentSlot[EquipmentSlot["Hands"] = 5] = "Hands";
+        EquipmentSlot[EquipmentSlot["Feet"] = 6] = "Feet";
+        EquipmentSlot[EquipmentSlot["Face"] = 7] = "Face";
+        EquipmentSlot[EquipmentSlot["Arms"] = 8] = "Arms";
+        EquipmentSlot[EquipmentSlot["Shoulders"] = 9] = "Shoulders";
+        EquipmentSlot[EquipmentSlot["Back"] = 10] = "Back";
+        EquipmentSlot[EquipmentSlot["Pocket"] = 11] = "Pocket";
+        EquipmentSlot[EquipmentSlot["Waist"] = 12] = "Waist";
+        EquipmentSlot[EquipmentSlot["Eyes"] = 13] = "Eyes";
+        EquipmentSlot[EquipmentSlot["Ears"] = 14] = "Ears";
+        EquipmentSlot[EquipmentSlot["Neck"] = 15] = "Neck";
+        EquipmentSlot[EquipmentSlot["Wrists"] = 16] = "Wrists";
+        EquipmentSlot[EquipmentSlot["Fingers"] = 17] = "Fingers";
+        EquipmentSlot[EquipmentSlot["Light"] = 18] = "Light";
+    })(KMud.EquipmentSlot || (KMud.EquipmentSlot = {}));
+    var EquipmentSlot = KMud.EquipmentSlot;
     (function (CommunicationType) {
         CommunicationType[CommunicationType["Gossip"] = 0] = "Gossip";
         CommunicationType[CommunicationType["Auction"] = 1] = "Auction";

@@ -40,7 +40,7 @@ module KMud {
         public static ClassName: string = 'InventoryCommand';
     }
     export class InventoryListMessage extends MessageBase {
-        constructor(public Cash?: CurrencyDescription[], public Items?: ItemDescription[], public Encumbrance?: number, public MaxEncumbrance?: number) { super('InventoryListMessage'); }
+        constructor(public Cash?: CurrencyDescription[], public TotalCash?: CurrencyDescription, public Items?: ItemDescription[], public Encumbrance?: number, public MaxEncumbrance?: number, public Currency?: number) { super('InventoryListMessage'); }
         public static ClassName: string = 'InventoryListMessage';
     }
     export class GetItemCommand extends MessageBase {
@@ -112,6 +112,7 @@ module KMud {
         public Id: string;
         public TemplateId: number;
         public Modified: boolean;
+        public EquippedSlot: EquipmentSlot;
     }
     export class ActorDescription {
         public Name: string;
@@ -125,6 +126,27 @@ module KMud {
         public Direction: Direction;
         public Name: string;
         public DestinationRoom: number;
+    }
+    export enum EquipmentSlot {
+        Weapon = 0,
+        Offhand = 1,
+        Head = 2,
+        Chest = 3,
+        Legs = 4,
+        Hands = 5,
+        Feet = 6,
+        Face = 7,
+        Arms = 8,
+        Shoulders = 9,
+        Back = 10,
+        Pocket = 11,
+        Waist = 12,
+        Eyes = 13,
+        Ears = 14,
+        Neck = 15,
+        Wrists = 16,
+        Fingers = 17,
+        Light = 18,
     }
     export enum CommunicationType {
         Gossip = 0,

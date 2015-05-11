@@ -64,6 +64,7 @@ namespace KatanaMUD.Messages
         public Guid Id { get; set; }
         public int TemplateId { get; set; }
         public bool Modified { get; set; }
+        public EquipmentSlot? EquippedSlot { get; set; }
 
         public ItemDescription() { }
 
@@ -73,6 +74,7 @@ namespace KatanaMUD.Messages
             this.Id = item.Id;
             this.TemplateId = item.ItemTemplate.Id;
             this.Modified = item.Modified;
+            this.EquippedSlot = item.EquippedSlot;
         }
 
         public ItemDescription(ItemTemplate template)

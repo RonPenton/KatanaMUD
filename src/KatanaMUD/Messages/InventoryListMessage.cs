@@ -12,6 +12,7 @@ namespace KatanaMUD.Messages
         {
             var response = new InventoryListMessage();
             response.Cash = Game.Data.AllCurrencies.Select(x => new CurrencyDescription(x, Currency.Get(x, actor.Cash))).Where(x => x.Amount > 0).ToArray();
+            response.TotalCash = new CurrencyDescription(Game.Data.AllCurrencies.First(x => x.Value == 1), Game.Data.AllCurrencies.Sum(x => Currency.Get(x, actor.Cash) * x.Value));
             response.Items = actor.Items.Select(x => new ItemDescription(x)).ToArray();
             response.Encumbrance = actor.Encumbrance;
             response.MaxEncumbrance = actor.MaxEncumbrance;
@@ -22,9 +23,11 @@ namespace KatanaMUD.Messages
     public class InventoryListMessage : MessageBase
     {
         public CurrencyDescription[] Cash { get; set; }
+        public CurrencyDescription TotalCash { get; set; }
         public ItemDescription[] Items { get; set; }
         public long Encumbrance { get; set; }
         public long MaxEncumbrance { get; set; }
+        public long Currency { get; set; }
     }
 
 

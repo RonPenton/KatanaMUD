@@ -45,14 +45,13 @@
         <input type="text" id="cps" disabled value="@Model.CharacterPoints" />
     </div>
 
-
     <div class="stat-area">
-        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model.RaceTemplate.Stats.Strength, Model.RaceTemplate.Stats.StrengthCap, Model.Stats.Strength, "Strength");}
-        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model.RaceTemplate.Stats.Intellect, Model.RaceTemplate.Stats.IntellectCap, Model.Stats.Intellect, "Intellect"); }
-        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model.RaceTemplate.Stats.Willpower, Model.RaceTemplate.Stats.WillpowerCap, Model.Stats.Willpower, "Willpower"); }
-        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model.RaceTemplate.Stats.Agility, Model.RaceTemplate.Stats.AgilityCap, Model.Stats.Agility, "Agility"); }
-        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model.RaceTemplate.Stats.Health, Model.RaceTemplate.Stats.HealthCap, Model.Stats.Health, "Health"); }
-        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model.RaceTemplate.Stats.Charm, Model.RaceTemplate.Stats.CharmCap, Model.Stats.Charm, "Charm"); }
+        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model, "Strength");}
+        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model, "Intellect");}
+        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model, "Willpower");}
+        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model, "Agility");}
+        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model, "Health");}
+        @{KatanaMUD.Controllers.HomeController.EditControl(this.Html, Model, "Charm");}
     </div>
     <input type="submit" value="Next" />
 }
