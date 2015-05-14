@@ -143,8 +143,17 @@ input:focus {
 .encumbrance-label {
   color: mediumseagreen;
 }
+.item-cash {
+  color: darkorange;
+}
+.item-equipped {
+  color: skyblue;
+}
 .wealth-amount,
-.inventory-list,
-.encumbrance-value {
+.encumbrance-value,
+.item-held {
   color: deepskyblue;
+}
+.item-separator {
+  color: darkcyan;
 }
