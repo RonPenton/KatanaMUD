@@ -54,6 +54,7 @@ var KMud;
             });
             this.registerMessageHandlers();
             this.registerCommandHandlers();
+            this.ding = new Audio("media/ding.wav");
         }
         Object.defineProperty(Game.prototype, "mainOutput", {
             get: function () {
@@ -62,6 +63,11 @@ var KMud;
             enumerable: true,
             configurable: true
         });
+        Game.prototype.notify = function () {
+            if (document.hidden) {
+                this.ding.play();
+            }
+        };
         Game.prototype.processCommand = function (command) {
             var lower = command.toLocaleLowerCase().trim();
             var words = command.split(/\s+/gi);
@@ -410,6 +416,7 @@ var KMud;
             switch (message.Type) {
                 case KMud.CommunicationType.Gossip:
                     this.addOutput(this.mainOutput, message.ActorName + " gossips: " + message.Message, "gossip");
+                    this.notify();
                     break;
                 case KMud.CommunicationType.Say:
                     if (message.ActorId == this.currentPlayer.Id) {
@@ -417,10 +424,12 @@ var KMud;
                     }
                     else {
                         this.addOutput(this.mainOutput, message.ActorName + " says \"" + message.Message + "\"", "say");
+                        this.notify();
                     }
                     break;
                 case KMud.CommunicationType.Telepath:
                     this.addOutput(this.mainOutput, message.ActorName + " telepaths " + message.Message, "telepath");
+                    this.notify();
                     break;
             }
         };

@@ -14,9 +14,16 @@ module KMud {
         private commandHandlers: { [index: string]: Action3<string[], string, string> } = {};
         private symbolCommandHandlers: { [index: string]: Action3<string[], string, string> } = {};
         private currentPlayer: ActorInformationMessage;
+        private ding: HTMLAudioElement;
 
         private get mainOutput(): HTMLElement {
             return document.getElementById("Output");
+        }
+
+        private notify() {
+            if (document.hidden) {
+                this.ding.play();
+            }
         }
 
         constructor() {
@@ -65,6 +72,8 @@ module KMud {
 
             this.registerMessageHandlers();
             this.registerCommandHandlers();
+
+            this.ding = new Audio("media/ding.wav");
         }
 
         private processCommand(command: string) {
@@ -465,6 +474,7 @@ module KMud {
             switch (message.Type) {
                 case CommunicationType.Gossip:
                     this.addOutput(this.mainOutput, message.ActorName + " gossips: " + message.Message, "gossip");
+                    this.notify();
                     break;
 
                 case CommunicationType.Say:
@@ -473,11 +483,13 @@ module KMud {
                     }
                     else {
                         this.addOutput(this.mainOutput, message.ActorName + " says \"" + message.Message + "\"", "say");
+                        this.notify();
                     }
                     break;
 
                 case CommunicationType.Telepath:
                     this.addOutput(this.mainOutput, message.ActorName + " telepaths " + message.Message, "telepath");
+                    this.notify();
                     break;
             }
         }
