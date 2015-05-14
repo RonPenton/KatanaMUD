@@ -3,15 +3,17 @@ body {
   overflow: hidden;
   display: flex;
   height: 100vh;
-  font-size: 16px;
-  font-family: Consolas, Courier New, Courier, monospace;
+  font-size: 18px;
+  font-family: Courier New, Courier, Consolas, monospace;
   color: white;
+}
+.game-text {
+  max-width: 80ch;
+  word-wrap: break-word;
 }
 .game-text span {
   padding: 2px 0px;
   display: inline-block;
-  max-width: 80ch;
-  word-wrap: break-word;
   margin-right: 1ch;
 }
 .error-text {
@@ -61,7 +63,6 @@ input:focus {
 #InputArea {
   height: 24px;
   min-height: 24px;
-  font-weight: bold;
   flex-grow: 0;
   display: flex;
 }
@@ -156,4 +157,8 @@ input:focus {
 }
 .item-separator {
   color: darkcyan;
+}
+a:hover {
+  text-decoration: underline;
+  cursor: pointer;
 }

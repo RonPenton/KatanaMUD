@@ -21,9 +21,9 @@ module KMud {
         }
 
         private notify() {
-            if (document.hidden) {
+            //if (document.visibilityState == "hidden") {
                 this.ding.play();
-            }
+            //}
         }
 
         constructor() {
@@ -73,7 +73,7 @@ module KMud {
             this.registerMessageHandlers();
             this.registerCommandHandlers();
 
-            this.ding = new Audio("media/ding.wav");
+            this.ding = new Audio("../media/ding.wav");
         }
 
         private processCommand(command: string) {
@@ -678,8 +678,8 @@ module KMud {
             if (quantity == 1)
                 return name;
             if (name.charAt(name.length - 1).toLowerCase() === "y")
-                return name.substr(0, name.length - 1) + "ies";
-            return name + "s";
+                return String(quantity) + " " + name.substr(0, name.length - 1) + "ies";
+            return String(quantity) + " " + name + "s";
         }
     }
 

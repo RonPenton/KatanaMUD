@@ -54,7 +54,7 @@ var KMud;
             });
             this.registerMessageHandlers();
             this.registerCommandHandlers();
-            this.ding = new Audio("media/ding.wav");
+            this.ding = new Audio("../media/ding.wav");
         }
         Object.defineProperty(Game.prototype, "mainOutput", {
             get: function () {
@@ -64,9 +64,9 @@ var KMud;
             configurable: true
         });
         Game.prototype.notify = function () {
-            if (document.hidden) {
-                this.ding.play();
-            }
+            //if (document.visibilityState == "hidden") {
+            this.ding.play();
+            //}
         };
         Game.prototype.processCommand = function (command) {
             var lower = command.toLocaleLowerCase().trim();
@@ -587,8 +587,8 @@ var KMud;
             if (quantity == 1)
                 return name;
             if (name.charAt(name.length - 1).toLowerCase() === "y")
-                return name.substr(0, name.length - 1) + "ies";
-            return name + "s";
+                return String(quantity) + " " + name.substr(0, name.length - 1) + "ies";
+            return String(quantity) + " " + name + "s";
         };
         return Game;
     })();
