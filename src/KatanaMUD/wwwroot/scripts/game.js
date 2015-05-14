@@ -55,6 +55,13 @@ var KMud;
             this.registerMessageHandlers();
             this.registerCommandHandlers();
         }
+        Object.defineProperty(Game.prototype, "mainOutput", {
+            get: function () {
+                return document.getElementById("Output");
+            },
+            enumerable: true,
+            configurable: true
+        });
         Game.prototype.processCommand = function (command) {
             var lower = command.toLocaleLowerCase().trim();
             var words = command.split(/\s+/gi);
@@ -124,8 +131,8 @@ var KMud;
             this.messageHandlers[KMud.ItemOwnershipMessage.ClassName] = function (message) { return _this.itemOwnership(message); };
             this.messageHandlers[KMud.CashTransferMessage.ClassName] = function (message) { return _this.cashTransfer(message); };
             this.messageHandlers[KMud.SearchMessage.ClassName] = function (message) { return _this.search(message); };
-            this.messageHandlers[KMud.ActionNotAllowedMessage.ClassName] = function (message) { return _this.mainOutput(message.Message, "action-not-allowed"); };
-            this.messageHandlers[KMud.GenericMessage.ClassName] = function (message) { return _this.mainOutput(message.Message, message.Class); };
+            this.messageHandlers[KMud.ActionNotAllowedMessage.ClassName] = function (message) { return _this.addOutput(_this.mainOutput, message.Message, "action-not-allowed"); };
+            this.messageHandlers[KMud.GenericMessage.ClassName] = function (message) { return _this.addOutput(_this.mainOutput, message.Message, message.Class); };
             this.messageHandlers[KMud.AmbiguousActorMessage.ClassName] = function (message) { return _this.ambiguousActors(message); };
             this.messageHandlers[KMud.AmbiguousItemMessage.ClassName] = function (message) { return _this.ambiguousItems(message); };
             this.messageHandlers[KMud.ItemEquippedChangedMessage.ClassName] = function (message) { return _this.equipChanged(message); };
@@ -163,10 +170,10 @@ var KMud;
         };
         Game.prototype.loginMessage = function (message) {
             if (message.Login == true) {
-                this.mainOutput(message.Actor.Name + " just entered the Realm.", "login");
+                this.addOutput(this.mainOutput, message.Actor.Name + " just entered the Realm.", "login");
             }
             else {
-                this.mainOutput(message.Actor.Name + " just left the Realm.", "logout");
+                this.addOutput(this.mainOutput, message.Actor.Name + " just left the Realm.", "logout");
             }
         };
         Game.prototype.get = function (item) {
@@ -232,21 +239,23 @@ var KMud;
                 // Don't show anything if you move. I guess. That's how MajorMUD works. 
                 if (message.Enter == false && message.Leader.Id != this.currentPlayer.Id) {
                     // else show the party lead message.
-                    this.mainOutput(" -- Following your Party leader " + KMud.Direction[message.Direction].toLowerCase() + " --", "party-follow");
+                    this.addOutput(this.mainOutput, " -- Following your Party leader " + KMud.Direction[message.Direction].toLowerCase() + " --", "party-follow");
                 }
             }
             else {
-                var runs = this.runJoin(actors.select(function (x) { return x.Name; }).toArray(), ", ", "moving-player", "player-separator");
+                // TODO: Player Link
+                var runs = this.createElements(actors.toArray(), function (x) { return x.Name; }, "moving-player", "a");
+                var runs = this.joinElements(runs, ", ", "player-separator");
                 if (message.Enter) {
                     var verb = "walks";
                     if (message.Actors.length > 1)
                         verb = "walk";
-                    runs.push([" " + verb + " into the room from the " + KMud.Direction[message.Direction].toLowerCase() + ".", "party-movement"]);
+                    runs.push(this.createElement(" " + verb + " into the room from the " + KMud.Direction[message.Direction].toLowerCase() + ".", "party-movement"));
                 }
                 else {
-                    runs.push([" just left to the " + KMud.Direction[message.Direction].toLowerCase() + ".", "party-movement"]);
+                    runs.push(this.createElement(" just left to the " + KMud.Direction[message.Direction].toLowerCase() + ".", "party-movement"));
                 }
-                this.mainOutputRuns(runs);
+                this.addElements(this.mainOutput, runs);
             }
         };
         Game.prototype.itemOwnership = function (message) {
@@ -259,13 +268,13 @@ var KMud;
                 if (message.Giver != null && message.Taker != null) {
                     // player-to-player transfer
                     if (message.Giver.Id == this.currentPlayer.Id) {
-                        this.mainOutput("You just gave " + name + " to " + message.Taker.Name + ".", "item-ownership");
+                        this.addOutput(this.mainOutput, "You just gave " + name + " to " + message.Taker.Name + ".", "item-ownership");
                     }
                     else if (message.Taker.Id == this.currentPlayer.Id) {
-                        this.mainOutput(message.Giver.Name + " just gave you " + name + ".", "item-ownership");
+                        this.addOutput(this.mainOutput, message.Giver.Name + " just gave you " + name + ".", "item-ownership");
                     }
                     else {
-                        this.mainOutput(message.Giver.Name + " just gave " + message.Taker.Name + " something.", "item-ownership");
+                        this.addOutput(this.mainOutput, message.Giver.Name + " just gave " + message.Taker.Name + " something.", "item-ownership");
                     }
                 }
                 else {
@@ -273,16 +282,16 @@ var KMud;
                         var verb = "dropped";
                         if (message.Hide)
                             verb = "hid";
-                        this.mainOutput("You " + verb + " " + name + ".", "item-ownership");
+                        this.addOutput(this.mainOutput, "You " + verb + " " + name + ".", "item-ownership");
                     }
                     else if (message.Taker != null && message.Taker.Id == this.currentPlayer.Id) {
-                        this.mainOutput("You took " + name + ".", "item-ownership");
+                        this.addOutput(this.mainOutput, "You took " + name + ".", "item-ownership");
                     }
                     else if (message.Giver != null) {
-                        this.mainOutput(message.Giver.Name + " dropped " + name + ".", "item-ownership");
+                        this.addOutput(this.mainOutput, message.Giver.Name + " dropped " + name + ".", "item-ownership");
                     }
                     else if (message.Taker != null) {
-                        this.mainOutput(message.Taker.Name + " picks up " + name + ".", "item-ownership");
+                        this.addOutput(this.mainOutput, message.Taker.Name + " picks up " + name + ".", "item-ownership");
                     }
                 }
             }
@@ -301,13 +310,13 @@ var KMud;
             if (message.Giver != null && message.Taker != null) {
                 // player-to-player transfer
                 if (message.Giver.Id == this.currentPlayer.Id) {
-                    this.mainOutput("You just gave " + name + " to " + message.Taker.Name + ".", "item-ownership");
+                    this.addOutput(this.mainOutput, "You just gave " + name + " to " + message.Taker.Name + ".", "item-ownership");
                 }
                 else if (message.Taker.Id == this.currentPlayer.Id) {
-                    this.mainOutput(message.Giver.Name + " just gave you " + name + ".", "item-ownership");
+                    this.addOutput(this.mainOutput, message.Giver.Name + " just gave you " + name + ".", "item-ownership");
                 }
                 else {
-                    this.mainOutput(message.Giver.Name + " just gave " + message.Taker.Name + " something.", "item-ownership");
+                    this.addOutput(this.mainOutput, message.Giver.Name + " just gave " + message.Taker.Name + " something.", "item-ownership");
                 }
             }
             else {
@@ -315,22 +324,22 @@ var KMud;
                     var verb = "dropped";
                     if (message.Hide)
                         verb = "hid";
-                    this.mainOutput("You " + verb + " " + name + ".", "item-ownership");
+                    this.addOutput(this.mainOutput, "You " + verb + " " + name + ".", "item-ownership");
                 }
                 else if (message.Taker != null && message.Taker.Id == this.currentPlayer.Id) {
-                    this.mainOutput("You took " + name + ".", "item-ownership");
+                    this.addOutput(this.mainOutput, "You took " + name + ".", "item-ownership");
                 }
                 else if (message.Giver != null) {
-                    this.mainOutput(message.Giver.Name + " dropped " + name + ".", "item-ownership");
+                    this.addOutput(this.mainOutput, message.Giver.Name + " dropped " + name + ".", "item-ownership");
                 }
                 else if (message.Taker != null) {
-                    this.mainOutput(message.Taker.Name + " picks up " + name + ".", "item-ownership");
+                    this.addOutput(this.mainOutput, message.Taker.Name + " picks up " + name + ".", "item-ownership");
                 }
             }
         };
         Game.prototype.search = function (message) {
             if (message.FoundCash.length == 0 && message.FoundItems.length == 0) {
-                this.mainOutput("Your search revealed nothing.", "search");
+                this.addOutput(this.mainOutput, "Your search revealed nothing.", "search");
                 return;
             }
             var items = [];
@@ -341,69 +350,27 @@ var KMud;
                 var groups = KMud.Linq(message.FoundItems).groupBy(function (x) { return x.TemplateId + "|" + x.Name; });
                 KMud.pushRange(items, groups.select(function (x) { return (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name; }).toArray());
             }
-            this.mainOutput("You notice " + items.join(", ") + " here.", "search-found");
-        };
-        Game.prototype.addElements = function (target, elements) {
-            var scrolledToBottom = (target.scrollHeight - target.scrollTop === target.offsetHeight);
-            for (var i = 0; i < elements.length; i++) {
-                target.appendChild(elements[i]);
-            }
-            // Keep scrolling to bottom if they're already there.
-            if (scrolledToBottom) {
-                target.scrollTop = target.scrollHeight;
-            }
-        };
-        Game.prototype.addOutput = function (target, text, css) {
-            if (css === void 0) { css = null; }
-            this.addOutputRuns(target, [[text, css]]);
-        };
-        Game.prototype.addOutputRuns = function (target, runs) {
-            var elements = [];
-            for (var i = 0; i < runs.length; i++) {
-                var span = document.createElement("span");
-                span.textContent = runs[i][0];
-                if (runs[i].length > 1)
-                    span.className = runs[i][1];
-                elements.push(span);
-            }
-            elements.push(document.createElement("br"));
-            this.addElements(target, elements);
-        };
-        Game.prototype.runJoin = function (items, separator, itemClass, separatorClass) {
-            var output = [];
-            for (var i = 0; i < items.length - 1; i++) {
-                output.push([items[i], itemClass]);
-                output.push([separator, separatorClass]);
-            }
-            output.push([items[items.length - 1], itemClass]);
-            return output;
-        };
-        Game.prototype.mainOutput = function (text, css) {
-            if (css === void 0) { css = null; }
-            this.addOutput(document.getElementById("Output"), text, css);
-        };
-        Game.prototype.mainOutputRuns = function (runs) {
-            this.addOutputRuns(document.getElementById("Output"), runs);
+            this.addOutput(this.mainOutput, "You notice " + items.join(", ") + " here.", "search-found");
         };
         Game.prototype.showRoomDescription = function (message) {
             var _this = this;
             if (message.CannotSee) {
                 if (!StringUtilities.isNullOrWhitespace(message.CannotSeeMessage)) {
-                    this.mainOutput(message.CannotSeeMessage, "cannot-see");
+                    this.addOutput(this.mainOutput, message.CannotSeeMessage, "cannot-see");
                 }
                 else {
                     if (message.LightLevel == KMud.LightLevel.Nothing)
-                        this.mainOutput("The room is darker than anything you've ever seen before - you can't see anything", "cannot-see");
+                        this.addOutput(this.mainOutput, "The room is darker than anything you've ever seen before - you can't see anything", "cannot-see");
                     if (message.LightLevel == KMud.LightLevel.PitchBlack)
-                        this.mainOutput("The room is pitch black - you can't see anything", "cannot-see");
+                        this.addOutput(this.mainOutput, "The room is pitch black - you can't see anything", "cannot-see");
                     if (message.LightLevel == KMud.LightLevel.VeryDark)
-                        this.mainOutput("The room is very dark - you can't see anything", "cannot-see");
+                        this.addOutput(this.mainOutput, "The room is very dark - you can't see anything", "cannot-see");
                 }
             }
             else {
-                this.mainOutput(message.Name, "room-name");
+                this.addOutput(this.mainOutput, message.Name, "room-name");
                 if (StringUtilities.notEmpty(message.Description)) {
-                    this.mainOutput(message.Description, "room-desc");
+                    this.addOutput(this.mainOutput, message.Description, "room-desc");
                 }
                 var items = [];
                 if (message.VisibleCash.length > 0) {
@@ -421,68 +388,62 @@ var KMud;
                     KMud.pushRange(items, groups.select(function (x) { return (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name + "†"; }).toArray());
                 }
                 if (items.length > 0) {
-                    this.mainOutput("You notice " + items.join(", ") + " here.", "items");
+                    this.addOutput(this.mainOutput, "You notice " + items.join(", ") + " here.", "items");
                 }
                 if (message.Actors.length > 1) {
                     var actors = message.Actors.filter(function (x) { return x.Id != _this.currentPlayer.Id; });
-                    this.mainOutput("Also here: " + actors.map(function (x) { return x.Name; }).join(", ") + ".", "actors");
+                    this.addOutput(this.mainOutput, "Also here: " + actors.map(function (x) { return x.Name; }).join(", ") + ".", "actors");
                 }
                 if (message.Exits.length > 0) {
-                    this.mainOutput("Obvious exits: " + message.Exits.map(function (x) { return x.Name; }).join(", "), "exits");
+                    this.addOutput(this.mainOutput, "Obvious exits: " + message.Exits.map(function (x) { return x.Name; }).join(", "), "exits");
                 }
                 else {
-                    this.mainOutput("Obvious exits: NONE!!!", "exits");
+                    this.addOutput(this.mainOutput, "Obvious exits: NONE!!!", "exits");
                 }
                 if (message.LightLevel == KMud.LightLevel.BarelyVisible)
-                    this.mainOutput("The room is barely visible", "dimly-lit");
+                    this.addOutput(this.mainOutput, "The room is barely visible", "dimly-lit");
                 if (message.LightLevel == KMud.LightLevel.DimlyLit)
-                    this.mainOutput("The room is dimly lit", "dimly-lit");
+                    this.addOutput(this.mainOutput, "The room is dimly lit", "dimly-lit");
             }
         };
         Game.prototype.showCommunication = function (message) {
             switch (message.Type) {
                 case KMud.CommunicationType.Gossip:
-                    this.mainOutput(message.ActorName + " gossips: " + message.Message, "gossip");
+                    this.addOutput(this.mainOutput, message.ActorName + " gossips: " + message.Message, "gossip");
                     break;
                 case KMud.CommunicationType.Say:
                     if (message.ActorId == this.currentPlayer.Id) {
-                        this.mainOutput("You say \"" + message.Message + "\"", "say");
+                        this.addOutput(this.mainOutput, "You say \"" + message.Message + "\"", "say");
                     }
                     else {
-                        this.mainOutput(message.ActorName + " says \"" + message.Message + "\"", "say");
+                        this.addOutput(this.mainOutput, message.ActorName + " says \"" + message.Message + "\"", "say");
                     }
                     break;
                 case KMud.CommunicationType.Telepath:
-                    this.mainOutput(message.ActorName + " telepaths " + message.Message, "telepath");
+                    this.addOutput(this.mainOutput, message.ActorName + " telepaths " + message.Message, "telepath");
                     break;
             }
         };
         Game.prototype.showInventory = function (message) {
+            var _this = this;
             var equipped = KMud.Linq(message.Items).where(function (x) { return x.EquippedSlot != null; }).orderBy(function (x) { return x.EquippedSlot; });
             var groups = KMud.Linq(message.Items).where(function (x) { return x.EquippedSlot == null; }).groupBy(function (x) { return x.TemplateId + "|" + x.Name; }).orderBy(function (x) { return x.first().Name; });
-            var items = [];
-            if (message.Cash.length > 0) {
-                KMud.Linq(message.Cash).forEach(function (x) { return items.push(String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "")); });
+            var itemRuns = [];
+            //this.addOutput(this.mainOutput, "You are carrying:", "inventory-label" false);
+            //    [itemStr, "inventory-list"]
+            //]);
+            KMud.pushRange(itemRuns, this.createElements(message.Cash, function (x) { return _this.pluralize(x.Name, x.Amount); }, "item-cash", "a"));
+            KMud.pushRange(itemRuns, this.createElements(equipped.toArray(), function (x) { return x.Name + " (" + KMud.EquipmentSlot[x.EquippedSlot] + ")"; }, "item-equipped", "a"));
+            KMud.pushRange(itemRuns, this.createElements(groups.toArray(), function (x) { return _this.pluralize(x.values[0].Name, x.values.length); }, "item-held", "a"));
+            itemRuns = this.joinElements(itemRuns, ", ", "item-separator");
+            if (itemRuns.length == 0) {
+                itemRuns.push(this.createElement("Nothing!", "item-none"));
             }
-            if (equipped.areAny()) {
-                equipped.forEach(function (x) { return items.push(x.Name + " (" + KMud.EquipmentSlot[x.EquippedSlot] + ")"); });
-            }
-            if (groups.areAny()) {
-                groups.forEach(function (x) { return items.push((x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name); });
-            }
-            var itemStr = "Nothing!";
-            if (items.length > 0) {
-                itemStr = items.join(", ");
-            }
-            this.mainOutputRuns([
-                ["You are carrying:", "inventory-label"],
-                [itemStr, "inventory-list"]
-            ]);
+            itemRuns.unshift(this.createElement("You are carrying:", "inventory-label"));
+            this.addElements(this.mainOutput, itemRuns);
             //TODO: You have no keys.
-            this.mainOutputRuns([
-                ["Wealth:", "wealth-label"],
-                [StringUtilities.formatMoney(message.TotalCash.Amount) + " " + message.TotalCash.Name + "s", "wealth-amount"]
-            ]);
+            this.addOutput(this.mainOutput, "Wealth:", "wealth-label", false);
+            this.addOutput(this.mainOutput, StringUtilities.formatMoney(message.TotalCash.Amount) + " " + this.pluralize(message.TotalCash.Name, message.TotalCash.Amount), "wealth-amount");
             var pct = Math.round((message.Encumbrance / message.MaxEncumbrance) * 100);
             var category = "Heavy";
             if (pct <= 66)
@@ -491,50 +452,134 @@ var KMud;
                 category = "Light";
             else if (pct <= 15)
                 category = "None";
-            this.mainOutputRuns([
-                ["Encumbrance:", "encumbrance-label"],
-                [message.Encumbrance + "/" + message.MaxEncumbrance + " - " + category + " [" + pct + "%]", "encumbrance-value"]
-            ]);
+            this.addOutput(this.mainOutput, "Encumbrance:", "encumbrance-label", false);
+            this.addOutput(this.mainOutput, message.Encumbrance + "/" + message.MaxEncumbrance + " - " + category + " [" + pct + "%]", "encumbrance-value");
         };
         Game.prototype.ambiguousActors = function (message) {
-            this.mainOutput("Please be more specific.  You could have meant any of these:", "error");
+            this.addOutput(this.mainOutput, "Please be more specific.  You could have meant any of these:", "error");
             for (var i = 0; i < message.Actors.length; i++) {
-                this.mainOutput("-- " + message.Actors[i].Name);
+                this.addOutput(this.mainOutput, "-- " + message.Actors[i].Name);
             }
         };
         Game.prototype.ambiguousItems = function (message) {
-            this.mainOutput("Please be more specific.  You could have meant any of these:", "error");
+            this.addOutput(this.mainOutput, "Please be more specific.  You could have meant any of these:", "error");
             for (var i = 0; i < message.Items.length; i++) {
-                this.mainOutput("-- " + message.Items[i].Name);
+                this.addOutput(this.mainOutput, "-- " + message.Items[i].Name);
             }
         };
         Game.prototype.equipChanged = function (message) {
             if (message.Equipped) {
                 if (message.Actor.Id == this.currentPlayer.Id) {
                     if (message.Item.EquippedSlot == KMud.EquipmentSlot.Weapon || message.Item.EquippedSlot == KMud.EquipmentSlot.Offhand || message.Item.EquippedSlot == KMud.EquipmentSlot.Light) {
-                        this.mainOutput("You are now holding " + message.Item.Name + ".", "equip");
+                        this.addOutput(this.mainOutput, "You are now holding " + message.Item.Name + ".", "equip");
                     }
                     else {
-                        this.mainOutput("You are now wearing " + message.Item.Name + ".", "equip");
+                        this.addOutput(this.mainOutput, "You are now wearing " + message.Item.Name + ".", "equip");
                     }
                 }
                 else {
                     if (message.Item.EquippedSlot == KMud.EquipmentSlot.Weapon || message.Item.EquippedSlot == KMud.EquipmentSlot.Offhand || message.Item.EquippedSlot == KMud.EquipmentSlot.Light) {
-                        this.mainOutput(message.Actor.Name + " readies " + message.Item.Name + "!", "equip");
+                        this.addOutput(this.mainOutput, message.Actor.Name + " readies " + message.Item.Name + "!", "equip");
                     }
                     else {
-                        this.mainOutput(message.Actor.Name + " wears " + message.Item.Name + "!", "equip");
+                        this.addOutput(this.mainOutput, message.Actor.Name + " wears " + message.Item.Name + "!", "equip");
                     }
                 }
             }
             else {
                 if (message.Actor.Id == this.currentPlayer.Id) {
-                    this.mainOutput("You have removed " + message.Item.Name + ".", "equip");
+                    this.addOutput(this.mainOutput, "You have removed " + message.Item.Name + ".", "equip");
                 }
                 else {
-                    this.mainOutput(message.Actor.Name + " removes " + message.Item.Name + "!", "equip");
+                    this.addOutput(this.mainOutput, message.Actor.Name + " removes " + message.Item.Name + "!", "equip");
                 }
             }
+        };
+        //////////////////////////////////////////////////////////////////////////////////
+        // OUTPUT ROUTINES 
+        /////////////////////////////////////////////////////////////////////////////////
+        Game.prototype.addElements = function (target, elements, finished) {
+            if (finished === void 0) { finished = true; }
+            var scrolledToBottom = (target.scrollHeight - target.scrollTop === target.offsetHeight);
+            for (var i = 0; i < elements.length; i++) {
+                target.appendChild(elements[i]);
+            }
+            if (finished) {
+                var newLine = document.createElement("br");
+                target.appendChild(newLine);
+                // Keep scrolling to bottom if they're already there.
+                if (scrolledToBottom) {
+                    target.scrollTop = target.scrollHeight;
+                }
+            }
+        };
+        Game.prototype.addOutput = function (target, text, css, finished) {
+            if (finished === void 0) { finished = true; }
+            var element = document.createElement("span");
+            element.textContent = text;
+            if (css !== undefined) {
+                element.className = css;
+            }
+            this.addElements(target, [element], finished);
+        };
+        /**
+         * Creates an array of HTML Elements based on the provided list of items and options.
+         */
+        Game.prototype.createElements = function (items, caption, css, elementName, decorator) {
+            if (elementName === void 0) { elementName = "span"; }
+            var elements = [];
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                var c;
+                if (css !== undefined) {
+                    if (typeof css === 'string') {
+                        c = css;
+                    }
+                    else {
+                        c = css(item);
+                    }
+                }
+                var element = this.createElement(caption(item), c, elementName);
+                if (decorator !== undefined) {
+                    decorator(item, element);
+                }
+                elements.push(element);
+            }
+            return elements;
+        };
+        Game.prototype.createElement = function (caption, css, elementName) {
+            if (elementName === void 0) { elementName = "span"; }
+            var element = document.createElement(elementName);
+            element.textContent = caption;
+            if (css !== undefined) {
+                element.className = css;
+            }
+            return element;
+        };
+        /**
+         * Joins a group of HTML Elements together with a separator span.
+         */
+        Game.prototype.joinElements = function (elements, separator, separatorClass) {
+            var output = [];
+            for (var i = 0; i < elements.length; i++) {
+                output.push(elements[i]);
+                if (i != elements.length - 1) {
+                    var span = document.createElement("span");
+                    span.textContent = separator;
+                    if (separatorClass !== undefined) {
+                        span.className = separatorClass;
+                    }
+                    output.push(span);
+                }
+            }
+            return output;
+        };
+        Game.prototype.pluralize = function (name, quantity) {
+            if (quantity == 1)
+                return name;
+            if (name.charAt(name.length - 1).toLowerCase() === "y")
+                return name.substr(0, name.length - 1) + "ies";
+            return name + "s";
         };
         return Game;
     })();

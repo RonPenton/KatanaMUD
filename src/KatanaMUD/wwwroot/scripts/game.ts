@@ -15,6 +15,10 @@ module KMud {
         private symbolCommandHandlers: { [index: string]: Action3<string[], string, string> } = {};
         private currentPlayer: ActorInformationMessage;
 
+        private get mainOutput(): HTMLElement {
+            return document.getElementById("Output");
+        }
+
         constructor() {
             this.input = <HTMLInputElement>document.getElementById("InputBox");
             $("#InputBox").keypress(x => {
@@ -143,8 +147,8 @@ module KMud {
             this.messageHandlers[ItemOwnershipMessage.ClassName] = (message: ItemOwnershipMessage) => this.itemOwnership(message);
             this.messageHandlers[CashTransferMessage.ClassName] = (message: CashTransferMessage) => this.cashTransfer(message);
             this.messageHandlers[SearchMessage.ClassName] = (message: SearchMessage) => this.search(message);
-            this.messageHandlers[ActionNotAllowedMessage.ClassName] = (message: ActionNotAllowedMessage) => this.mainOutput(message.Message, "action-not-allowed");
-            this.messageHandlers[GenericMessage.ClassName] = (message: GenericMessage) => this.mainOutput(message.Message, message.Class);
+            this.messageHandlers[ActionNotAllowedMessage.ClassName] = (message: ActionNotAllowedMessage) => this.addOutput(this.mainOutput, message.Message, "action-not-allowed");
+            this.messageHandlers[GenericMessage.ClassName] = (message: GenericMessage) => this.addOutput(this.mainOutput, message.Message, message.Class);
             this.messageHandlers[AmbiguousActorMessage.ClassName] = (message: AmbiguousActorMessage) => this.ambiguousActors(message);
             this.messageHandlers[AmbiguousItemMessage.ClassName] = (message: AmbiguousItemMessage) => this.ambiguousItems(message);
 
@@ -190,10 +194,10 @@ module KMud {
 
         private loginMessage(message: LoginStateMessage) {
             if (message.Login == true) {
-                this.mainOutput(message.Actor.Name + " just entered the Realm.", "login");
+                this.addOutput(this.mainOutput, message.Actor.Name + " just entered the Realm.", "login");
             }
             else {
-                this.mainOutput(message.Actor.Name + " just left the Realm.", "logout");
+                this.addOutput(this.mainOutput, message.Actor.Name + " just left the Realm.", "logout");
             }
         }
 
@@ -267,23 +271,25 @@ module KMud {
                 // Don't show anything if you move. I guess. That's how MajorMUD works. 
                 if (message.Enter == false && message.Leader.Id != this.currentPlayer.Id) {
                     // else show the party lead message.
-                    this.mainOutput(" -- Following your Party leader " + Direction[message.Direction].toLowerCase() + " --", "party-follow");
+                    this.addOutput(this.mainOutput, " -- Following your Party leader " + Direction[message.Direction].toLowerCase() + " --", "party-follow");
                 }
             }
             else {
-                var runs = this.runJoin(actors.select(x => x.Name).toArray(), ", ", "moving-player", "player-separator");
+                // TODO: Player Link
+                var runs = this.createElements(actors.toArray(), x => x.Name, "moving-player", "a");
+                var runs = this.joinElements(runs, ", ", "player-separator");
 
                 if (message.Enter) {
                     var verb = "walks";
                     if (message.Actors.length > 1)
                         verb = "walk";
-                    runs.push([" " + verb + " into the room from the " + Direction[message.Direction].toLowerCase() + ".", "party-movement"]);
+                    runs.push(this.createElement(" " + verb + " into the room from the " + Direction[message.Direction].toLowerCase() + ".", "party-movement"));
                 }
                 else {
-                    runs.push([" just left to the " + Direction[message.Direction].toLowerCase() + ".", "party-movement"]);
+                    runs.push(this.createElement(" just left to the " + Direction[message.Direction].toLowerCase() + ".", "party-movement"));
                 }
 
-                this.mainOutputRuns(runs);
+                this.addElements(this.mainOutput, runs);
             }
         }
 
@@ -299,13 +305,13 @@ module KMud {
                 if (message.Giver != null && message.Taker != null) {
                     // player-to-player transfer
                     if (message.Giver.Id == this.currentPlayer.Id) {
-                        this.mainOutput("You just gave " + name + " to " + message.Taker.Name + ".", "item-ownership");
+                        this.addOutput(this.mainOutput, "You just gave " + name + " to " + message.Taker.Name + ".", "item-ownership");
                     }
                     else if (message.Taker.Id == this.currentPlayer.Id) {
-                        this.mainOutput(message.Giver.Name + " just gave you " + name + ".", "item-ownership");
+                        this.addOutput(this.mainOutput, message.Giver.Name + " just gave you " + name + ".", "item-ownership");
                     }
                     else {
-                        this.mainOutput(message.Giver.Name + " just gave " + message.Taker.Name + " something.", "item-ownership");
+                        this.addOutput(this.mainOutput, message.Giver.Name + " just gave " + message.Taker.Name + " something.", "item-ownership");
                     }
                 }
                 else {
@@ -314,16 +320,16 @@ module KMud {
                         if (message.Hide)
                             verb = "hid";
 
-                        this.mainOutput("You " + verb + " " + name + ".", "item-ownership");
+                        this.addOutput(this.mainOutput, "You " + verb + " " + name + ".", "item-ownership");
                     }
                     else if (message.Taker != null && message.Taker.Id == this.currentPlayer.Id) {
-                        this.mainOutput("You took " + name + ".", "item-ownership");
+                        this.addOutput(this.mainOutput, "You took " + name + ".", "item-ownership");
                     }
                     else if (message.Giver != null) {
-                        this.mainOutput(message.Giver.Name + " dropped " + name + ".", "item-ownership");
+                        this.addOutput(this.mainOutput, message.Giver.Name + " dropped " + name + ".", "item-ownership");
                     }
                     else if (message.Taker != null) {
-                        this.mainOutput(message.Taker.Name + " picks up " + name + ".", "item-ownership");
+                        this.addOutput(this.mainOutput, message.Taker.Name + " picks up " + name + ".", "item-ownership");
                     }
                 }
             }
@@ -344,13 +350,13 @@ module KMud {
             if (message.Giver != null && message.Taker != null) {
                 // player-to-player transfer
                 if (message.Giver.Id == this.currentPlayer.Id) {
-                    this.mainOutput("You just gave " + name + " to " + message.Taker.Name + ".", "item-ownership");
+                    this.addOutput(this.mainOutput, "You just gave " + name + " to " + message.Taker.Name + ".", "item-ownership");
                 }
                 else if (message.Taker.Id == this.currentPlayer.Id) {
-                    this.mainOutput(message.Giver.Name + " just gave you " + name + ".", "item-ownership");
+                    this.addOutput(this.mainOutput, message.Giver.Name + " just gave you " + name + ".", "item-ownership");
                 }
                 else {
-                    this.mainOutput(message.Giver.Name + " just gave " + message.Taker.Name + " something.", "item-ownership");
+                    this.addOutput(this.mainOutput, message.Giver.Name + " just gave " + message.Taker.Name + " something.", "item-ownership");
                 }
             }
             else {
@@ -359,23 +365,23 @@ module KMud {
                     if (message.Hide)
                         verb = "hid";
 
-                    this.mainOutput("You " + verb + " " + name + ".", "item-ownership");
+                    this.addOutput(this.mainOutput, "You " + verb + " " + name + ".", "item-ownership");
                 }
                 else if (message.Taker != null && message.Taker.Id == this.currentPlayer.Id) {
-                    this.mainOutput("You took " + name + ".", "item-ownership");
+                    this.addOutput(this.mainOutput, "You took " + name + ".", "item-ownership");
                 }
                 else if (message.Giver != null) {
-                    this.mainOutput(message.Giver.Name + " dropped " + name + ".", "item-ownership");
+                    this.addOutput(this.mainOutput, message.Giver.Name + " dropped " + name + ".", "item-ownership");
                 }
                 else if (message.Taker != null) {
-                    this.mainOutput(message.Taker.Name + " picks up " + name + ".", "item-ownership");
+                    this.addOutput(this.mainOutput, message.Taker.Name + " picks up " + name + ".", "item-ownership");
                 }
             }
         }
 
         private search(message: SearchMessage) {
             if (message.FoundCash.length == 0 && message.FoundItems.length == 0) {
-                this.mainOutput("Your search revealed nothing.", "search");
+                this.addOutput(this.mainOutput, "Your search revealed nothing.", "search");
                 return;
             }
 
@@ -389,79 +395,27 @@ module KMud {
                 pushRange(items, groups.select(x => (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name).toArray());
             }
 
-            this.mainOutput("You notice " + items.join(", ") + " here.", "search-found");
-        }
-
-        private addElements(target: HTMLElement, elements: HTMLElement[]) {
-            var scrolledToBottom = (target.scrollHeight - target.scrollTop === target.offsetHeight);
-
-            for (var i = 0; i < elements.length; i++) {
-                target.appendChild(elements[i]);
-            }
-
-            // Keep scrolling to bottom if they're already there.
-            if (scrolledToBottom) {
-                target.scrollTop = target.scrollHeight;
-            }
-        }
-
-        private addOutput(target: HTMLElement, text: string, css: string = null) {
-            this.addOutputRuns(target, [[text, css]]);
-        }
-
-        private addOutputRuns(target: HTMLElement, runs: string[][]) {
-            var elements = [];
-
-            for (var i = 0; i < runs.length; i++) {
-                var span = document.createElement("span");
-                span.textContent = runs[i][0];
-                if (runs[i].length > 1)
-                    span.className = runs[i][1];
-                elements.push(span);
-            }
-            elements.push(document.createElement("br"));
-
-            this.addElements(target, elements);
-        }
-
-        private runJoin(items: string[], separator: string, itemClass: string, separatorClass: string): string[][] {
-            var output: string[][] = [];
-
-            for (var i = 0; i < items.length - 1; i++) {
-                output.push([items[i], itemClass]);
-                output.push([separator, separatorClass]);
-            }
-            output.push([items[items.length - 1], itemClass]);
-
-            return output;
-        }
-
-        private mainOutput(text: string, css: string = null) {
-            this.addOutput(document.getElementById("Output"), text, css);
-        }
-
-        private mainOutputRuns(runs: string[][]) {
-            this.addOutputRuns(document.getElementById("Output"), runs);
+            this.addOutput(this.mainOutput, "You notice " + items.join(", ") + " here.", "search-found");
         }
 
         private showRoomDescription(message: RoomDescriptionMessage) {
             if (message.CannotSee) {
                 if (!StringUtilities.isNullOrWhitespace(message.CannotSeeMessage)) {
-                    this.mainOutput(message.CannotSeeMessage, "cannot-see");
+                    this.addOutput(this.mainOutput, message.CannotSeeMessage, "cannot-see");
                 }
                 else {
                     if (message.LightLevel == LightLevel.Nothing)
-                        this.mainOutput("The room is darker than anything you've ever seen before - you can't see anything", "cannot-see");
+                        this.addOutput(this.mainOutput, "The room is darker than anything you've ever seen before - you can't see anything", "cannot-see");
                     if (message.LightLevel == LightLevel.PitchBlack)
-                        this.mainOutput("The room is pitch black - you can't see anything", "cannot-see");
+                        this.addOutput(this.mainOutput, "The room is pitch black - you can't see anything", "cannot-see");
                     if (message.LightLevel == LightLevel.VeryDark)
-                        this.mainOutput("The room is very dark - you can't see anything", "cannot-see");
+                        this.addOutput(this.mainOutput, "The room is very dark - you can't see anything", "cannot-see");
                 }
             }
             else {
-                this.mainOutput(message.Name, "room-name");
+                this.addOutput(this.mainOutput, message.Name, "room-name");
                 if (StringUtilities.notEmpty(message.Description)) {
-                    this.mainOutput(message.Description, "room-desc");
+                    this.addOutput(this.mainOutput, message.Description, "room-desc");
                 }
 
                 var items = [];
@@ -485,45 +439,45 @@ module KMud {
                 }
 
                 if (items.length > 0) {
-                    this.mainOutput("You notice " + items.join(", ") + " here.", "items");
+                    this.addOutput(this.mainOutput, "You notice " + items.join(", ") + " here.", "items");
                 }
 
                 if (message.Actors.length > 1) {
                     var actors = message.Actors.filter(x => x.Id != this.currentPlayer.Id)
-                    this.mainOutput("Also here: " + actors.map(x=> x.Name).join(", ") + ".", "actors");
+                    this.addOutput(this.mainOutput, "Also here: " + actors.map(x=> x.Name).join(", ") + ".", "actors");
                 }
 
                 if (message.Exits.length > 0) {
-                    this.mainOutput("Obvious exits: " + message.Exits.map(x=> x.Name).join(", "), "exits");
+                    this.addOutput(this.mainOutput, "Obvious exits: " + message.Exits.map(x=> x.Name).join(", "), "exits");
                 }
                 else {
-                    this.mainOutput("Obvious exits: NONE!!!", "exits");
+                    this.addOutput(this.mainOutput, "Obvious exits: NONE!!!", "exits");
                 }
 
                 if (message.LightLevel == LightLevel.BarelyVisible)
-                    this.mainOutput("The room is barely visible", "dimly-lit");
+                    this.addOutput(this.mainOutput, "The room is barely visible", "dimly-lit");
                 if (message.LightLevel == LightLevel.DimlyLit)
-                    this.mainOutput("The room is dimly lit", "dimly-lit");
+                    this.addOutput(this.mainOutput, "The room is dimly lit", "dimly-lit");
             }
         }
 
         private showCommunication(message: CommunicationMessage) {
             switch (message.Type) {
                 case CommunicationType.Gossip:
-                    this.mainOutput(message.ActorName + " gossips: " + message.Message, "gossip");
+                    this.addOutput(this.mainOutput, message.ActorName + " gossips: " + message.Message, "gossip");
                     break;
 
                 case CommunicationType.Say:
                     if (message.ActorId == this.currentPlayer.Id) {
-                        this.mainOutput("You say \"" + message.Message + "\"", "say");
+                        this.addOutput(this.mainOutput, "You say \"" + message.Message + "\"", "say");
                     }
                     else {
-                        this.mainOutput(message.ActorName + " says \"" + message.Message + "\"", "say");
+                        this.addOutput(this.mainOutput, message.ActorName + " says \"" + message.Message + "\"", "say");
                     }
                     break;
 
                 case CommunicationType.Telepath:
-                    this.mainOutput(message.ActorName + " telepaths " + message.Message, "telepath");
+                    this.addOutput(this.mainOutput, message.ActorName + " telepaths " + message.Message, "telepath");
                     break;
             }
         }
@@ -533,34 +487,31 @@ module KMud {
             var equipped = Linq(message.Items).where(x => x.EquippedSlot != null).orderBy(x => x.EquippedSlot);
             var groups = Linq(message.Items).where(x => x.EquippedSlot == null).groupBy(x => x.TemplateId + "|" + x.Name).orderBy(x => x.first().Name);
 
-            var items: string[] = [];
 
-            if (message.Cash.length > 0) {
-                Linq(message.Cash).forEach(x=> items.push(String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "")));
-            }
-            if (equipped.areAny()) {
-                equipped.forEach(x => items.push(x.Name + " (" + EquipmentSlot[x.EquippedSlot] + ")"));
-            }
-            if (groups.areAny()) {
-                groups.forEach(x => items.push((x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name));
+            var itemRuns: HTMLElement[] = [];
+
+            //this.addOutput(this.mainOutput, "You are carrying:", "inventory-label" false);
+            //    [itemStr, "inventory-list"]
+            //]);
+
+            pushRange(itemRuns, this.createElements(message.Cash, x => this.pluralize(x.Name, x.Amount), "item-cash", "a"));
+            pushRange(itemRuns, this.createElements(equipped.toArray(), x => x.Name + " (" + EquipmentSlot[x.EquippedSlot] + ")", "item-equipped", "a"));
+            pushRange(itemRuns, this.createElements(groups.toArray(), x => this.pluralize(x.values[0].Name, x.values.length), "item-held", "a"));
+
+            itemRuns = this.joinElements(itemRuns, ", ", "item-separator");
+
+            if (itemRuns.length == 0) {
+                itemRuns.push(this.createElement("Nothing!", "item-none"));
             }
 
-            var itemStr = "Nothing!";
-            if (items.length > 0) {
-                itemStr = items.join(", ");
-            }
+            itemRuns.unshift(this.createElement("You are carrying:", "inventory-label"));
 
-            this.mainOutputRuns([
-                ["You are carrying:", "inventory-label"],
-                [itemStr, "inventory-list"]
-            ]);
+            this.addElements(this.mainOutput, itemRuns);
 
             //TODO: You have no keys.
 
-            this.mainOutputRuns([
-                ["Wealth:", "wealth-label"],
-                [StringUtilities.formatMoney(message.TotalCash.Amount) + " " + message.TotalCash.Name + "s", "wealth-amount"]
-            ]);
+            this.addOutput(this.mainOutput, "Wealth:", "wealth-label", false);
+            this.addOutput(this.mainOutput, StringUtilities.formatMoney(message.TotalCash.Amount) + " " + this.pluralize(message.TotalCash.Name, message.TotalCash.Amount), "wealth-amount");
 
             var pct = Math.round((message.Encumbrance / message.MaxEncumbrance) * 100);
             var category = "Heavy";
@@ -571,23 +522,21 @@ module KMud {
             else if (pct <= 15)
                 category = "None";
 
-            this.mainOutputRuns([
-                ["Encumbrance:", "encumbrance-label"],
-                [message.Encumbrance + "/" + message.MaxEncumbrance + " - " + category + " [" + pct + "%]", "encumbrance-value"]
-            ]);
+            this.addOutput(this.mainOutput, "Encumbrance:", "encumbrance-label", false);
+            this.addOutput(this.mainOutput, message.Encumbrance + "/" + message.MaxEncumbrance + " - " + category + " [" + pct + "%]", "encumbrance-value");
         }
 
         private ambiguousActors(message: AmbiguousActorMessage) {
-            this.mainOutput("Please be more specific.  You could have meant any of these:", "error");
+            this.addOutput(this.mainOutput, "Please be more specific.  You could have meant any of these:", "error");
             for (var i = 0; i < message.Actors.length; i++) {
-                this.mainOutput("-- " + message.Actors[i].Name);
+                this.addOutput(this.mainOutput, "-- " + message.Actors[i].Name);
             }
         }
 
         private ambiguousItems(message: AmbiguousItemMessage) {
-            this.mainOutput("Please be more specific.  You could have meant any of these:", "error");
+            this.addOutput(this.mainOutput, "Please be more specific.  You could have meant any of these:", "error");
             for (var i = 0; i < message.Items.length; i++) {
-                this.mainOutput("-- " + message.Items[i].Name);
+                this.addOutput(this.mainOutput, "-- " + message.Items[i].Name);
             }
         }
 
@@ -596,29 +545,129 @@ module KMud {
             if (message.Equipped) {
                 if (message.Actor.Id == this.currentPlayer.Id) {
                     if (message.Item.EquippedSlot == EquipmentSlot.Weapon || message.Item.EquippedSlot == EquipmentSlot.Offhand || message.Item.EquippedSlot == EquipmentSlot.Light) {
-                        this.mainOutput("You are now holding " + message.Item.Name + ".", "equip");
+                        this.addOutput(this.mainOutput, "You are now holding " + message.Item.Name + ".", "equip");
                     }
                     else {
-                        this.mainOutput("You are now wearing " + message.Item.Name + ".", "equip");
+                        this.addOutput(this.mainOutput, "You are now wearing " + message.Item.Name + ".", "equip");
                     }
                 }
                 else {
                     if (message.Item.EquippedSlot == EquipmentSlot.Weapon || message.Item.EquippedSlot == EquipmentSlot.Offhand || message.Item.EquippedSlot == EquipmentSlot.Light) {
-                        this.mainOutput(message.Actor.Name + " readies " + message.Item.Name + "!", "equip");
+                        this.addOutput(this.mainOutput, message.Actor.Name + " readies " + message.Item.Name + "!", "equip");
                     }
                     else {
-                        this.mainOutput(message.Actor.Name + " wears " + message.Item.Name + "!", "equip");
+                        this.addOutput(this.mainOutput, message.Actor.Name + " wears " + message.Item.Name + "!", "equip");
                     }
                 }
             }
             else {
                 if (message.Actor.Id == this.currentPlayer.Id) {
-                    this.mainOutput("You have removed " + message.Item.Name + ".", "equip");
+                    this.addOutput(this.mainOutput, "You have removed " + message.Item.Name + ".", "equip");
                 }
                 else {
-                    this.mainOutput(message.Actor.Name + " removes " + message.Item.Name + "!", "equip");
+                    this.addOutput(this.mainOutput, message.Actor.Name + " removes " + message.Item.Name + "!", "equip");
                 }
-            }           
+            }
+        }
+
+
+        //////////////////////////////////////////////////////////////////////////////////
+        // OUTPUT ROUTINES 
+        /////////////////////////////////////////////////////////////////////////////////
+
+        private addElements(target: HTMLElement, elements: HTMLElement[], finished: boolean = true) {
+            var scrolledToBottom = (target.scrollHeight - target.scrollTop === target.offsetHeight);
+
+            for (var i = 0; i < elements.length; i++) {
+                target.appendChild(elements[i]);
+            }
+
+            if (finished) {
+                var newLine = document.createElement("br");
+                target.appendChild(newLine);
+
+                // Keep scrolling to bottom if they're already there.
+                if (scrolledToBottom) {
+                    target.scrollTop = target.scrollHeight;
+                }
+            }
+        }
+
+        private addOutput(target: HTMLElement, text: string, css?: string, finished: boolean = true) {
+            var element = document.createElement("span");
+            element.textContent = text;
+
+            if (css !== undefined) {
+                element.className = css;
+            }
+            this.addElements(target, [element], finished);
+        }
+
+        /**
+         * Creates an array of HTML Elements based on the provided list of items and options.
+         */
+        private createElements<T>(items: ArrayLikeObject<T>, caption: Func1<T, string>, css?: string|Func1<T, string>, elementName: string = "span", decorator?: Action2<T, HTMLElement>): HTMLElement[] {
+            var elements: HTMLElement[] = [];
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                var c: string;
+                if (css !== undefined) {
+                    if (typeof css === 'string') {
+                        c = css;
+                    }
+                    else {
+                        c = css(item);
+                    }
+                }
+                var element = this.createElement(caption(item), c, elementName);
+
+                if (decorator !== undefined) {
+                    decorator(item, element);
+                }
+
+                elements.push(element);
+            }
+            return elements;
+        }
+
+        private createElement(caption: string, css?: string, elementName: string = "span"): HTMLElement {
+            var element = document.createElement(elementName);
+            element.textContent = caption;
+
+            if (css !== undefined) {
+                element.className = css;
+            }
+
+            return element;
+        }
+
+        /**
+         * Joins a group of HTML Elements together with a separator span.
+         */
+        private joinElements(elements: HTMLElement[], separator: string, separatorClass?: string): HTMLElement[] {
+            var output: HTMLElement[] = [];
+            for (var i = 0; i < elements.length; i++) {
+                output.push(elements[i]);
+                if (i != elements.length - 1) {
+                    var span = document.createElement("span");
+                    span.textContent = separator;
+
+                    if (separatorClass !== undefined) {
+                        span.className = separatorClass;
+                    }
+                    output.push(span);
+                }
+            }
+
+            return output;
+        }
+
+        public pluralize(name: string, quantity: number) {
+            if (quantity == 1)
+                return name;
+            if (name.charAt(name.length - 1).toLowerCase() === "y")
+                return name.substr(0, name.length - 1) + "ies";
+            return name + "s";
         }
     }
 
