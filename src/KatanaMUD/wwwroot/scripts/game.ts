@@ -22,7 +22,7 @@ module KMud {
 
         private notify() {
             //if (document.visibilityState == "hidden") {
-                this.ding.play();
+            this.ding.play();
             //}
         }
 
@@ -347,13 +347,10 @@ module KMud {
         private cashTransfer(message: CashTransferMessage) {
             var name = message.Currency.Name;
             if (message.Quantity > 0) {
-                name = String(message.Quantity) + " " + name;
-                if (message.Quantity > 1) {
-                    name = name + "s";
-                }
+                name = this.pluralize(name, message.Quantity);
             }
             else {
-                name = "some " + name + "s";
+                name = "some " + this.pluralize(name, 0, true);
             }
 
             if (message.Giver != null && message.Taker != null) {
@@ -427,35 +424,31 @@ module KMud {
                     this.addOutput(this.mainOutput, message.Description, "room-desc");
                 }
 
-                var items = [];
+                // Items
+                var visibleGroups = this.groupItems(message.VisibleItems);
+                var foundGroups = this.groupItems(message.FoundItems);
 
-                if (message.VisibleCash.length > 0) {
-                    pushRange(items, Linq(message.VisibleCash).select(x => String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "")).toArray());
+                var itemRuns: HTMLElement[] = [];
+                pushRange(itemRuns, this.createElements(message.VisibleCash, x => this.pluralize(x.Name, x.Amount), "item-cash", "a"));
+                pushRange(itemRuns, this.createElements(message.FoundCash, x => this.pluralize(x.Name, x.Amount), "item-cash-hidden", "a"));
+                pushRange(itemRuns, this.createElements(visibleGroups.toArray(), x => this.pluralize(x.values[0].Name, x.values.length), "item-visible", "a"));
+                pushRange(itemRuns, this.createElements(foundGroups.toArray(), x => this.pluralize(x.values[0].Name, x.values.length), "item-hidden", "a"));
+                itemRuns = this.joinElements(itemRuns, ", ", "item-separator");
+
+                if (itemRuns.length != 0) {
+
+                    this.addOutput(this.mainOutput, "You notice ", "items", false);
+                    this.addElements(this.mainOutput, itemRuns, false);
+                    this.addOutput(this.mainOutput, " here.", "items");
                 }
 
-                if (message.FoundCash.length > 0) {
-                    pushRange(items, Linq(message.FoundCash).select(x => String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "") + "†").toArray());
-                }
-
-                if (message.VisibleItems.length > 0) {
-                    var groups = Linq(message.VisibleItems).groupBy(x => x.TemplateId + "|" + x.Name);
-                    pushRange(items, groups.select(x => (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name).toArray());
-                }
-
-                if (message.FoundItems.length > 0) {
-                    var groups = Linq(message.FoundItems).groupBy(x => x.TemplateId + "|" + x.Name);
-                    pushRange(items, groups.select(x => (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name + "†").toArray());
-                }
-
-                if (items.length > 0) {
-                    this.addOutput(this.mainOutput, "You notice " + items.join(", ") + " here.", "items");
-                }
-
+                // Actors
                 if (message.Actors.length > 1) {
                     var actors = message.Actors.filter(x => x.Id != this.currentPlayer.Id)
                     this.addOutput(this.mainOutput, "Also here: " + actors.map(x=> x.Name).join(", ") + ".", "actors");
                 }
 
+                // Exits
                 if (message.Exits.length > 0) {
                     this.addOutput(this.mainOutput, "Obvious exits: " + message.Exits.map(x=> x.Name).join(", "), "exits");
                 }
@@ -495,35 +488,25 @@ module KMud {
         }
 
         private showInventory(message: InventoryListMessage) {
-
             var equipped = Linq(message.Items).where(x => x.EquippedSlot != null).orderBy(x => x.EquippedSlot);
             var groups = Linq(message.Items).where(x => x.EquippedSlot == null).groupBy(x => x.TemplateId + "|" + x.Name).orderBy(x => x.first().Name);
 
-
             var itemRuns: HTMLElement[] = [];
-
-            //this.addOutput(this.mainOutput, "You are carrying:", "inventory-label" false);
-            //    [itemStr, "inventory-list"]
-            //]);
-
             pushRange(itemRuns, this.createElements(message.Cash, x => this.pluralize(x.Name, x.Amount), "item-cash", "a"));
             pushRange(itemRuns, this.createElements(equipped.toArray(), x => x.Name + " (" + EquipmentSlot[x.EquippedSlot] + ")", "item-equipped", "a"));
             pushRange(itemRuns, this.createElements(groups.toArray(), x => this.pluralize(x.values[0].Name, x.values.length), "item-held", "a"));
-
             itemRuns = this.joinElements(itemRuns, ", ", "item-separator");
 
             if (itemRuns.length == 0) {
                 itemRuns.push(this.createElement("Nothing!", "item-none"));
             }
-
             itemRuns.unshift(this.createElement("You are carrying:", "inventory-label"));
-
             this.addElements(this.mainOutput, itemRuns);
 
             //TODO: You have no keys.
 
             this.addOutput(this.mainOutput, "Wealth:", "wealth-label", false);
-            this.addOutput(this.mainOutput, StringUtilities.formatMoney(message.TotalCash.Amount) + " " + this.pluralize(message.TotalCash.Name, message.TotalCash.Amount), "wealth-amount");
+            this.addOutput(this.mainOutput, this.pluralize(message.TotalCash.Name, message.TotalCash.Amount), "wealth-amount");
 
             var pct = Math.round((message.Encumbrance / message.MaxEncumbrance) * 100);
             var category = "Heavy";
@@ -588,7 +571,7 @@ module KMud {
         /////////////////////////////////////////////////////////////////////////////////
 
         private addElements(target: HTMLElement, elements: HTMLElement[], finished: boolean = true) {
-            var scrolledToBottom = (target.scrollHeight - target.scrollTop === target.offsetHeight);
+            var scrolledToBottom = Math.abs((target.scrollHeight - target.scrollTop) - target.offsetHeight) < 10;
 
             for (var i = 0; i < elements.length; i++) {
                 target.appendChild(elements[i]);
@@ -597,11 +580,11 @@ module KMud {
             if (finished) {
                 var newLine = document.createElement("br");
                 target.appendChild(newLine);
+            }
 
-                // Keep scrolling to bottom if they're already there.
-                if (scrolledToBottom) {
-                    target.scrollTop = target.scrollHeight;
-                }
+            // Keep scrolling to bottom if they're already there.
+            if (scrolledToBottom) {
+                target.scrollTop = target.scrollHeight;
             }
         }
 
@@ -661,30 +644,48 @@ module KMud {
             for (var i = 0; i < elements.length; i++) {
                 output.push(elements[i]);
                 if (i != elements.length - 1) {
-                    var span = document.createElement("span");
-                    span.textContent = separator;
+                    elements[i].textContent += separator;
+                    //var span = document.createElement("span");
+                    //span.textContent = separator;
 
-                    if (separatorClass !== undefined) {
-                        span.className = separatorClass;
-                    }
-                    output.push(span);
+                    //if (separatorClass !== undefined) {
+                    //    span.className = separatorClass;
+                    //}
+                    //output.push(span);
                 }
             }
 
             return output;
         }
 
-        public pluralize(name: string, quantity: number) {
+        public pluralize(name: string, quantity: number, omitNumber = false) {
             if (quantity == 1)
                 return name;
+            var res = "";
+            if (!omitNumber) {
+                res = StringUtilities.formatNumber(quantity) + " ";
+            }
             if (name.charAt(name.length - 1).toLowerCase() === "y")
-                return String(quantity) + " " + name.substr(0, name.length - 1) + "ies";
-            return String(quantity) + " " + name + "s";
+                return res + name.substr(0, name.length - 1) + "ies";
+            if (name.charAt(name.length - 1).toLowerCase() === "h")
+                return res + name + "es";
+            return res + name + "s";
+        }
+
+        public groupItems(items: LinqContainer<ItemDescription> | ItemDescription[]): LinqContainer<Grouping<ItemDescription, string>> {
+            var linq: LinqContainer<ItemDescription>;
+            if (Array.isArray(items)) {
+                linq = Linq(<ItemDescription[]>items);
+            }
+            else {
+                linq = <LinqContainer<ItemDescription>>items;
+            }
+            return linq.groupBy(x => x.TemplateId + "|" + x.Name);
         }
     }
 
     export class StringUtilities {
-        public static formatMoney(n: number) {
+        public static formatNumber(n: number) {
             return n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 

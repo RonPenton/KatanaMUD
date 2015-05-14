@@ -12,10 +12,10 @@
     max-width: 80ch;
     word-wrap: break-word;
 
-    span {
+    span, a {
         padding: 2px 0px;
-		display:inline-block;
-        margin-right: 1ch;
+		/*display:inline-block;
+        margin-right: 1ch;*/
     }
 }
 
@@ -178,15 +178,23 @@ input {
 }
 
 .item-cash {
-    color:darkorange;
+    color:gold;
+}
+
+.item-cash-hidden {
+    color: darken(gold, 15%);
 }
 
 .item-equipped {
     color: skyblue;
 }
 
-.wealth-amount, .encumbrance-value, .item-held {
-    color: deepskyblue;
+.wealth-amount, .encumbrance-value, .item-held, .item-visible {
+    color: cyan;
+}
+
+.item-hidden {
+    color: darken(cyan, 15%);
 }
 
 .item-separator {

@@ -305,13 +305,10 @@ var KMud;
         Game.prototype.cashTransfer = function (message) {
             var name = message.Currency.Name;
             if (message.Quantity > 0) {
-                name = String(message.Quantity) + " " + name;
-                if (message.Quantity > 1) {
-                    name = name + "s";
-                }
+                name = this.pluralize(name, message.Quantity);
             }
             else {
-                name = "some " + name + "s";
+                name = "some " + this.pluralize(name, 0, true);
             }
             if (message.Giver != null && message.Taker != null) {
                 // player-to-player transfer
@@ -378,28 +375,26 @@ var KMud;
                 if (StringUtilities.notEmpty(message.Description)) {
                     this.addOutput(this.mainOutput, message.Description, "room-desc");
                 }
-                var items = [];
-                if (message.VisibleCash.length > 0) {
-                    KMud.pushRange(items, KMud.Linq(message.VisibleCash).select(function (x) { return String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : ""); }).toArray());
+                // Items
+                var visibleGroups = this.groupItems(message.VisibleItems);
+                var foundGroups = this.groupItems(message.FoundItems);
+                var itemRuns = [];
+                KMud.pushRange(itemRuns, this.createElements(message.VisibleCash, function (x) { return _this.pluralize(x.Name, x.Amount); }, "item-cash", "a"));
+                KMud.pushRange(itemRuns, this.createElements(message.FoundCash, function (x) { return _this.pluralize(x.Name, x.Amount); }, "item-cash-hidden", "a"));
+                KMud.pushRange(itemRuns, this.createElements(visibleGroups.toArray(), function (x) { return _this.pluralize(x.values[0].Name, x.values.length); }, "item-visible", "a"));
+                KMud.pushRange(itemRuns, this.createElements(foundGroups.toArray(), function (x) { return _this.pluralize(x.values[0].Name, x.values.length); }, "item-hidden", "a"));
+                itemRuns = this.joinElements(itemRuns, ", ", "item-separator");
+                if (itemRuns.length != 0) {
+                    this.addOutput(this.mainOutput, "You notice ", "items", false);
+                    this.addElements(this.mainOutput, itemRuns, false);
+                    this.addOutput(this.mainOutput, " here.", "items");
                 }
-                if (message.FoundCash.length > 0) {
-                    KMud.pushRange(items, KMud.Linq(message.FoundCash).select(function (x) { return String(x.Amount) + " " + x.Name + (x.Amount > 1 ? "s" : "") + "†"; }).toArray());
-                }
-                if (message.VisibleItems.length > 0) {
-                    var groups = KMud.Linq(message.VisibleItems).groupBy(function (x) { return x.TemplateId + "|" + x.Name; });
-                    KMud.pushRange(items, groups.select(function (x) { return (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name; }).toArray());
-                }
-                if (message.FoundItems.length > 0) {
-                    var groups = KMud.Linq(message.FoundItems).groupBy(function (x) { return x.TemplateId + "|" + x.Name; });
-                    KMud.pushRange(items, groups.select(function (x) { return (x.values.length > 1 ? String(x.values.length) + " " : "") + x.values[0].Name + "†"; }).toArray());
-                }
-                if (items.length > 0) {
-                    this.addOutput(this.mainOutput, "You notice " + items.join(", ") + " here.", "items");
-                }
+                // Actors
                 if (message.Actors.length > 1) {
                     var actors = message.Actors.filter(function (x) { return x.Id != _this.currentPlayer.Id; });
                     this.addOutput(this.mainOutput, "Also here: " + actors.map(function (x) { return x.Name; }).join(", ") + ".", "actors");
                 }
+                // Exits
                 if (message.Exits.length > 0) {
                     this.addOutput(this.mainOutput, "Obvious exits: " + message.Exits.map(function (x) { return x.Name; }).join(", "), "exits");
                 }
@@ -438,9 +433,6 @@ var KMud;
             var equipped = KMud.Linq(message.Items).where(function (x) { return x.EquippedSlot != null; }).orderBy(function (x) { return x.EquippedSlot; });
             var groups = KMud.Linq(message.Items).where(function (x) { return x.EquippedSlot == null; }).groupBy(function (x) { return x.TemplateId + "|" + x.Name; }).orderBy(function (x) { return x.first().Name; });
             var itemRuns = [];
-            //this.addOutput(this.mainOutput, "You are carrying:", "inventory-label" false);
-            //    [itemStr, "inventory-list"]
-            //]);
             KMud.pushRange(itemRuns, this.createElements(message.Cash, function (x) { return _this.pluralize(x.Name, x.Amount); }, "item-cash", "a"));
             KMud.pushRange(itemRuns, this.createElements(equipped.toArray(), function (x) { return x.Name + " (" + KMud.EquipmentSlot[x.EquippedSlot] + ")"; }, "item-equipped", "a"));
             KMud.pushRange(itemRuns, this.createElements(groups.toArray(), function (x) { return _this.pluralize(x.values[0].Name, x.values.length); }, "item-held", "a"));
@@ -452,7 +444,7 @@ var KMud;
             this.addElements(this.mainOutput, itemRuns);
             //TODO: You have no keys.
             this.addOutput(this.mainOutput, "Wealth:", "wealth-label", false);
-            this.addOutput(this.mainOutput, StringUtilities.formatMoney(message.TotalCash.Amount) + " " + this.pluralize(message.TotalCash.Name, message.TotalCash.Amount), "wealth-amount");
+            this.addOutput(this.mainOutput, this.pluralize(message.TotalCash.Name, message.TotalCash.Amount), "wealth-amount");
             var pct = Math.round((message.Encumbrance / message.MaxEncumbrance) * 100);
             var category = "Heavy";
             if (pct <= 66)
@@ -509,17 +501,17 @@ var KMud;
         /////////////////////////////////////////////////////////////////////////////////
         Game.prototype.addElements = function (target, elements, finished) {
             if (finished === void 0) { finished = true; }
-            var scrolledToBottom = (target.scrollHeight - target.scrollTop === target.offsetHeight);
+            var scrolledToBottom = Math.abs((target.scrollHeight - target.scrollTop) - target.offsetHeight) < 10;
             for (var i = 0; i < elements.length; i++) {
                 target.appendChild(elements[i]);
             }
             if (finished) {
                 var newLine = document.createElement("br");
                 target.appendChild(newLine);
-                // Keep scrolling to bottom if they're already there.
-                if (scrolledToBottom) {
-                    target.scrollTop = target.scrollHeight;
-                }
+            }
+            // Keep scrolling to bottom if they're already there.
+            if (scrolledToBottom) {
+                target.scrollTop = target.scrollHeight;
             }
         };
         Game.prototype.addOutput = function (target, text, css, finished) {
@@ -573,22 +565,34 @@ var KMud;
             for (var i = 0; i < elements.length; i++) {
                 output.push(elements[i]);
                 if (i != elements.length - 1) {
-                    var span = document.createElement("span");
-                    span.textContent = separator;
-                    if (separatorClass !== undefined) {
-                        span.className = separatorClass;
-                    }
-                    output.push(span);
+                    elements[i].textContent += separator;
                 }
             }
             return output;
         };
-        Game.prototype.pluralize = function (name, quantity) {
+        Game.prototype.pluralize = function (name, quantity, omitNumber) {
+            if (omitNumber === void 0) { omitNumber = false; }
             if (quantity == 1)
                 return name;
+            var res = "";
+            if (!omitNumber) {
+                res = StringUtilities.formatNumber(quantity) + " ";
+            }
             if (name.charAt(name.length - 1).toLowerCase() === "y")
-                return String(quantity) + " " + name.substr(0, name.length - 1) + "ies";
-            return String(quantity) + " " + name + "s";
+                return res + name.substr(0, name.length - 1) + "ies";
+            if (name.charAt(name.length - 1).toLowerCase() === "h")
+                return res + name + "es";
+            return res + name + "s";
+        };
+        Game.prototype.groupItems = function (items) {
+            var linq;
+            if (Array.isArray(items)) {
+                linq = KMud.Linq(items);
+            }
+            else {
+                linq = items;
+            }
+            return linq.groupBy(function (x) { return x.TemplateId + "|" + x.Name; });
         };
         return Game;
     })();
@@ -596,7 +600,7 @@ var KMud;
     var StringUtilities = (function () {
         function StringUtilities() {
         }
-        StringUtilities.formatMoney = function (n) {
+        StringUtilities.formatNumber = function (n) {
             return n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         };
         StringUtilities.notEmpty = function (s) {
