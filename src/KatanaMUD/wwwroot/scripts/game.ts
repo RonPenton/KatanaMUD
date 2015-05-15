@@ -15,15 +15,23 @@ module KMud {
         private symbolCommandHandlers: { [index: string]: Action3<string[], string, string> } = {};
         private currentPlayer: ActorInformationMessage;
         private ding: HTMLAudioElement;
+        private hasFocus: boolean = true;
+        private lastDing = new Date(0);
 
         private get mainOutput(): HTMLElement {
             return document.getElementById("Output");
         }
 
         private notify() {
-            //if (document.visibilityState == "hidden") {
-            this.ding.play();
-            //}
+            // only ding if the window is out of focus, and it hasn't dinged in the last minute.
+            if (!this.hasFocus) {
+                var now = new Date();
+                var diff = now.valueOf() - this.lastDing.valueOf();
+                if (diff > 1000 * 60) {
+                    this.lastDing = now;
+                    this.ding.play();
+                }
+            }
         }
 
         constructor() {
@@ -69,6 +77,9 @@ module KMud {
                 if (window.getSelection().toString().length == 0)
                     $("#InputBox").focus();
             });
+            $(window).focus(evt => this.hasFocus = true);
+            $(window).blur(evt => this.hasFocus = false);
+            
 
             this.registerMessageHandlers();
             this.registerCommandHandlers();
@@ -240,7 +251,7 @@ module KMud {
         }
 
         private talk(text: string, type: CommunicationType, param?: string) {
-            if (StringUtilities.isNullOrWhitespace(text))
+            if (Str.empty(text))
                 return; // don't bother sending empty messages.
 
             var message = new CommunicationMessage();
@@ -406,7 +417,7 @@ module KMud {
 
         private showRoomDescription(message: RoomDescriptionMessage) {
             if (message.CannotSee) {
-                if (!StringUtilities.isNullOrWhitespace(message.CannotSeeMessage)) {
+                if (!Str.empty(message.CannotSeeMessage)) {
                     this.addOutput(this.mainOutput, message.CannotSeeMessage, "cannot-see");
                 }
                 else {
@@ -420,7 +431,7 @@ module KMud {
             }
             else {
                 this.addOutput(this.mainOutput, message.Name, "room-name");
-                if (StringUtilities.notEmpty(message.Description)) {
+                if (Str.notEmpty(message.Description)) {
                     this.addOutput(this.mainOutput, message.Description, "room-desc");
                 }
 
@@ -500,12 +511,12 @@ module KMud {
             if (itemRuns.length == 0) {
                 itemRuns.push(this.createElement("Nothing!", "item-none"));
             }
-            itemRuns.unshift(this.createElement("You are carrying:", "inventory-label"));
+            itemRuns.unshift(this.createElement("You are carrying: ", "inventory-label"));
             this.addElements(this.mainOutput, itemRuns);
 
             //TODO: You have no keys.
 
-            this.addOutput(this.mainOutput, "Wealth:", "wealth-label", false);
+            this.addOutput(this.mainOutput, "Wealth: ", "wealth-label", false);
             this.addOutput(this.mainOutput, this.pluralize(message.TotalCash.Name, message.TotalCash.Amount), "wealth-amount");
 
             var pct = Math.round((message.Encumbrance / message.MaxEncumbrance) * 100);
@@ -517,7 +528,7 @@ module KMud {
             else if (pct <= 15)
                 category = "None";
 
-            this.addOutput(this.mainOutput, "Encumbrance:", "encumbrance-label", false);
+            this.addOutput(this.mainOutput, "Encumbrance: ", "encumbrance-label", false);
             this.addOutput(this.mainOutput, message.Encumbrance + "/" + message.MaxEncumbrance + " - " + category + " [" + pct + "%]", "encumbrance-value");
         }
 
@@ -663,7 +674,7 @@ module KMud {
                 return name;
             var res = "";
             if (!omitNumber) {
-                res = StringUtilities.formatNumber(quantity) + " ";
+                res = Str.formatNumber(quantity) + " ";
             }
             if (name.charAt(name.length - 1).toLowerCase() === "y")
                 return res + name.substr(0, name.length - 1) + "ies";
@@ -684,20 +695,16 @@ module KMud {
         }
     }
 
-    export class StringUtilities {
+    export class Str {
         public static formatNumber(n: number) {
             return n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
         public static notEmpty(s: string): boolean {
-            return !this.isNullOrWhitespace(s);
+            return !this.empty(s);
         }
 
-        public static isNullOrEmpty(s: string): boolean {
-            return (s === null || s === undefined || s === "");
-        }
-
-        public static isNullOrWhitespace(s: string): boolean {
+        public static empty(s: string): boolean {
             return (s === null || s === undefined || /^\s*$/g.test(s));
         }
 
@@ -707,6 +714,29 @@ module KMud {
             });
         }
 
+        public static endsWith(str: string, ends: string, caseSensitive: boolean = false): boolean {
+            if (!caseSensitive) {
+                str = str.toLowerCase();
+                ends = ends.toLowerCase();
+            }
+
+            if (ends.length > str.length)
+                return false;
+
+            return str.substr(str.length - ends.length) == ends;
+        }
+
+        public static startsWith(str: string, starts: string, caseSensitive: boolean = false): boolean {
+            if (!caseSensitive) {
+                str = str.toLowerCase();
+                starts = starts.toLowerCase();
+            }
+
+            if (starts.length > str.length)
+                return false;
+
+            return str.substr(0, starts.length) == starts;
+        }
 
         // Referring to the table here:
         // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/regexp
@@ -721,10 +751,10 @@ module KMud {
             "/", "{", "}", "(", ")", "*", "+", "?", ".", "\\", "^", "$", "|" // order doesn't matter for any of these
         ];
 
-        private static _escapeRegExpRegexp: RegExp = new RegExp('[' + StringUtilities._escapeRegExpCharacters.join('\\') + ']', 'g');
+        private static _escapeRegExpRegexp: RegExp = new RegExp('[' + Str._escapeRegExpCharacters.join('\\') + ']', 'g');
 
         public static escapeRegExp(str: string): string {
-            return str.replace(StringUtilities._escapeRegExpRegexp, "\\$&");
+            return str.replace(Str._escapeRegExpRegexp, "\\$&");
         }
     }
 

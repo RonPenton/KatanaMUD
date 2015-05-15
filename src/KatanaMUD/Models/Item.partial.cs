@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace KatanaMUD.Models
 {
-    public partial class Item
+    public partial class Item : IItem
     {
         public string Name => CustomName ?? ItemTemplate.Name;
 

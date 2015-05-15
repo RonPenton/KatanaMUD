@@ -5,17 +5,19 @@ namespace KatanaMUD
     public class Validation
     {
         public bool Allowed { get; set; }
-        public string Reason { get; set; }
+        public string FirstPerson { get; set; }
+        public string ThirdPerson { get; set; }
 
         public Validation()
         {
             Allowed = true;
         }
 
-        public Validation(string reason)
+        public Validation(string firstPerson, string thirdPerson)
         {
             Allowed = false;
-            Reason = reason;
+            FirstPerson = firstPerson;
+            ThirdPerson = thirdPerson;
         }
     }
 }

@@ -161,19 +161,19 @@ namespace KatanaMUD.Models
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public Validation CanGetItem(Item item)
+        public Validation CanGetItem(Item item, bool receive = false)
         {
             // Make sure fixed items aren't able to be gotten
             if (item.ItemTemplate.Fixed)
-                return new Validation("You cannot pick up that item!");
+                return new Validation("You cannot pick up that item!", Name + " cannot pick up that item!");
 
             // Make sure item is actually in the room.
-            if (item.Room != Room)
-                return new Validation("You are not in the same room as that item!");
+            if (item.Room != Room && receive == false)
+                return new Validation("You are not in the same room as that item!", null);
 
             // Check weight.
             if (Encumbrance + item.Weight > MaxEncumbrance)
-                return new Validation("You cannot carry that much!");
+                return new Validation("You cannot carry that much!", Name + " cannot carry that much!");
 
             //TODO: Ask item if it can be gotten. 
             return new Validation();
@@ -302,6 +302,18 @@ namespace KatanaMUD.Models
 
         public void DropCash(Currency currency, long? quantity, bool hide)
         {
+            var q = RemoveCash(currency, quantity);
+            var container = Room.Cash;
+            if (hide == true)
+                container = Room.HiddenCash;
+            Currency.Add(currency, container, quantity.Value);
+
+            if (hide == true)
+                Room.ClearFoundHiddenCash(currency);
+        }
+
+        public long RemoveCash(Currency currency, long? quantity)
+        {
             var q = Currency.Get(currency, Cash);
             if (quantity == null)
                 quantity = q;
@@ -309,15 +321,15 @@ namespace KatanaMUD.Models
             if (quantity > q)
                 quantity = q;
 
-            var container = Room.Cash;
-            if (hide == true)
-                container = Room.HiddenCash;
-
             Currency.Add(currency, Cash, -quantity.Value);
-            Currency.Add(currency, container, quantity.Value);
+            return quantity.Value;
+        }
 
-            if (hide == true)
-                Room.ClearFoundHiddenCash(currency);
+        public void AddCash(Currency currency, long quantity)
+        {
+            var q = Currency.Get(currency, Cash);
+
+            Currency.Add(currency, Cash, quantity);
         }
 
         /// <summary>
@@ -347,7 +359,7 @@ namespace KatanaMUD.Models
         /// Removes an item from the Actors equipped list.
         /// </summary>
         /// <param name="item"></param>
-        public void RemoveItem(Item item)
+        public void UnEquip(Item item)
         {
             if (item.Actor != this)
                 throw new InvalidOperationException("Item does not belong to Actor");

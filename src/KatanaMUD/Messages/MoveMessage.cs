@@ -29,7 +29,7 @@ namespace KatanaMUD.Messages
                     }
                     else
                     {
-                        actor.SendMessage(new ActionNotAllowedMessage() { Message = action.Reason });
+                        actor.SendMessage(new ActionNotAllowedMessage() { Message = action.FirstPerson });
                     }
                 }
             }

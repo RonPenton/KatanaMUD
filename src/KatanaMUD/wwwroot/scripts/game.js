@@ -12,6 +12,8 @@ var KMud;
             this.messageHandlers = {};
             this.commandHandlers = {};
             this.symbolCommandHandlers = {};
+            this.hasFocus = true;
+            this.lastDing = new Date(0);
             this.input = document.getElementById("InputBox");
             $("#InputBox").keypress(function (x) {
                 if (x.keyCode == 13) {
@@ -52,6 +54,8 @@ var KMud;
                 if (window.getSelection().toString().length == 0)
                     $("#InputBox").focus();
             });
+            $(window).focus(function (evt) { return _this.hasFocus = true; });
+            $(window).blur(function (evt) { return _this.hasFocus = false; });
             this.registerMessageHandlers();
             this.registerCommandHandlers();
             this.ding = new Audio("../media/ding.wav");
@@ -64,9 +68,15 @@ var KMud;
             configurable: true
         });
         Game.prototype.notify = function () {
-            //if (document.visibilityState == "hidden") {
-            this.ding.play();
-            //}
+            // only ding if the window is out of focus, and it hasn't dinged in the last minute.
+            if (!this.hasFocus) {
+                var now = new Date();
+                var diff = now.valueOf() - this.lastDing.valueOf();
+                if (diff > 1000 * 60) {
+                    this.lastDing = now;
+                    this.ding.play();
+                }
+            }
         };
         Game.prototype.processCommand = function (command) {
             var lower = command.toLocaleLowerCase().trim();
@@ -86,7 +96,7 @@ var KMud;
                 return;
             }
             // No clue. Say it, don't spray it.
-            this.talk(command, KMud.CommunicationType.Say);
+            this.talk(command, 2 /* Say */);
         };
         Game.prototype.connect = function (url) {
             var _this = this;
@@ -146,16 +156,16 @@ var KMud;
         Game.prototype.registerCommandHandlers = function () {
             var _this = this;
             this.commandHandlers["ping"] = function (x) { return _this.ping(); };
-            this.commandHandlers["n"] = this.commandHandlers["north"] = function (words) { return _this.move(KMud.Direction.North); };
-            this.commandHandlers["s"] = this.commandHandlers["south"] = function (words) { return _this.move(KMud.Direction.South); };
-            this.commandHandlers["e"] = this.commandHandlers["east"] = function (words) { return _this.move(KMud.Direction.East); };
-            this.commandHandlers["w"] = this.commandHandlers["west"] = function (words) { return _this.move(KMud.Direction.West); };
-            this.commandHandlers["ne"] = this.commandHandlers["northeast"] = function (words) { return _this.move(KMud.Direction.Northeast); };
-            this.commandHandlers["nw"] = this.commandHandlers["northwest"] = function (words) { return _this.move(KMud.Direction.Northwest); };
-            this.commandHandlers["se"] = this.commandHandlers["southeast"] = function (words) { return _this.move(KMud.Direction.Southeast); };
-            this.commandHandlers["sw"] = this.commandHandlers["southwest"] = function (words) { return _this.move(KMud.Direction.Southwest); };
-            this.commandHandlers["u"] = this.commandHandlers["up"] = function (words) { return _this.move(KMud.Direction.Up); };
-            this.commandHandlers["d"] = this.commandHandlers["down"] = function (words) { return _this.move(KMud.Direction.Down); };
+            this.commandHandlers["n"] = this.commandHandlers["north"] = function (words) { return _this.move(0 /* North */); };
+            this.commandHandlers["s"] = this.commandHandlers["south"] = function (words) { return _this.move(1 /* South */); };
+            this.commandHandlers["e"] = this.commandHandlers["east"] = function (words) { return _this.move(2 /* East */); };
+            this.commandHandlers["w"] = this.commandHandlers["west"] = function (words) { return _this.move(3 /* West */); };
+            this.commandHandlers["ne"] = this.commandHandlers["northeast"] = function (words) { return _this.move(4 /* Northeast */); };
+            this.commandHandlers["nw"] = this.commandHandlers["northwest"] = function (words) { return _this.move(5 /* Northwest */); };
+            this.commandHandlers["se"] = this.commandHandlers["southeast"] = function (words) { return _this.move(6 /* Southeast */); };
+            this.commandHandlers["sw"] = this.commandHandlers["southwest"] = function (words) { return _this.move(7 /* Southwest */); };
+            this.commandHandlers["u"] = this.commandHandlers["up"] = function (words) { return _this.move(8 /* Up */); };
+            this.commandHandlers["d"] = this.commandHandlers["down"] = function (words) { return _this.move(9 /* Down */); };
             this.commandHandlers["l"] = this.commandHandlers["look"] = function (words) { return _this.look(words); };
             this.commandHandlers["i"] = this.commandHandlers["inv"] = this.commandHandlers["inventory"] = function (words, tail) { return _this.SendMessage(new KMud.InventoryCommand()); };
             this.commandHandlers["get"] = this.commandHandlers["g"] = function (words, tail) { return _this.get(tail); };
@@ -164,15 +174,15 @@ var KMud;
             this.commandHandlers["search"] = this.commandHandlers["sea"] = function (words, tail) { return _this.SendMessage(new KMud.SearchCommand()); };
             this.commandHandlers["equip"] = this.commandHandlers["eq"] = this.commandHandlers["arm"] = this.commandHandlers["ar"] = function (words, tail) { return _this.SendMessage(new KMud.EquipCommand(null, tail)); };
             this.commandHandlers["remove"] = this.commandHandlers["rem"] = function (words, tail) { return _this.SendMessage(new KMud.RemoveCommand(null, tail)); };
-            this.commandHandlers["gos"] = this.commandHandlers["gossip"] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Gossip); };
-            this.commandHandlers["say"] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Say); };
+            this.commandHandlers["gos"] = this.commandHandlers["gossip"] = function (words, tail) { return _this.talk(tail, 0 /* Gossip */); };
+            this.commandHandlers["say"] = function (words, tail) { return _this.talk(tail, 2 /* Say */); };
             this.commandHandlers["sys"] = this.commandHandlers["sysop"] = function (words, tail) {
                 var msg = new KMud.SysopMessage();
                 msg.Command = tail;
                 _this.SendMessage(msg);
             };
-            this.symbolCommandHandlers["."] = function (words, tail) { return _this.talk(tail, KMud.CommunicationType.Say); };
-            this.symbolCommandHandlers["/"] = function (words, tail, param) { return _this.talk(tail, KMud.CommunicationType.Telepath, param); };
+            this.symbolCommandHandlers["."] = function (words, tail) { return _this.talk(tail, 2 /* Say */); };
+            this.symbolCommandHandlers["/"] = function (words, tail, param) { return _this.talk(tail, 8 /* Telepath */, param); };
         };
         Game.prototype.loginMessage = function (message) {
             if (message.Login == true) {
@@ -210,7 +220,7 @@ var KMud;
             this.SendMessage(message);
         };
         Game.prototype.talk = function (text, type, param) {
-            if (StringUtilities.isNullOrWhitespace(text))
+            if (Str.empty(text))
                 return; // don't bother sending empty messages.
             var message = new KMud.CommunicationMessage();
             message.Message = text;
@@ -358,21 +368,21 @@ var KMud;
         Game.prototype.showRoomDescription = function (message) {
             var _this = this;
             if (message.CannotSee) {
-                if (!StringUtilities.isNullOrWhitespace(message.CannotSeeMessage)) {
+                if (!Str.empty(message.CannotSeeMessage)) {
                     this.addOutput(this.mainOutput, message.CannotSeeMessage, "cannot-see");
                 }
                 else {
-                    if (message.LightLevel == KMud.LightLevel.Nothing)
+                    if (message.LightLevel == -10000 /* Nothing */)
                         this.addOutput(this.mainOutput, "The room is darker than anything you've ever seen before - you can't see anything", "cannot-see");
-                    if (message.LightLevel == KMud.LightLevel.PitchBlack)
+                    if (message.LightLevel == -500 /* PitchBlack */)
                         this.addOutput(this.mainOutput, "The room is pitch black - you can't see anything", "cannot-see");
-                    if (message.LightLevel == KMud.LightLevel.VeryDark)
+                    if (message.LightLevel == -250 /* VeryDark */)
                         this.addOutput(this.mainOutput, "The room is very dark - you can't see anything", "cannot-see");
                 }
             }
             else {
                 this.addOutput(this.mainOutput, message.Name, "room-name");
-                if (StringUtilities.notEmpty(message.Description)) {
+                if (Str.notEmpty(message.Description)) {
                     this.addOutput(this.mainOutput, message.Description, "room-desc");
                 }
                 // Items
@@ -401,19 +411,19 @@ var KMud;
                 else {
                     this.addOutput(this.mainOutput, "Obvious exits: NONE!!!", "exits");
                 }
-                if (message.LightLevel == KMud.LightLevel.BarelyVisible)
+                if (message.LightLevel == -200 /* BarelyVisible */)
                     this.addOutput(this.mainOutput, "The room is barely visible", "dimly-lit");
-                if (message.LightLevel == KMud.LightLevel.DimlyLit)
+                if (message.LightLevel == -150 /* DimlyLit */)
                     this.addOutput(this.mainOutput, "The room is dimly lit", "dimly-lit");
             }
         };
         Game.prototype.showCommunication = function (message) {
             switch (message.Type) {
-                case KMud.CommunicationType.Gossip:
+                case 0 /* Gossip */:
                     this.addOutput(this.mainOutput, message.ActorName + " gossips: " + message.Message, "gossip");
                     this.notify();
                     break;
-                case KMud.CommunicationType.Say:
+                case 2 /* Say */:
                     if (message.ActorId == this.currentPlayer.Id) {
                         this.addOutput(this.mainOutput, "You say \"" + message.Message + "\"", "say");
                     }
@@ -422,7 +432,7 @@ var KMud;
                         this.notify();
                     }
                     break;
-                case KMud.CommunicationType.Telepath:
+                case 8 /* Telepath */:
                     this.addOutput(this.mainOutput, message.ActorName + " telepaths " + message.Message, "telepath");
                     this.notify();
                     break;
@@ -440,10 +450,10 @@ var KMud;
             if (itemRuns.length == 0) {
                 itemRuns.push(this.createElement("Nothing!", "item-none"));
             }
-            itemRuns.unshift(this.createElement("You are carrying:", "inventory-label"));
+            itemRuns.unshift(this.createElement("You are carrying: ", "inventory-label"));
             this.addElements(this.mainOutput, itemRuns);
             //TODO: You have no keys.
-            this.addOutput(this.mainOutput, "Wealth:", "wealth-label", false);
+            this.addOutput(this.mainOutput, "Wealth: ", "wealth-label", false);
             this.addOutput(this.mainOutput, this.pluralize(message.TotalCash.Name, message.TotalCash.Amount), "wealth-amount");
             var pct = Math.round((message.Encumbrance / message.MaxEncumbrance) * 100);
             var category = "Heavy";
@@ -453,7 +463,7 @@ var KMud;
                 category = "Light";
             else if (pct <= 15)
                 category = "None";
-            this.addOutput(this.mainOutput, "Encumbrance:", "encumbrance-label", false);
+            this.addOutput(this.mainOutput, "Encumbrance: ", "encumbrance-label", false);
             this.addOutput(this.mainOutput, message.Encumbrance + "/" + message.MaxEncumbrance + " - " + category + " [" + pct + "%]", "encumbrance-value");
         };
         Game.prototype.ambiguousActors = function (message) {
@@ -471,7 +481,7 @@ var KMud;
         Game.prototype.equipChanged = function (message) {
             if (message.Equipped) {
                 if (message.Actor.Id == this.currentPlayer.Id) {
-                    if (message.Item.EquippedSlot == KMud.EquipmentSlot.Weapon || message.Item.EquippedSlot == KMud.EquipmentSlot.Offhand || message.Item.EquippedSlot == KMud.EquipmentSlot.Light) {
+                    if (message.Item.EquippedSlot == 0 /* Weapon */ || message.Item.EquippedSlot == 1 /* Offhand */ || message.Item.EquippedSlot == 18 /* Light */) {
                         this.addOutput(this.mainOutput, "You are now holding " + message.Item.Name + ".", "equip");
                     }
                     else {
@@ -479,7 +489,7 @@ var KMud;
                     }
                 }
                 else {
-                    if (message.Item.EquippedSlot == KMud.EquipmentSlot.Weapon || message.Item.EquippedSlot == KMud.EquipmentSlot.Offhand || message.Item.EquippedSlot == KMud.EquipmentSlot.Light) {
+                    if (message.Item.EquippedSlot == 0 /* Weapon */ || message.Item.EquippedSlot == 1 /* Offhand */ || message.Item.EquippedSlot == 18 /* Light */) {
                         this.addOutput(this.mainOutput, message.Actor.Name + " readies " + message.Item.Name + "!", "equip");
                     }
                     else {
@@ -576,7 +586,7 @@ var KMud;
                 return name;
             var res = "";
             if (!omitNumber) {
-                res = StringUtilities.formatNumber(quantity) + " ";
+                res = Str.formatNumber(quantity) + " ";
             }
             if (name.charAt(name.length - 1).toLowerCase() === "y")
                 return res + name.substr(0, name.length - 1) + "ies";
@@ -597,22 +607,19 @@ var KMud;
         return Game;
     })();
     KMud.Game = Game;
-    var StringUtilities = (function () {
-        function StringUtilities() {
+    var Str = (function () {
+        function Str() {
         }
-        StringUtilities.formatNumber = function (n) {
+        Str.formatNumber = function (n) {
             return n.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         };
-        StringUtilities.notEmpty = function (s) {
-            return !this.isNullOrWhitespace(s);
+        Str.notEmpty = function (s) {
+            return !this.empty(s);
         };
-        StringUtilities.isNullOrEmpty = function (s) {
-            return (s === null || s === undefined || s === "");
-        };
-        StringUtilities.isNullOrWhitespace = function (s) {
+        Str.empty = function (s) {
             return (s === null || s === undefined || /^\s*$/g.test(s));
         };
-        StringUtilities.formatString = function (str, args) {
+        Str.formatString = function (str, args) {
             return str.replace(/{(\d+)}/g, function (match) {
                 var i = [];
                 for (var _i = 1; _i < arguments.length; _i++) {
@@ -621,8 +628,28 @@ var KMud;
                 return typeof args[i[0]] != 'undefined' ? args[i[0]] : match;
             });
         };
-        StringUtilities.escapeRegExp = function (str) {
-            return str.replace(StringUtilities._escapeRegExpRegexp, "\\$&");
+        Str.endsWith = function (str, ends, caseSensitive) {
+            if (caseSensitive === void 0) { caseSensitive = false; }
+            if (!caseSensitive) {
+                str = str.toLowerCase();
+                ends = ends.toLowerCase();
+            }
+            if (ends.length > str.length)
+                return false;
+            return str.substr(str.length - ends.length) == ends;
+        };
+        Str.startsWith = function (str, starts, caseSensitive) {
+            if (caseSensitive === void 0) { caseSensitive = false; }
+            if (!caseSensitive) {
+                str = str.toLowerCase();
+                starts = starts.toLowerCase();
+            }
+            if (starts.length > str.length)
+                return false;
+            return str.substr(0, starts.length) == starts;
+        };
+        Str.escapeRegExp = function (str) {
+            return str.replace(Str._escapeRegExpRegexp, "\\$&");
         };
         // Referring to the table here:
         // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/regexp
@@ -632,7 +659,7 @@ var KMud;
         // they do not need to be escaped, but they MAY be escaped
         // without any adverse effects (to the best of my knowledge and casual testing)
         // : ! , = 
-        StringUtilities._escapeRegExpCharacters = [
+        Str._escapeRegExpCharacters = [
             "-",
             "[",
             "]",
@@ -650,8 +677,8 @@ var KMud;
             "$",
             "|"
         ];
-        StringUtilities._escapeRegExpRegexp = new RegExp('[' + StringUtilities._escapeRegExpCharacters.join('\\') + ']', 'g');
-        return StringUtilities;
+        Str._escapeRegExpRegexp = new RegExp('[' + Str._escapeRegExpCharacters.join('\\') + ']', 'g');
+        return Str;
     })();
-    KMud.StringUtilities = StringUtilities;
+    KMud.Str = Str;
 })(KMud || (KMud = {}));

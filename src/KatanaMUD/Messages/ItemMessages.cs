@@ -30,7 +30,6 @@ namespace KatanaMUD.Messages
         public long Currency { get; set; }
     }
 
-
     public class GetItemCommand : MessageBase
     {
         public Guid? ItemId { get; set; }
@@ -79,12 +78,11 @@ namespace KatanaMUD.Messages
                         Currency = new CurrencyDescription(currency, Quantity)
                     };
                     actor.Room.ActiveActors.Where(x => x != actor).ForEach(x => x.SendMessage(message));
-                    message.Quantity = Quantity;    // Only the actor involved knows the amount.
                     actor.SendMessage(message);
                 }
                 else
                 {
-                    actor.SendMessage(new ActionNotAllowedMessage() { Message = action.Reason });
+                    actor.SendMessage(new ActionNotAllowedMessage() { Message = action.FirstPerson });
                 }
                 return;
             }
@@ -109,7 +107,7 @@ namespace KatanaMUD.Messages
                     }
                     else
                     {
-                        failures.Add(action.Reason);
+                        failures.Add(action.FirstPerson);
                     }
                 }
 
@@ -153,7 +151,7 @@ namespace KatanaMUD.Messages
 
     public class DropItemCommand : MessageBase
     {
-        public Guid? ItemId { get; set; }
+        public Guid[] ItemIds { get; set; }
         public string ItemName { get; set; }
         public int Quantity { get; set; }
         public bool Hide { get; set; }
@@ -162,12 +160,20 @@ namespace KatanaMUD.Messages
         {
             if (Quantity < 0)
             {
-                actor.SendMessage(new ActionNotAllowedMessage() { Message = "Cannot get negative items." });
+                actor.SendMessage(new ActionNotAllowedMessage() { Message = "Cannot drop negative items." });
                 return;
             }
 
-            var availableCurrencies = Game.Data.AllCurrencies.Where(x => Currency.Get(x, actor.Cash) > 0).ToList();
-            var items = GetItemCommand.FindItems(availableCurrencies, actor.Items.ToList(), ItemName);
+            IEnumerable<IItem> items;
+            if (ItemIds != null && ItemIds.Any())
+            {
+                items = actor.Items.Where(x => ItemIds.Contains(x.Id));
+            }
+            else
+            {
+                var availableCurrencies = Game.Data.AllCurrencies.Where(x => Currency.Get(x, actor.Cash) > 0).ToList();
+                items = GetItemCommand.FindItems(availableCurrencies, actor.Items.ToList(), ItemName);
+            }
 
             if (items.Count() > 1)
             {
@@ -210,13 +216,11 @@ namespace KatanaMUD.Messages
                         // let the actors in the room know, but only if it's not being hidden.
                         actor.Room.ActiveActors.Where(x => x != actor).ForEach(x => x.SendMessage(message));
                     }
-
-                    message.Quantity = Quantity;    // Only the actor involved knows the amount.
                     actor.SendMessage(message);
                 }
                 else
                 {
-                    actor.SendMessage(new ActionNotAllowedMessage() { Message = action.Reason });
+                    actor.SendMessage(new ActionNotAllowedMessage() { Message = action.FirstPerson });
                 }
                 return;
             }
@@ -224,11 +228,20 @@ namespace KatanaMUD.Messages
             // Handle a regular drop
             Quantity = Math.Max(Quantity, 1);   // 0 is valid in the event that no number is specified. In that instance, we assume 1 instead.
 
-            var group = items.First() as ItemGroup;
+            IEnumerable<Item> finalItems;
+            if (items.First() is ItemGroup)
+            {
+                finalItems = (items.First() as ItemGroup).Items;
+            }
+            else
+            {
+                finalItems = items.Cast<Item>();
+            }
+
             List<Item> successes = new List<Item>();
             List<string> failures = new List<string>();
 
-            foreach (var item in group.Items)
+            foreach (var item in finalItems)
             {
                 var action = actor.CanDropItem(item);
 
@@ -239,7 +252,7 @@ namespace KatanaMUD.Messages
                 }
                 else
                 {
-                    failures.Add(action.Reason);
+                    failures.Add(action.FirstPerson);
                 }
             }
 
@@ -260,6 +273,175 @@ namespace KatanaMUD.Messages
                 {
                     actor.SendMessage(message);
                 }
+            }
+            if (failures.Any())
+            {
+                failures.Distinct().ForEach(x => actor.SendMessage(new ActionNotAllowedMessage() { Message = x }));
+            }
+        }
+    }
+
+    public class ItemOwnershipMessage : MessageBase
+    {
+        public ItemDescription[] Items { get; set; }
+        public ActorDescription Giver { get; set; }
+        public ActorDescription Taker { get; set; }
+        public bool Hide { get; set; }
+    }
+
+    public class CashTransferMessage : MessageBase
+    {
+        public CurrencyDescription Currency { get; set; }
+        public ActorDescription Giver { get; set; }
+        public ActorDescription Taker { get; set; }
+        public bool Hide { get; set; }
+    }
+
+    public class GiveCommand : MessageBase
+    {
+        public Guid[] ItemIds { get; set; }
+        public string ItemName { get; set; }
+        public Guid? ActorId { get; set; }
+        public string ActorName { get; set; }
+        public int Quantity { get; set; }
+
+        public override void Process(Actor actor)
+        {
+            if (Quantity < 0)
+            {
+                actor.SendMessage(new ActionNotAllowedMessage() { Message = "Cannot give negative items." });
+                return;
+            }
+
+            IEnumerable<Actor> receivers;
+            if (ActorId != null)
+            {
+                receivers = actor.Room.ActiveActors.Where(x => x.Id == ActorId.Value);
+            }
+            else
+            {
+                receivers = actor.Room.ActiveActors.FindActorsByName(ActorName, true).ToList();
+            }
+            if (!receivers.Any())
+            {
+                actor.SendMessage(new ActionNotAllowedMessage() { Message = "Cannot find player!" });
+                return;
+            }
+            if (receivers.Count() > 1)
+            {
+                actor.SendMessage(new AmbiguousActorMessage() { Actors = receivers.Select(x => new ActorDescription(x)).ToArray() });
+                return;
+            }
+            var receiver = receivers.First();
+
+            IEnumerable<IItem> items;
+            if (ItemIds != null && ItemIds.Any())
+            {
+                items = actor.Items.Where(x => ItemIds.Contains(x.Id));
+            }
+            else
+            {
+                var availableCurrencies = Game.Data.AllCurrencies.Where(x => Currency.Get(x, actor.Cash) > 0).ToList();
+                items = GetItemCommand.FindItems(availableCurrencies, actor.Items.ToList(), ItemName);
+            }
+            if (items.Count() > 1)
+            {
+                actor.SendMessage(new AmbiguousItemMessage() { Items = items.Select(x => new ItemDescription(x)).ToArray() });
+                return;
+            }
+            if (!items.Any())
+            {
+                actor.SendMessage(new ActionNotAllowedMessage() { Message = "Cannot find item!" });
+                return;
+            }
+
+            // Handle a cash give.
+            if (items.First() is Currency)
+            {
+                var currency = items.First() as Currency;
+                if (Quantity == 0)
+                {
+                    // In the event that no number is specified (ie 0), then we assume the user
+                    // wants to drop all currency. So, we oblige them.
+                    // TODO: see if this is a correct assumption. Could be dangerous?
+                    Quantity = (int)Currency.Get(currency, actor.Cash);
+                }
+
+                var action = actor.CanDropCash(currency, Quantity);
+                if (!action.Allowed)
+                {
+                    actor.SendMessage(new ActionNotAllowedMessage() { Message = action.FirstPerson });
+                    return;
+                }
+                action = receiver.CanGetCash(currency, Quantity);
+                if (!action.Allowed)
+                {
+                    actor.SendMessage(new ActionNotAllowedMessage() { Message = action.ThirdPerson });
+                    return;
+                }
+
+                var quantity = actor.RemoveCash(currency, Quantity);
+                receiver.AddCash(currency, quantity);
+
+                var message = new CashTransferMessage()
+                {
+                    Giver = new ActorDescription(actor),
+                    Taker = new ActorDescription(receiver),
+                    Currency = new CurrencyDescription(currency, quantity)
+                };
+
+                actor.Room.ActiveActors.ForEach(x => x.SendMessage(message));
+                return;
+            }
+
+            // Handle a regular give
+            Quantity = Math.Max(Quantity, 1);   // 0 is valid in the event that no number is specified. In that instance, we assume 1 instead.
+
+            IEnumerable<Item> finalItems;
+            if (items.First() is ItemGroup)
+            {
+                finalItems = (items.First() as ItemGroup).Items;
+            }
+            else
+            {
+                finalItems = items.Cast<Item>();
+            }
+
+            List<Item> successes = new List<Item>();
+            List<string> failures = new List<string>();
+
+            foreach (var item in finalItems)
+            {
+                var give = actor.CanDropItem(item);
+                var take = receiver.CanGetItem(item);
+
+                if (give.Allowed && take.Allowed)
+                {
+                    actor.RemoveItem(item);
+                    receiver.AddItem(item);
+                    successes.Add(item);
+                }
+
+                if (!give.Allowed)
+                {
+                    failures.Add(give.FirstPerson);
+                }
+                if (!take.Allowed)
+                {
+                    failures.Add(take.ThirdPerson);
+                }
+            }
+
+            if (successes.Any())
+            {
+                var message = new ItemOwnershipMessage()
+                {
+                    Giver = new ActorDescription(actor),
+                    Taker = new ActorDescription(receiver),
+                    Items = successes.Select(x => new ItemDescription(x)).ToArray(),
+                };
+
+                actor.Room.ActiveActors.ForEach(x => x.SendMessage(message));
             }
             if (failures.Any())
             {

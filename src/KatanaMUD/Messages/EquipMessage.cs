@@ -33,11 +33,11 @@ namespace KatanaMUD.Messages
             var isvalid = actor.CanRemoveItem(item);
             if (!isvalid.Allowed)
             {
-                actor.SendMessage(new ActionNotAllowedMessage() { Message = isvalid.Reason });
+                actor.SendMessage(new ActionNotAllowedMessage() { Message = isvalid.FirstPerson });
                 return;
             }
 
-            actor.RemoveItem(item);
+            actor.UnEquip(item);
             var message = new ItemEquippedChangedMessage() { Actor = new ActorDescription(actor), Item = new ItemDescription(item), Equipped = false };
             actor.Room.ActiveActors.ForEach(x => x.SendMessage(message));
         }
@@ -83,14 +83,14 @@ namespace KatanaMUD.Messages
                     var isvalid = actor.CanRemoveItem(remove);
                     if (!isvalid.Allowed)
                     {
-                        actor.SendMessage(new ActionNotAllowedMessage() { Message = isvalid.Reason });
+                        actor.SendMessage(new ActionNotAllowedMessage() { Message = isvalid.FirstPerson });
                         return;
                     }
                 }
 
                 foreach (var remove in open.ItemsToRemove)
                 {
-                    actor.RemoveItem(remove);
+                    actor.UnEquip(remove);
                     var remMessage = new ItemEquippedChangedMessage() { Actor = new ActorDescription(actor), Item = new ItemDescription(remove), Equipped = false };
                     actor.Room.ActiveActors.ForEach(x => x.SendMessage(remMessage));
                 }
@@ -99,7 +99,7 @@ namespace KatanaMUD.Messages
             var valid = actor.CanEquipItem(item);
             if (!valid.Allowed)
             {
-                actor.SendMessage(new ActionNotAllowedMessage() { Message = valid.Reason });
+                actor.SendMessage(new ActionNotAllowedMessage() { Message = valid.FirstPerson });
                 return;
             }
 
