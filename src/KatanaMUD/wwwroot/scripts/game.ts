@@ -100,7 +100,7 @@ module KMud {
             }
 
             // Check for character commands; ie "/Mithrandir hey there"
-            var char = words[0].substr(0, 1);
+            var char = words.token(0).substr(0, 1);
             var charHandler = this.symbolCommandHandlers[char]
             if (charHandler != null) {
                 charHandler(words);
