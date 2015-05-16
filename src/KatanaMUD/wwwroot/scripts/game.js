@@ -88,14 +88,14 @@ var KMud;
                 return;
             }
             // Check for character commands; ie "/Mithrandir hey there"
-            var char = words[0].substr(0, 1);
+            var char = words.token(0).substr(0, 1);
             var charHandler = this.symbolCommandHandlers[char];
             if (charHandler != null) {
                 charHandler(words);
                 return;
             }
             // No clue. Say it, don't spray it.
-            this.talk(command, KMud.CommunicationType.Say);
+            this.talk(command, 2 /* Say */);
         };
         Game.prototype.connect = function (url) {
             var _this = this;
@@ -155,16 +155,16 @@ var KMud;
         Game.prototype.registerCommandHandlers = function () {
             var _this = this;
             this.commandHandlers["ping"] = function (x) { return _this.ping(); };
-            this.commandHandlers["n"] = this.commandHandlers["north"] = function (words) { return _this.move(KMud.Direction.North); };
-            this.commandHandlers["s"] = this.commandHandlers["south"] = function (words) { return _this.move(KMud.Direction.South); };
-            this.commandHandlers["e"] = this.commandHandlers["east"] = function (words) { return _this.move(KMud.Direction.East); };
-            this.commandHandlers["w"] = this.commandHandlers["west"] = function (words) { return _this.move(KMud.Direction.West); };
-            this.commandHandlers["ne"] = this.commandHandlers["northeast"] = function (words) { return _this.move(KMud.Direction.Northeast); };
-            this.commandHandlers["nw"] = this.commandHandlers["northwest"] = function (words) { return _this.move(KMud.Direction.Northwest); };
-            this.commandHandlers["se"] = this.commandHandlers["southeast"] = function (words) { return _this.move(KMud.Direction.Southeast); };
-            this.commandHandlers["sw"] = this.commandHandlers["southwest"] = function (words) { return _this.move(KMud.Direction.Southwest); };
-            this.commandHandlers["u"] = this.commandHandlers["up"] = function (words) { return _this.move(KMud.Direction.Up); };
-            this.commandHandlers["d"] = this.commandHandlers["down"] = function (words) { return _this.move(KMud.Direction.Down); };
+            this.commandHandlers["n"] = this.commandHandlers["north"] = function (words) { return _this.move(0 /* North */); };
+            this.commandHandlers["s"] = this.commandHandlers["south"] = function (words) { return _this.move(1 /* South */); };
+            this.commandHandlers["e"] = this.commandHandlers["east"] = function (words) { return _this.move(2 /* East */); };
+            this.commandHandlers["w"] = this.commandHandlers["west"] = function (words) { return _this.move(3 /* West */); };
+            this.commandHandlers["ne"] = this.commandHandlers["northeast"] = function (words) { return _this.move(4 /* Northeast */); };
+            this.commandHandlers["nw"] = this.commandHandlers["northwest"] = function (words) { return _this.move(5 /* Northwest */); };
+            this.commandHandlers["se"] = this.commandHandlers["southeast"] = function (words) { return _this.move(6 /* Southeast */); };
+            this.commandHandlers["sw"] = this.commandHandlers["southwest"] = function (words) { return _this.move(7 /* Southwest */); };
+            this.commandHandlers["u"] = this.commandHandlers["up"] = function (words) { return _this.move(8 /* Up */); };
+            this.commandHandlers["d"] = this.commandHandlers["down"] = function (words) { return _this.move(9 /* Down */); };
             this.commandHandlers["l"] = this.commandHandlers["look"] = function (words) { return _this.look(words.tail(0)); };
             this.commandHandlers["i"] = this.commandHandlers["inv"] = this.commandHandlers["inventory"] = function (words) { return _this.SendMessage(new KMud.InventoryCommand()); };
             this.commandHandlers["get"] = this.commandHandlers["g"] = function (words) { return _this.get(words.tail(0)); };
@@ -174,13 +174,13 @@ var KMud;
             this.commandHandlers["equip"] = this.commandHandlers["eq"] = this.commandHandlers["arm"] = this.commandHandlers["ar"] = function (words) { return _this.SendMessage(new KMud.EquipCommand(null, words.tail(0))); };
             this.commandHandlers["remove"] = this.commandHandlers["rem"] = function (words) { return _this.SendMessage(new KMud.RemoveCommand(null, words.tail(0))); };
             this.commandHandlers["give"] = function (words) { return _this.give(words.tail(0)); };
-            this.commandHandlers["gos"] = this.commandHandlers["gossip"] = function (words) { return _this.talk(words.tail(0), KMud.CommunicationType.Gossip); };
-            this.commandHandlers["say"] = function (words) { return _this.talk(words.tail(0), KMud.CommunicationType.Say); };
+            this.commandHandlers["gos"] = this.commandHandlers["gossip"] = function (words) { return _this.talk(words.tail(0), 0 /* Gossip */); };
+            this.commandHandlers["say"] = function (words) { return _this.talk(words.tail(0), 2 /* Say */); };
             this.commandHandlers["sys"] = this.commandHandlers["sysop"] = function (words) {
                 _this.SendMessage(new KMud.SysopMessage(words.tail(0)));
             };
-            this.symbolCommandHandlers["."] = function (words) { return _this.talk(words.tail(-1).substr(1), KMud.CommunicationType.Say); };
-            this.symbolCommandHandlers["/"] = function (words) { return _this.talk(words.tail(0), KMud.CommunicationType.Telepath, words.token(0).substr(1)); };
+            this.symbolCommandHandlers["."] = function (words) { return _this.talk(words.tail(-1).substr(1), 2 /* Say */); };
+            this.symbolCommandHandlers["/"] = function (words) { return _this.talk(words.tail(0), 8 /* Telepath */, words.token(0).substr(1)); };
         };
         Game.prototype.loginMessage = function (message) {
             if (message.Login == true) {
@@ -355,7 +355,7 @@ var KMud;
             var tokens = new Tokenizer(parameters);
             var split = tokens.split("to");
             if (split.length != 2) {
-                this.talk(parameters, KMud.CommunicationType.Say);
+                this.talk(parameters, 2 /* Say */);
                 return;
             }
             var quantity = Str.parseQuantity(split[0]);
@@ -368,11 +368,11 @@ var KMud;
                     this.addOutput(this.mainOutput, message.CannotSeeMessage, "cannot-see");
                 }
                 else {
-                    if (message.LightLevel == KMud.LightLevel.Nothing)
+                    if (message.LightLevel == -10000 /* Nothing */)
                         this.addOutput(this.mainOutput, "The room is darker than anything you've ever seen before - you can't see anything", "cannot-see");
-                    if (message.LightLevel == KMud.LightLevel.PitchBlack)
+                    if (message.LightLevel == -500 /* PitchBlack */)
                         this.addOutput(this.mainOutput, "The room is pitch black - you can't see anything", "cannot-see");
-                    if (message.LightLevel == KMud.LightLevel.VeryDark)
+                    if (message.LightLevel == -250 /* VeryDark */)
                         this.addOutput(this.mainOutput, "The room is very dark - you can't see anything", "cannot-see");
                 }
             }
@@ -407,19 +407,19 @@ var KMud;
                 else {
                     this.addOutput(this.mainOutput, "Obvious exits: NONE!!!", "exits");
                 }
-                if (message.LightLevel == KMud.LightLevel.BarelyVisible)
+                if (message.LightLevel == -200 /* BarelyVisible */)
                     this.addOutput(this.mainOutput, "The room is barely visible", "dimly-lit");
-                if (message.LightLevel == KMud.LightLevel.DimlyLit)
+                if (message.LightLevel == -150 /* DimlyLit */)
                     this.addOutput(this.mainOutput, "The room is dimly lit", "dimly-lit");
             }
         };
         Game.prototype.showCommunication = function (message) {
             switch (message.Type) {
-                case KMud.CommunicationType.Gossip:
+                case 0 /* Gossip */:
                     this.addOutput(this.mainOutput, message.ActorName + " gossips: " + message.Message, "gossip");
                     this.notify();
                     break;
-                case KMud.CommunicationType.Say:
+                case 2 /* Say */:
                     if (message.ActorId == this.currentPlayer.Id) {
                         this.addOutput(this.mainOutput, "You say \"" + message.Message + "\"", "say");
                     }
@@ -428,7 +428,7 @@ var KMud;
                         this.notify();
                     }
                     break;
-                case KMud.CommunicationType.Telepath:
+                case 8 /* Telepath */:
                     this.addOutput(this.mainOutput, message.ActorName + " telepaths " + message.Message, "telepath");
                     this.notify();
                     break;
@@ -477,7 +477,7 @@ var KMud;
         Game.prototype.equipChanged = function (message) {
             if (message.Equipped) {
                 if (message.Actor.Id == this.currentPlayer.Id) {
-                    if (message.Item.EquippedSlot == KMud.EquipmentSlot.Weapon || message.Item.EquippedSlot == KMud.EquipmentSlot.Offhand || message.Item.EquippedSlot == KMud.EquipmentSlot.Light) {
+                    if (message.Item.EquippedSlot == 0 /* Weapon */ || message.Item.EquippedSlot == 1 /* Offhand */ || message.Item.EquippedSlot == 18 /* Light */) {
                         this.addOutput(this.mainOutput, "You are now holding " + message.Item.Name + ".", "equip");
                     }
                     else {
@@ -485,7 +485,7 @@ var KMud;
                     }
                 }
                 else {
-                    if (message.Item.EquippedSlot == KMud.EquipmentSlot.Weapon || message.Item.EquippedSlot == KMud.EquipmentSlot.Offhand || message.Item.EquippedSlot == KMud.EquipmentSlot.Light) {
+                    if (message.Item.EquippedSlot == 0 /* Weapon */ || message.Item.EquippedSlot == 1 /* Offhand */ || message.Item.EquippedSlot == 18 /* Light */) {
                         this.addOutput(this.mainOutput, message.Actor.Name + " readies " + message.Item.Name + "!", "equip");
                     }
                     else {
