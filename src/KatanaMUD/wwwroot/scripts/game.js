@@ -29,7 +29,7 @@ var KMud;
                     }
                     else {
                         // Hardcoded "brief look" command when user simply hits "enter".
-                        _this.look([], true);
+                        _this.look("", true);
                     }
                 }
             }).keydown(function (x) {
@@ -80,23 +80,22 @@ var KMud;
         };
         Game.prototype.processCommand = function (command) {
             var lower = command.toLocaleLowerCase().trim();
-            var words = command.split(/\s+/gi);
-            var tail = command.substr(words[0].length).trim();
-            var param = words[0].substr(1);
-            var handler = this.commandHandlers[words[0]];
+            var words = new Tokenizer(command);
+            var param = words.token(0).substr(1);
+            var handler = this.commandHandlers[words.token(0)];
             if (handler) {
-                handler(words, tail, words.length > 1 ? words[1] : null);
+                handler(words);
                 return;
             }
             // Check for character commands; ie "/Mithrandir hey there"
             var char = words[0].substr(0, 1);
             var charHandler = this.symbolCommandHandlers[char];
             if (charHandler != null) {
-                charHandler(words, command.substr(1), param);
+                charHandler(words);
                 return;
             }
             // No clue. Say it, don't spray it.
-            this.talk(command, 2 /* Say */);
+            this.talk(command, KMud.CommunicationType.Say);
         };
         Game.prototype.connect = function (url) {
             var _this = this;
@@ -156,33 +155,32 @@ var KMud;
         Game.prototype.registerCommandHandlers = function () {
             var _this = this;
             this.commandHandlers["ping"] = function (x) { return _this.ping(); };
-            this.commandHandlers["n"] = this.commandHandlers["north"] = function (words) { return _this.move(0 /* North */); };
-            this.commandHandlers["s"] = this.commandHandlers["south"] = function (words) { return _this.move(1 /* South */); };
-            this.commandHandlers["e"] = this.commandHandlers["east"] = function (words) { return _this.move(2 /* East */); };
-            this.commandHandlers["w"] = this.commandHandlers["west"] = function (words) { return _this.move(3 /* West */); };
-            this.commandHandlers["ne"] = this.commandHandlers["northeast"] = function (words) { return _this.move(4 /* Northeast */); };
-            this.commandHandlers["nw"] = this.commandHandlers["northwest"] = function (words) { return _this.move(5 /* Northwest */); };
-            this.commandHandlers["se"] = this.commandHandlers["southeast"] = function (words) { return _this.move(6 /* Southeast */); };
-            this.commandHandlers["sw"] = this.commandHandlers["southwest"] = function (words) { return _this.move(7 /* Southwest */); };
-            this.commandHandlers["u"] = this.commandHandlers["up"] = function (words) { return _this.move(8 /* Up */); };
-            this.commandHandlers["d"] = this.commandHandlers["down"] = function (words) { return _this.move(9 /* Down */); };
-            this.commandHandlers["l"] = this.commandHandlers["look"] = function (words) { return _this.look(words); };
-            this.commandHandlers["i"] = this.commandHandlers["inv"] = this.commandHandlers["inventory"] = function (words, tail) { return _this.SendMessage(new KMud.InventoryCommand()); };
-            this.commandHandlers["get"] = this.commandHandlers["g"] = function (words, tail) { return _this.get(tail); };
-            this.commandHandlers["drop"] = this.commandHandlers["dr"] = function (words, tail) { return _this.drop(tail, false); };
-            this.commandHandlers["hide"] = this.commandHandlers["hid"] = function (words, tail) { return _this.drop(tail, true); };
-            this.commandHandlers["search"] = this.commandHandlers["sea"] = function (words, tail) { return _this.SendMessage(new KMud.SearchCommand()); };
-            this.commandHandlers["equip"] = this.commandHandlers["eq"] = this.commandHandlers["arm"] = this.commandHandlers["ar"] = function (words, tail) { return _this.SendMessage(new KMud.EquipCommand(null, tail)); };
-            this.commandHandlers["remove"] = this.commandHandlers["rem"] = function (words, tail) { return _this.SendMessage(new KMud.RemoveCommand(null, tail)); };
-            this.commandHandlers["gos"] = this.commandHandlers["gossip"] = function (words, tail) { return _this.talk(tail, 0 /* Gossip */); };
-            this.commandHandlers["say"] = function (words, tail) { return _this.talk(tail, 2 /* Say */); };
-            this.commandHandlers["sys"] = this.commandHandlers["sysop"] = function (words, tail) {
-                var msg = new KMud.SysopMessage();
-                msg.Command = tail;
-                _this.SendMessage(msg);
+            this.commandHandlers["n"] = this.commandHandlers["north"] = function (words) { return _this.move(KMud.Direction.North); };
+            this.commandHandlers["s"] = this.commandHandlers["south"] = function (words) { return _this.move(KMud.Direction.South); };
+            this.commandHandlers["e"] = this.commandHandlers["east"] = function (words) { return _this.move(KMud.Direction.East); };
+            this.commandHandlers["w"] = this.commandHandlers["west"] = function (words) { return _this.move(KMud.Direction.West); };
+            this.commandHandlers["ne"] = this.commandHandlers["northeast"] = function (words) { return _this.move(KMud.Direction.Northeast); };
+            this.commandHandlers["nw"] = this.commandHandlers["northwest"] = function (words) { return _this.move(KMud.Direction.Northwest); };
+            this.commandHandlers["se"] = this.commandHandlers["southeast"] = function (words) { return _this.move(KMud.Direction.Southeast); };
+            this.commandHandlers["sw"] = this.commandHandlers["southwest"] = function (words) { return _this.move(KMud.Direction.Southwest); };
+            this.commandHandlers["u"] = this.commandHandlers["up"] = function (words) { return _this.move(KMud.Direction.Up); };
+            this.commandHandlers["d"] = this.commandHandlers["down"] = function (words) { return _this.move(KMud.Direction.Down); };
+            this.commandHandlers["l"] = this.commandHandlers["look"] = function (words) { return _this.look(words.tail(0)); };
+            this.commandHandlers["i"] = this.commandHandlers["inv"] = this.commandHandlers["inventory"] = function (words) { return _this.SendMessage(new KMud.InventoryCommand()); };
+            this.commandHandlers["get"] = this.commandHandlers["g"] = function (words) { return _this.get(words.tail(0)); };
+            this.commandHandlers["drop"] = this.commandHandlers["dr"] = function (words) { return _this.drop(words.tail(0), false); };
+            this.commandHandlers["hide"] = this.commandHandlers["hid"] = function (words) { return _this.drop(words.tail(0), true); };
+            this.commandHandlers["search"] = this.commandHandlers["sea"] = function (words) { return _this.SendMessage(new KMud.SearchCommand()); };
+            this.commandHandlers["equip"] = this.commandHandlers["eq"] = this.commandHandlers["arm"] = this.commandHandlers["ar"] = function (words) { return _this.SendMessage(new KMud.EquipCommand(null, words.tail(0))); };
+            this.commandHandlers["remove"] = this.commandHandlers["rem"] = function (words) { return _this.SendMessage(new KMud.RemoveCommand(null, words.tail(0))); };
+            this.commandHandlers["give"] = function (words) { return _this.give(words.tail(0)); };
+            this.commandHandlers["gos"] = this.commandHandlers["gossip"] = function (words) { return _this.talk(words.tail(0), KMud.CommunicationType.Gossip); };
+            this.commandHandlers["say"] = function (words) { return _this.talk(words.tail(0), KMud.CommunicationType.Say); };
+            this.commandHandlers["sys"] = this.commandHandlers["sysop"] = function (words) {
+                _this.SendMessage(new KMud.SysopMessage(words.tail(0)));
             };
-            this.symbolCommandHandlers["."] = function (words, tail) { return _this.talk(tail, 2 /* Say */); };
-            this.symbolCommandHandlers["/"] = function (words, tail, param) { return _this.talk(tail, 8 /* Telepath */, param); };
+            this.symbolCommandHandlers["."] = function (words) { return _this.talk(words.tail(-1).substr(1), KMud.CommunicationType.Say); };
+            this.symbolCommandHandlers["/"] = function (words) { return _this.talk(words.tail(0), KMud.CommunicationType.Telepath, words.token(0).substr(1)); };
         };
         Game.prototype.loginMessage = function (message) {
             if (message.Login == true) {
@@ -194,29 +192,17 @@ var KMud;
         };
         Game.prototype.get = function (item) {
             var message = new KMud.GetItemCommand();
-            var tokens = item.split(/\s+/gi);
-            var quantity = parseInt(tokens[0]);
-            if (!isNaN(quantity)) {
-                message.Quantity = quantity;
-                message.ItemName = tokens.slice(1).join(" ");
-            }
-            else {
-                message.ItemName = item;
-            }
+            var quantity = Str.parseQuantity(item);
+            message.Quantity = quantity[0];
+            message.ItemName = quantity[1];
             this.SendMessage(message);
         };
         Game.prototype.drop = function (item, hide) {
             var message = new KMud.DropItemCommand();
             message.Hide = hide;
-            var tokens = item.split(/\s+/gi);
-            var quantity = parseInt(tokens[0]);
-            if (!isNaN(quantity)) {
-                message.Quantity = quantity;
-                message.ItemName = tokens.slice(1).join(" ");
-            }
-            else {
-                message.ItemName = item;
-            }
+            var quantity = Str.parseQuantity(item);
+            message.Quantity = quantity[0];
+            message.ItemName = quantity[1];
             this.SendMessage(message);
         };
         Game.prototype.talk = function (text, type, param) {
@@ -230,7 +216,7 @@ var KMud;
             }
             this._socket.send(JSON.stringify(message));
         };
-        Game.prototype.look = function (words, brief) {
+        Game.prototype.look = function (parameter, brief) {
             if (brief === void 0) { brief = false; }
             var message = new KMud.LookMessage();
             message.Brief = brief;
@@ -314,8 +300,8 @@ var KMud;
         };
         Game.prototype.cashTransfer = function (message) {
             var name = message.Currency.Name;
-            if (message.Quantity > 0) {
-                name = this.pluralize(name, message.Quantity);
+            if (message.Currency.Amount > 0) {
+                name = this.pluralize(name, message.Currency.Amount);
             }
             else {
                 name = "some " + this.pluralize(name, 0, true);
@@ -365,6 +351,16 @@ var KMud;
             }
             this.addOutput(this.mainOutput, "You notice " + items.join(", ") + " here.", "search-found");
         };
+        Game.prototype.give = function (parameters) {
+            var tokens = new Tokenizer(parameters);
+            var split = tokens.split("to");
+            if (split.length != 2) {
+                this.talk(parameters, KMud.CommunicationType.Say);
+                return;
+            }
+            var quantity = Str.parseQuantity(split[0]);
+            this.SendMessage(new KMud.GiveCommand(null, quantity[1], null, split[1], quantity[0]));
+        };
         Game.prototype.showRoomDescription = function (message) {
             var _this = this;
             if (message.CannotSee) {
@@ -372,11 +368,11 @@ var KMud;
                     this.addOutput(this.mainOutput, message.CannotSeeMessage, "cannot-see");
                 }
                 else {
-                    if (message.LightLevel == -10000 /* Nothing */)
+                    if (message.LightLevel == KMud.LightLevel.Nothing)
                         this.addOutput(this.mainOutput, "The room is darker than anything you've ever seen before - you can't see anything", "cannot-see");
-                    if (message.LightLevel == -500 /* PitchBlack */)
+                    if (message.LightLevel == KMud.LightLevel.PitchBlack)
                         this.addOutput(this.mainOutput, "The room is pitch black - you can't see anything", "cannot-see");
-                    if (message.LightLevel == -250 /* VeryDark */)
+                    if (message.LightLevel == KMud.LightLevel.VeryDark)
                         this.addOutput(this.mainOutput, "The room is very dark - you can't see anything", "cannot-see");
                 }
             }
@@ -411,19 +407,19 @@ var KMud;
                 else {
                     this.addOutput(this.mainOutput, "Obvious exits: NONE!!!", "exits");
                 }
-                if (message.LightLevel == -200 /* BarelyVisible */)
+                if (message.LightLevel == KMud.LightLevel.BarelyVisible)
                     this.addOutput(this.mainOutput, "The room is barely visible", "dimly-lit");
-                if (message.LightLevel == -150 /* DimlyLit */)
+                if (message.LightLevel == KMud.LightLevel.DimlyLit)
                     this.addOutput(this.mainOutput, "The room is dimly lit", "dimly-lit");
             }
         };
         Game.prototype.showCommunication = function (message) {
             switch (message.Type) {
-                case 0 /* Gossip */:
+                case KMud.CommunicationType.Gossip:
                     this.addOutput(this.mainOutput, message.ActorName + " gossips: " + message.Message, "gossip");
                     this.notify();
                     break;
-                case 2 /* Say */:
+                case KMud.CommunicationType.Say:
                     if (message.ActorId == this.currentPlayer.Id) {
                         this.addOutput(this.mainOutput, "You say \"" + message.Message + "\"", "say");
                     }
@@ -432,7 +428,7 @@ var KMud;
                         this.notify();
                     }
                     break;
-                case 8 /* Telepath */:
+                case KMud.CommunicationType.Telepath:
                     this.addOutput(this.mainOutput, message.ActorName + " telepaths " + message.Message, "telepath");
                     this.notify();
                     break;
@@ -481,7 +477,7 @@ var KMud;
         Game.prototype.equipChanged = function (message) {
             if (message.Equipped) {
                 if (message.Actor.Id == this.currentPlayer.Id) {
-                    if (message.Item.EquippedSlot == 0 /* Weapon */ || message.Item.EquippedSlot == 1 /* Offhand */ || message.Item.EquippedSlot == 18 /* Light */) {
+                    if (message.Item.EquippedSlot == KMud.EquipmentSlot.Weapon || message.Item.EquippedSlot == KMud.EquipmentSlot.Offhand || message.Item.EquippedSlot == KMud.EquipmentSlot.Light) {
                         this.addOutput(this.mainOutput, "You are now holding " + message.Item.Name + ".", "equip");
                     }
                     else {
@@ -489,7 +485,7 @@ var KMud;
                     }
                 }
                 else {
-                    if (message.Item.EquippedSlot == 0 /* Weapon */ || message.Item.EquippedSlot == 1 /* Offhand */ || message.Item.EquippedSlot == 18 /* Light */) {
+                    if (message.Item.EquippedSlot == KMud.EquipmentSlot.Weapon || message.Item.EquippedSlot == KMud.EquipmentSlot.Offhand || message.Item.EquippedSlot == KMud.EquipmentSlot.Light) {
                         this.addOutput(this.mainOutput, message.Actor.Name + " readies " + message.Item.Name + "!", "equip");
                     }
                     else {
@@ -588,9 +584,9 @@ var KMud;
             if (!omitNumber) {
                 res = Str.formatNumber(quantity) + " ";
             }
-            if (name.charAt(name.length - 1).toLowerCase() === "y")
+            if (Str.endsWith(name, "y"))
                 return res + name.substr(0, name.length - 1) + "ies";
-            if (name.charAt(name.length - 1).toLowerCase() === "h")
+            if (Str.endsWith(name, "ch"))
                 return res + name + "es";
             return res + name + "s";
         };
@@ -651,6 +647,20 @@ var KMud;
         Str.escapeRegExp = function (str) {
             return str.replace(Str._escapeRegExpRegexp, "\\$&");
         };
+        Str.parseQuantity = function (str) {
+            var tokens = new Tokenizer(str);
+            var quantity = parseInt(tokens.token(0));
+            var result = [];
+            if (!isNaN(quantity)) {
+                result[0] = quantity;
+                result[1] = tokens.tail(0);
+            }
+            else {
+                result[0] = 0;
+                result[1] = str;
+            }
+            return result;
+        };
         // Referring to the table here:
         // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/regexp
         // these characters should be escaped
@@ -681,4 +691,67 @@ var KMud;
         return Str;
     })();
     KMud.Str = Str;
+    var Tokenizer = (function () {
+        function Tokenizer(_str) {
+            this._str = _str;
+            this._indices = [];
+            this._tokens = _str.split(/\s+/gi);
+            var lastIndex = 0;
+            for (var i = 0; i < this._tokens.length; i++) {
+                lastIndex = _str.indexOf(this._tokens[i], lastIndex);
+                this._indices[i] = lastIndex;
+                lastIndex += this._tokens[i].length;
+            }
+        }
+        /**
+         * Returns the token at the given index.
+         */
+        Tokenizer.prototype.token = function (index) {
+            return this._tokens[index];
+        };
+        /**
+         * Returns the tail end of the string, not including the token at the given index.
+         * The original string formatting is preserved, starting at the place where the first valid token starts.
+         */
+        Tokenizer.prototype.tail = function (index) {
+            if (index >= this._tokens.length - 1)
+                return null;
+            return this._str.substr(this._indices[index + 1]);
+        };
+        /**
+         * Returns the head of the string, not including the token at the given index.
+         * The original string formatting is preserved, starting at the place where the first valid token starts.
+         */
+        Tokenizer.prototype.head = function (index) {
+            if (index <= 0)
+                return null;
+            return this._str.substr(0, this._indices[index]);
+        };
+        /**
+         * Splits the string into substrings, separated by the last instance of the given token.
+         * The token is not included in the output.
+         * Origginal string formatting is preserved.
+         */
+        Tokenizer.prototype.split = function (token) {
+            var index = -1;
+            for (var i = this._tokens.length - 1; i >= 0; i--) {
+                if (this._tokens[i].toLowerCase() == token.toLowerCase()) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index == -1)
+                return [];
+            return [this.head(index), this.tail(index)];
+        };
+        Object.defineProperty(Tokenizer.prototype, "length", {
+            get: function () {
+                return this._tokens.length;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return Tokenizer;
+    })();
+    KMud.Tokenizer = Tokenizer;
 })(KMud || (KMud = {}));

@@ -11,8 +11,8 @@ module KMud {
         private lastCommands: string[] = [];
         private currentCommand: number = -1;
         private messageHandlers: { [index: string]: Action1<MessageBase> } = {};
-        private commandHandlers: { [index: string]: Action3<string[], string, string> } = {};
-        private symbolCommandHandlers: { [index: string]: Action3<string[], string, string> } = {};
+        private commandHandlers: { [index: string]: Action1<Tokenizer> } = {};
+        private symbolCommandHandlers: { [index: string]: Action1<Tokenizer> } = {};
         private currentPlayer: ActorInformationMessage;
         private ding: HTMLAudioElement;
         private hasFocus: boolean = true;
@@ -51,7 +51,7 @@ module KMud {
                     }
                     else {
                         // Hardcoded "brief look" command when user simply hits "enter".
-                        this.look([], true);
+                        this.look("", true);
                     }
                 }
             }).keydown(x => {
@@ -79,7 +79,7 @@ module KMud {
             });
             $(window).focus(evt => this.hasFocus = true);
             $(window).blur(evt => this.hasFocus = false);
-            
+
 
             this.registerMessageHandlers();
             this.registerCommandHandlers();
@@ -89,13 +89,13 @@ module KMud {
 
         private processCommand(command: string) {
             var lower = command.toLocaleLowerCase().trim();
-            var words = command.split(/\s+/gi);
-            var tail = command.substr(words[0].length).trim();
-            var param = words[0].substr(1);
 
-            var handler = this.commandHandlers[words[0]];
+            var words = new Tokenizer(command);
+            var param = words.token(0).substr(1);
+
+            var handler = this.commandHandlers[words.token(0)];
             if (handler) {
-                handler(words, tail, words.length > 1 ? words[1] : null);
+                handler(words);
                 return;
             }
 
@@ -103,7 +103,7 @@ module KMud {
             var char = words[0].substr(0, 1);
             var charHandler = this.symbolCommandHandlers[char]
             if (charHandler != null) {
-                charHandler(words, command.substr(1), param);
+                charHandler(words);
                 return;
             }
 
@@ -188,28 +188,25 @@ module KMud {
             this.commandHandlers["sw"] = this.commandHandlers["southwest"] = words => this.move(Direction.Southwest);
             this.commandHandlers["u"] = this.commandHandlers["up"] = words => this.move(Direction.Up);
             this.commandHandlers["d"] = this.commandHandlers["down"] = words => this.move(Direction.Down);
-            this.commandHandlers["l"] = this.commandHandlers["look"] = words => this.look(words);
+            this.commandHandlers["l"] = this.commandHandlers["look"] = words => this.look(words.tail(0));
 
-            this.commandHandlers["i"] = this.commandHandlers["inv"] = this.commandHandlers["inventory"] = (words, tail) => this.SendMessage(new InventoryCommand());
-            this.commandHandlers["get"] = this.commandHandlers["g"] = (words, tail) => this.get(tail);
-            this.commandHandlers["drop"] = this.commandHandlers["dr"] = (words, tail) => this.drop(tail, false);
-            this.commandHandlers["hide"] = this.commandHandlers["hid"] = (words, tail) => this.drop(tail, true);
-            this.commandHandlers["search"] = this.commandHandlers["sea"] = (words, tail) => this.SendMessage(new SearchCommand());
-            this.commandHandlers["equip"] = this.commandHandlers["eq"] = this.commandHandlers["arm"] = this.commandHandlers["ar"] = (words, tail) => this.SendMessage(new EquipCommand(null, tail));
-            this.commandHandlers["remove"] = this.commandHandlers["rem"] = (words, tail) => this.SendMessage(new RemoveCommand(null, tail));
+            this.commandHandlers["i"] = this.commandHandlers["inv"] = this.commandHandlers["inventory"] = words => this.SendMessage(new InventoryCommand());
+            this.commandHandlers["get"] = this.commandHandlers["g"] = words => this.get(words.tail(0));
+            this.commandHandlers["drop"] = this.commandHandlers["dr"] = words => this.drop(words.tail(0), false);
+            this.commandHandlers["hide"] = this.commandHandlers["hid"] = words => this.drop(words.tail(0), true);
+            this.commandHandlers["search"] = this.commandHandlers["sea"] = words => this.SendMessage(new SearchCommand());
+            this.commandHandlers["equip"] = this.commandHandlers["eq"] = this.commandHandlers["arm"] = this.commandHandlers["ar"] = words => this.SendMessage(new EquipCommand(null, words.tail(0)));
+            this.commandHandlers["remove"] = this.commandHandlers["rem"] = words => this.SendMessage(new RemoveCommand(null, words.tail(0)));
+            this.commandHandlers["give"] = words => this.give(words.tail(0));
 
 
-            this.commandHandlers["gos"] = this.commandHandlers["gossip"] = (words, tail) => this.talk(tail, CommunicationType.Gossip);
-            this.commandHandlers["say"] = (words, tail) => this.talk(tail, CommunicationType.Say);
+            this.commandHandlers["gos"] = this.commandHandlers["gossip"] = words => this.talk(words.tail(0), CommunicationType.Gossip);
+            this.commandHandlers["say"] = words => this.talk(words.tail(0), CommunicationType.Say);
 
-            this.commandHandlers["sys"] = this.commandHandlers["sysop"] = (words, tail) => {
-                var msg = new SysopMessage();
-                msg.Command = tail;
-                this.SendMessage(msg);
-            }
+            this.commandHandlers["sys"] = this.commandHandlers["sysop"] = words => { this.SendMessage(new SysopMessage(words.tail(0))) }
 
-            this.symbolCommandHandlers["."] = (words, tail) => this.talk(tail, CommunicationType.Say);
-            this.symbolCommandHandlers["/"] = (words, tail, param) => this.talk(tail, CommunicationType.Telepath, param);
+            this.symbolCommandHandlers["."] = words => this.talk(words.tail(-1).substr(1), CommunicationType.Say);
+            this.symbolCommandHandlers["/"] = words => this.talk(words.tail(0), CommunicationType.Telepath, words.token(0).substr(1));
         }
 
         private loginMessage(message: LoginStateMessage) {
@@ -223,30 +220,20 @@ module KMud {
 
         private get(item: string) {
             var message = new GetItemCommand();
-            var tokens = item.split(/\s+/gi);
-            var quantity = parseInt(tokens[0]);
-            if (!isNaN(quantity)) {
-                message.Quantity = quantity;
-                message.ItemName = tokens.slice(1).join(" ");
-            }
-            else {
-                message.ItemName = item;
-            }
+            var quantity = Str.parseQuantity(item);
+            message.Quantity = quantity[0];
+            message.ItemName = quantity[1];
             this.SendMessage(message);
         }
 
         private drop(item: string, hide: boolean) {
             var message = new DropItemCommand();
             message.Hide = hide;
-            var tokens = item.split(/\s+/gi);
-            var quantity = parseInt(tokens[0]);
-            if (!isNaN(quantity)) {
-                message.Quantity = quantity;
-                message.ItemName = tokens.slice(1).join(" ");
-            }
-            else {
-                message.ItemName = item;
-            }
+
+            var quantity = Str.parseQuantity(item);
+            message.Quantity = quantity[0];
+            message.ItemName = quantity[1];
+
             this.SendMessage(message);
         }
 
@@ -263,7 +250,7 @@ module KMud {
             this._socket.send(JSON.stringify(message));
         }
 
-        private look(words: string[], brief: boolean = false) {
+        private look(parameter: string, brief: boolean = false) {
             var message = new LookMessage()
             message.Brief = brief;
 
@@ -357,8 +344,8 @@ module KMud {
 
         private cashTransfer(message: CashTransferMessage) {
             var name = message.Currency.Name;
-            if (message.Quantity > 0) {
-                name = this.pluralize(name, message.Quantity);
+            if (message.Currency.Amount > 0) {
+                name = this.pluralize(name, message.Currency.Amount);
             }
             else {
                 name = "some " + this.pluralize(name, 0, true);
@@ -413,6 +400,21 @@ module KMud {
             }
 
             this.addOutput(this.mainOutput, "You notice " + items.join(", ") + " here.", "search-found");
+        }
+
+        private give(parameters: string) {
+            var tokens = new Tokenizer(parameters);
+
+            var split = tokens.split("to");
+
+            if (split.length != 2) {
+                this.talk(parameters, CommunicationType.Say);
+                return;
+            }
+
+            var quantity = Str.parseQuantity(split[0]);
+
+            this.SendMessage(new GiveCommand(null, quantity[1], null, split[1], quantity[0]));
         }
 
         private showRoomDescription(message: RoomDescriptionMessage) {
@@ -676,9 +678,9 @@ module KMud {
             if (!omitNumber) {
                 res = Str.formatNumber(quantity) + " ";
             }
-            if (name.charAt(name.length - 1).toLowerCase() === "y")
+            if (Str.endsWith(name, "y"))
                 return res + name.substr(0, name.length - 1) + "ies";
-            if (name.charAt(name.length - 1).toLowerCase() === "h")
+            if (Str.endsWith(name, "ch"))
                 return res + name + "es";
             return res + name + "s";
         }
@@ -756,6 +758,90 @@ module KMud {
         public static escapeRegExp(str: string): string {
             return str.replace(Str._escapeRegExpRegexp, "\\$&");
         }
+
+        public static parseQuantity(str: string): any[] {
+            var tokens = new Tokenizer(str);
+            var quantity = parseInt(tokens.token(0));
+            var result = [];
+            if (!isNaN(quantity)) {
+                result[0] = quantity;
+                result[1] = tokens.tail(0);
+            }
+            else {
+                result[0] = 0;
+                result[1] = str;
+            }
+
+            return result;
+        }
     }
 
+    export class Tokenizer {
+
+        private _tokens: string[];
+        private _indices: number[] = [];
+
+        constructor(private _str: string) {
+            this._tokens = _str.split(/\s+/gi);
+
+            var lastIndex: number = 0;
+            for (var i = 0; i < this._tokens.length; i++) {
+                lastIndex = _str.indexOf(this._tokens[i], lastIndex);
+                this._indices[i] = lastIndex;
+                lastIndex += this._tokens[i].length;
+            }
+        }
+
+        /**
+         * Returns the token at the given index.
+         */
+        public token(index: number): string {
+            return this._tokens[index];
+        }
+
+        /**
+         * Returns the tail end of the string, not including the token at the given index. 
+         * The original string formatting is preserved, starting at the place where the first valid token starts. 
+         */
+        public tail(index: number): string {
+            if (index >= this._tokens.length - 1)
+                return null;
+
+            return this._str.substr(this._indices[index + 1]);
+        }
+
+        /**
+         * Returns the head of the string, not including the token at the given index. 
+         * The original string formatting is preserved, starting at the place where the first valid token starts. 
+         */
+        public head(index: number): string {
+            if (index <= 0)
+                return null;
+
+            return this._str.substr(0, this._indices[index]);
+        }
+
+        /**
+         * Splits the string into substrings, separated by the last instance of the given token.
+         * The token is not included in the output.
+         * Origginal string formatting is preserved.
+         */
+        public split(token: string): string[] {
+            var index = -1;
+            for (var i = this._tokens.length - 1; i >= 0; i--) {
+                if (this._tokens[i].toLowerCase() == token.toLowerCase()) {
+                    index = i;
+                    break;
+                }
+            }
+
+            if (index == -1)
+                return [];
+            return [this.head(index), this.tail(index)];
+        }
+
+        public get length(): number {
+            return this._tokens.length;
+        }
+    }
 }

@@ -145,9 +145,9 @@ var KMud;
     KMud.GetItemCommand = GetItemCommand;
     var DropItemCommand = (function (_super) {
         __extends(DropItemCommand, _super);
-        function DropItemCommand(ItemId, ItemName, Quantity, Hide) {
+        function DropItemCommand(ItemIds, ItemName, Quantity, Hide) {
             _super.call(this, 'DropItemCommand');
-            this.ItemId = ItemId;
+            this.ItemIds = ItemIds;
             this.ItemName = ItemName;
             this.Quantity = Quantity;
             this.Hide = Hide;
@@ -171,10 +171,9 @@ var KMud;
     KMud.ItemOwnershipMessage = ItemOwnershipMessage;
     var CashTransferMessage = (function (_super) {
         __extends(CashTransferMessage, _super);
-        function CashTransferMessage(Currency, Quantity, Giver, Taker, Hide) {
+        function CashTransferMessage(Currency, Giver, Taker, Hide) {
             _super.call(this, 'CashTransferMessage');
             this.Currency = Currency;
-            this.Quantity = Quantity;
             this.Giver = Giver;
             this.Taker = Taker;
             this.Hide = Hide;
@@ -183,6 +182,20 @@ var KMud;
         return CashTransferMessage;
     })(KMud.MessageBase);
     KMud.CashTransferMessage = CashTransferMessage;
+    var GiveCommand = (function (_super) {
+        __extends(GiveCommand, _super);
+        function GiveCommand(ItemIds, ItemName, ActorId, ActorName, Quantity) {
+            _super.call(this, 'GiveCommand');
+            this.ItemIds = ItemIds;
+            this.ItemName = ItemName;
+            this.ActorId = ActorId;
+            this.ActorName = ActorName;
+            this.Quantity = Quantity;
+        }
+        GiveCommand.ClassName = 'GiveCommand';
+        return GiveCommand;
+    })(KMud.MessageBase);
+    KMud.GiveCommand = GiveCommand;
     var LoginRejected = (function (_super) {
         __extends(LoginRejected, _super);
         function LoginRejected(RejectionMessage, NoCharacter) {

@@ -48,7 +48,7 @@ module KMud {
         public static ClassName: string = 'GetItemCommand';
     }
     export class DropItemCommand extends MessageBase {
-        constructor(public ItemId?: string, public ItemName?: string, public Quantity?: number, public Hide?: boolean) { super('DropItemCommand'); }
+        constructor(public ItemIds?: string[], public ItemName?: string, public Quantity?: number, public Hide?: boolean) { super('DropItemCommand'); }
         public static ClassName: string = 'DropItemCommand';
     }
     export class ItemOwnershipMessage extends MessageBase {
@@ -56,8 +56,12 @@ module KMud {
         public static ClassName: string = 'ItemOwnershipMessage';
     }
     export class CashTransferMessage extends MessageBase {
-        constructor(public Currency?: CurrencyDescription, public Quantity?: number, public Giver?: ActorDescription, public Taker?: ActorDescription, public Hide?: boolean) { super('CashTransferMessage'); }
+        constructor(public Currency?: CurrencyDescription, public Giver?: ActorDescription, public Taker?: ActorDescription, public Hide?: boolean) { super('CashTransferMessage'); }
         public static ClassName: string = 'CashTransferMessage';
+    }
+    export class GiveCommand extends MessageBase {
+        constructor(public ItemIds?: string[], public ItemName?: string, public ActorId?: string, public ActorName?: string, public Quantity?: number) { super('GiveCommand'); }
+        public static ClassName: string = 'GiveCommand';
     }
     export class LoginRejected extends MessageBase {
         constructor(public RejectionMessage?: string, public NoCharacter?: boolean) { super('LoginRejected'); }
