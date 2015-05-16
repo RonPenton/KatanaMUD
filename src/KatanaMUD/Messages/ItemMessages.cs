@@ -68,10 +68,10 @@ namespace KatanaMUD.Messages
                     Quantity = (int)actor.Room.GetTotalCashUserCanSee(currency, actor).Total;
                 }
 
-                var action = actor.CanGetCash(currency, Quantity);
+                var action = actor.CanPickUpCash(currency, Quantity);
                 if (action.Allowed)
                 {
-                    actor.GetCash(currency, Quantity);
+                    actor.PickUpCash(currency, Quantity);
                     var message = new CashTransferMessage()
                     {
                         Taker = new ActorDescription(actor),
@@ -98,11 +98,11 @@ namespace KatanaMUD.Messages
 
                 foreach (var item in group.Items.Take(Quantity))
                 {
-                    var action = actor.CanGetItem(item);
+                    var action = actor.CanPickUpItem(item);
 
                     if (action.Allowed)
                     {
-                        actor.GetItem(item);
+                        actor.AcceptItem(item);
                         successes.Add(item);
                     }
                     else
@@ -199,7 +199,7 @@ namespace KatanaMUD.Messages
                     Quantity = (int)Currency.Get(currency, actor.Cash);
                 }
 
-                var action = actor.CanDropCash(currency, Quantity);
+                var action = actor.CanDropCash(currency, Quantity, Hide);
                 if (action.Allowed)
                 {
                     actor.DropCash(currency, Quantity, Hide);
@@ -367,13 +367,13 @@ namespace KatanaMUD.Messages
                     Quantity = (int)Currency.Get(currency, actor.Cash);
                 }
 
-                var action = actor.CanDropCash(currency, Quantity);
+                var action = actor.CanRemoveCash(currency, Quantity);
                 if (!action.Allowed)
                 {
                     actor.SendMessage(new ActionNotAllowedMessage() { Message = action.FirstPerson });
                     return;
                 }
-                action = receiver.CanGetCash(currency, Quantity);
+                action = receiver.CanAcceptCash(currency, Quantity);
                 if (!action.Allowed)
                 {
                     actor.SendMessage(new ActionNotAllowedMessage() { Message = action.ThirdPerson });
@@ -381,7 +381,7 @@ namespace KatanaMUD.Messages
                 }
 
                 var quantity = actor.RemoveCash(currency, Quantity);
-                receiver.AddCash(currency, quantity);
+                receiver.AcceptCash(currency, quantity);
 
                 var message = new CashTransferMessage()
                 {
@@ -413,12 +413,12 @@ namespace KatanaMUD.Messages
             foreach (var item in finalItems)
             {
                 var give = actor.CanDropItem(item);
-                var take = receiver.CanGetItem(item);
+                var take = receiver.CanAcceptItem(item);
 
                 if (give.Allowed && take.Allowed)
                 {
                     actor.RemoveItem(item);
-                    receiver.AddItem(item);
+                    receiver.AcceptItem(item);
                     successes.Add(item);
                 }
 

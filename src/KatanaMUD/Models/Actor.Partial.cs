@@ -156,181 +156,6 @@ namespace KatanaMUD.Models
             SendMessage(message);
         }
 
-        /// <summary>
-        /// Determines if an actor can get an item.
-        /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        public Validation CanGetItem(Item item, bool receive = false)
-        {
-            // Make sure fixed items aren't able to be gotten
-            if (item.ItemTemplate.Fixed)
-                return new Validation("You cannot pick up that item!", Name + " cannot pick up that item!");
-
-            // Make sure item is actually in the room.
-            if (item.Room != Room && receive == false)
-                return new Validation("You are not in the same room as that item!", null);
-
-            // Check weight.
-            if (Encumbrance + item.Weight > MaxEncumbrance)
-                return new Validation("You cannot carry that much!", Name + " cannot carry that much!");
-
-            //TODO: Ask item if it can be gotten. 
-            return new Validation();
-        }
-
-        /// <summary>
-        /// Determines if a user can get cash.
-        /// </summary>
-        /// <param name="currency"></param>
-        /// <param name="quantity">The quantity requested, or leave empty to get it all.</param>
-        /// <returns></returns>
-        public Validation CanGetCash(Currency currency, long? quantity)
-        {
-            var q = Room.GetTotalCashUserCanSee(currency, this);
-
-            if (quantity == null || quantity == 0)
-            {
-                // No quantity specified. Set total to the amount that the user knows about. Auto-max.
-                quantity = q.Total;
-            }
-
-            // Make sure item is actually in the room.
-            if (q.Total < quantity)
-                return new Validation("You do not see that here!");
-
-            // Check weight.
-            if (Encumbrance + (currency.Weight * quantity) > MaxEncumbrance)
-                return new Validation("You cannot carry that much!");
-
-            return new Validation();
-        }
-
-        /// <summary>
-        /// Gets an item. Beware that this performs no checks and essentially forces a get. 
-        /// Notifying the room of the item transfer is up to the executor of this method.
-        /// </summary>
-        /// <param name="item"></param>
-        public void GetItem(Item item)
-        {
-            item.Actor = this;
-            item.Room = null;
-            item.HiddenTime = null;
-            item.EquippedSlot = null;
-        }
-
-        /// <summary>
-        /// Gets cash. Beware that this performs minimal checks and essentially forces a get. 
-        /// Notifying the room of the item transfer is up to the executor of this method.
-        /// </summary>
-        /// <param name="item"></param>
-        public void GetCash(Currency currency, long? quantity)
-        {
-            var q = Room.GetTotalCashUserCanSee(currency, this);
-            var total = Room.GetTotalCash(currency);
-
-            if (quantity == null)
-            {
-                // No quantity specified. Set total to the amount that the user knows about. Auto-max.
-                quantity = q.Total;
-            }
-
-            // Make sure we don't grab more than what's on the floor. 
-            if (quantity > total.Total)
-                quantity = total.Total;
-
-            var visible = Math.Min(quantity.Value, q.Visible);
-            var hidden = quantity.Value - visible;
-
-            Currency.Add(currency, Cash, quantity.Value);
-            Currency.Add(currency, Room.Cash, -visible);
-            Currency.Add(currency, Room.HiddenCash, -hidden);
-            Room.ClearFoundHiddenCash(currency);
-        }
-
-        /// <summary>
-        /// Determines if an actor can drop an item.
-        /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        public Validation CanDropItem(Item item)
-        {
-            // Make sure item is actually in the room.
-            if (item.Actor != this)
-                return new Validation("Item is not in the same room");
-
-            // TODO: Ask item for a reason why it can't be dropped?
-            if (item.ItemTemplate.NotDroppable)
-                return new Validation("You cannot drop that!");
-
-            //TODO: Ask item if it can be dropped.
-
-            return new Validation();
-        }
-
-        /// <summary>
-        /// Drops an item. Beware that this performs no checks and essentially forces a drop. 
-        /// </summary>
-        /// <param name="item"></param>
-        public void DropItem(Item item, bool hide)
-        {
-            item.Actor = null;
-            item.Room = Room;
-            item.EquippedSlot = null;
-
-            if (hide)
-            {
-                item.HiddenTime = Game.GameTime.Ticks;
-            }
-            else
-            {
-                item.HiddenTime = null;
-            }
-        }
-
-        public Validation CanDropCash(Currency currency, long? quantity)
-        {
-            var q = Currency.Get(currency, Cash);
-            if (quantity == null)
-                quantity = q;
-
-            if (quantity > q)
-                return new Validation("You don't see that many " + currency.Name + " here!");
-
-            return new Validation();
-        }
-
-        public void DropCash(Currency currency, long? quantity, bool hide)
-        {
-            var q = RemoveCash(currency, quantity);
-            var container = Room.Cash;
-            if (hide == true)
-                container = Room.HiddenCash;
-            Currency.Add(currency, container, quantity.Value);
-
-            if (hide == true)
-                Room.ClearFoundHiddenCash(currency);
-        }
-
-        public long RemoveCash(Currency currency, long? quantity)
-        {
-            var q = Currency.Get(currency, Cash);
-            if (quantity == null)
-                quantity = q;
-
-            if (quantity > q)
-                quantity = q;
-
-            Currency.Add(currency, Cash, -quantity.Value);
-            return quantity.Value;
-        }
-
-        public void AddCash(Currency currency, long quantity)
-        {
-            var q = Currency.Get(currency, Cash);
-
-            Currency.Add(currency, Cash, quantity);
-        }
 
         /// <summary>
         /// Returns a list of all items the Actor owns which are currently equipped.
@@ -342,13 +167,13 @@ namespace KatanaMUD.Models
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public Validation CanRemoveItem(Item item)
+        public Validation CanUnEquip(Item item)
         {
             if (item.Actor != this)
-                return new Validation("You do not own that!");
+                return new Validation("You do not own that!", null);
 
             if (item.EquippedSlot == null)
-                return new Validation("You do not have that equipped!");
+                return new Validation("You do not have that equipped!", null);
 
             // TODO: Ask the item if it can be removed
 
@@ -442,17 +267,17 @@ namespace KatanaMUD.Models
         public Validation CanEquipItem(Item item)
         {
             if (item.Actor != this)
-                return new Validation("You do not own that item!");
+                return new Validation("You do not own that item!", null);
 
             if (item.ItemTemplate.EquipType == null)
-                return new Validation("You may not wear that item!");
+                return new Validation("You may not wear that item!", null);
 
             var open = IsSlotOpen(item);
             if(!open.IsOpen && open.ItemsToRemove.Any())
-                return new Validation("You currently have an item equipped in that slot!");
+                return new Validation("You currently have an item equipped in that slot!", null);
 
             if (!open.IsOpen && !String.IsNullOrEmpty(open.FailureReason))
-                return new Validation(open.FailureReason);
+                return new Validation(open.FailureReason, null);
 
             // TODO: Validate Weapon Type/Armour Type
             // TODO: ask item if it can be equipped
@@ -568,7 +393,7 @@ namespace KatanaMUD.Models
         {
             if (Members.Any(x => x.Encumbrance > x.MaxEncumbrance))
             {
-                return new Validation("At least one person in your party is too heavy to move!");
+                return new Validation("At least one person in your party is too heavy to move!", null);
             }
 
             return new Validation();

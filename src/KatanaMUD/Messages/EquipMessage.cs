@@ -30,7 +30,7 @@ namespace KatanaMUD.Messages
                 return;
             }
 
-            var isvalid = actor.CanRemoveItem(item);
+            var isvalid = actor.CanUnEquip(item);
             if (!isvalid.Allowed)
             {
                 actor.SendMessage(new ActionNotAllowedMessage() { Message = isvalid.FirstPerson });
@@ -80,7 +80,7 @@ namespace KatanaMUD.Messages
                 // Slot can be opened, if an item is removed. So try to remove all the items blocking the slot.
                 foreach (var remove in open.ItemsToRemove)
                 {
-                    var isvalid = actor.CanRemoveItem(remove);
+                    var isvalid = actor.CanUnEquip(remove);
                     if (!isvalid.Allowed)
                     {
                         actor.SendMessage(new ActionNotAllowedMessage() { Message = isvalid.FirstPerson });
