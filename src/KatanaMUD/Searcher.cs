@@ -13,6 +13,8 @@ namespace KatanaMUD
             if (String.IsNullOrWhiteSpace(name))
                 return new List<T>();
 
+            name = name.Trim();
+
             // First look for an exact match.
             var found = items.Where(x => getter(x).Equals(name, StringComparison.InvariantCultureIgnoreCase));
             if (!found.Any() && includeStartsWith)
