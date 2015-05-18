@@ -1,5 +1,7 @@
 #Development Server
 
+[![Join the chat at https://gitter.im/RonPenton/KatanaMUD](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/RonPenton/KatanaMUD?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 We now have a development server. The server may not always be running (if it crashes, for example), and may be taken down frequently for updates. But when it's up, it's here: 
 
 * http://katanamud.cloudapp.net/
