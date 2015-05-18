@@ -4,6 +4,10 @@ We now have a development server. The server may not always be running (if it cr
 
 * http://katanamud.cloudapp.net/
 
+#Building
+
+Information on how to build the project can be found here: https://github.com/RonPenton/KatanaMUD/wiki/Building
+
 # KatanaMUD
 A web browser MUD. It originally started life as a clone of MajorMUD, but may end up diverging from that vision significantly in the end.
 
