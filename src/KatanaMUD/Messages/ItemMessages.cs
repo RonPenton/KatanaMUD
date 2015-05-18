@@ -231,7 +231,7 @@ namespace KatanaMUD.Messages
             IEnumerable<Item> finalItems;
             if (items.First() is ItemGroup)
             {
-                finalItems = (items.First() as ItemGroup).Items;
+                finalItems = (items.First() as ItemGroup).Items.Take(Quantity);
             }
             else
             {
@@ -400,7 +400,7 @@ namespace KatanaMUD.Messages
             IEnumerable<Item> finalItems;
             if (items.First() is ItemGroup)
             {
-                finalItems = (items.First() as ItemGroup).Items;
+                finalItems = (items.First() as ItemGroup).Items.Take(Quantity);
             }
             else
             {
