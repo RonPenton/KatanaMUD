@@ -15,7 +15,8 @@
       "Microsoft.Framework.ConfigurationModel.Json >= 1.0.0-beta4",
       "Newtonsoft.Json >= 7.0.1-beta2",
       "Microsoft.AspNet.Authentication.Cookies >= 1.0.0-beta4",
-      "Spam >= 1.0.0-*"
+      "Spam >= 1.0.0-*",
+      "Microsoft.CodeAnalysis.Scripting >= 1.0.0-*"
     ],
     "DNX,Version=v4.5.1": []
   },
@@ -1420,9 +1421,9 @@
         "lib/dnxcore50/Microsoft.AspNet.WebUtilities.xml"
       ]
     },
-    "Microsoft.CodeAnalysis.Analyzers/1.0.0-rc2": {
+    "Microsoft.CodeAnalysis.Analyzers/1.0.0-rc3-20150514-02": {
       "serviceable": false,
-      "sha": "/4Z5es8TXCEn5sfzWz2uhUITmikgCfMAhehMJPQcSD2FRp2ooLTczDq3p4KOl+bcnsvaAu0aKrmdRgOvkrcwhw==",
+      "sha": "Gf9KrAzAj5P5IRpa3pJg3zqlKQGbaF6HTlrPQZgGD/mm1ir7BeocBDNpkAZAAjrvu2xh8EVK06OIQMMVpNn8yA==",
       "frameworks": {
         "DNX,Version=v4.5.1": {
           "dependencies": {},
@@ -1434,8 +1435,8 @@
         }
       },
       "files": [
-        "Microsoft.CodeAnalysis.Analyzers.1.0.0-rc2.nupkg",
-        "Microsoft.CodeAnalysis.Analyzers.1.0.0-rc2.nupkg.sha512",
+        "Microsoft.CodeAnalysis.Analyzers.1.0.0-rc3-20150514-02.nupkg",
+        "Microsoft.CodeAnalysis.Analyzers.1.0.0-rc3-20150514-02.nupkg.sha512",
         "Microsoft.CodeAnalysis.Analyzers.nuspec",
         "ThirdPartyNotices.rtf",
         "tools/install.ps1",
@@ -1446,15 +1447,15 @@
         "tools/analyzers/VB.NET/Microsoft.CodeAnalysis.VisualBasic.Analyzers.dll"
       ]
     },
-    "Microsoft.CodeAnalysis.Common/1.0.0-rc2": {
+    "Microsoft.CodeAnalysis.Common/1.0.0-rc3-20150514-02": {
       "serviceable": false,
-      "sha": "7ALXqeJxiEMgnSST2qlWMThc5CIhJNFsUKYITIXXXj7gf8mF+ktEuKgUE7NWePzUgi0gq/2WmBX/4yWJuF1j6w==",
+      "sha": "D6QgGaK84XGLVhqyO737Or7bRew0Cuv41HvJttZo9nJ5Z+mOLigDyftnNeXSZg56KOh/afL427r+xEAdyMrMSw==",
       "frameworks": {
         "DNX,Version=v4.5.1": {
           "dependencies": {
-            "System.Collections.Immutable": "[1.1.33-beta]",
-            "System.Reflection.Metadata": "[1.0.18-beta]",
-            "Microsoft.CodeAnalysis.Analyzers": "[1.0.0-rc2]"
+            "System.Collections.Immutable": "1.1.36",
+            "System.Reflection.Metadata": "1.0.21",
+            "Microsoft.CodeAnalysis.Analyzers": "[1.0.0-rc3-20150514-02]"
           },
           "frameworkAssemblies": [],
           "runtimeAssemblies": [
@@ -1468,8 +1469,8 @@
         }
       },
       "files": [
-        "Microsoft.CodeAnalysis.Common.1.0.0-rc2.nupkg",
-        "Microsoft.CodeAnalysis.Common.1.0.0-rc2.nupkg.sha512",
+        "Microsoft.CodeAnalysis.Common.1.0.0-rc3-20150514-02.nupkg",
+        "Microsoft.CodeAnalysis.Common.1.0.0-rc3-20150514-02.nupkg.sha512",
         "Microsoft.CodeAnalysis.Common.nuspec",
         "ThirdPartyNotices.rtf",
         "lib/net45/Microsoft.CodeAnalysis.Desktop.dll",
@@ -1510,6 +1511,106 @@
         "lib/net45/Microsoft.CodeAnalysis.CSharp.xml",
         "lib/portable-net45+win8/Microsoft.CodeAnalysis.CSharp.dll",
         "lib/portable-net45+win8/Microsoft.CodeAnalysis.CSharp.xml"
+      ]
+    },
+    "Microsoft.CodeAnalysis.Scripting/1.0.0-rc3-20150514-02": {
+      "serviceable": false,
+      "sha": "dtEKyZvtCEeTVe0mQiGkDMWIXNzCIahOSzGD6HvUv6LtLez00lCp7JbViEfWP6qKexviiWPtKgbm4WqFHvkvHg==",
+      "frameworks": {
+        "DNX,Version=v4.5.1": {
+          "dependencies": {
+            "Microsoft.CodeAnalysis.Scripting.Common": "[1.0.0-rc3-20150514-02]",
+            "Microsoft.CodeAnalysis.Scripting.CSharp": "[1.0.0-rc3-20150514-02]",
+            "Microsoft.CodeAnalysis.Scripting.VisualBasic": "[1.0.0-rc3-20150514-02]"
+          },
+          "frameworkAssemblies": [],
+          "runtimeAssemblies": [],
+          "compileAssemblies": []
+        }
+      },
+      "files": [
+        "Microsoft.CodeAnalysis.Scripting.1.0.0-rc3-20150514-02.nupkg",
+        "Microsoft.CodeAnalysis.Scripting.1.0.0-rc3-20150514-02.nupkg.sha512",
+        "Microsoft.CodeAnalysis.Scripting.nuspec",
+        "ThirdPartyNotices.rtf"
+      ]
+    },
+    "Microsoft.CodeAnalysis.Scripting.Common/1.0.0-rc3-20150514-02": {
+      "serviceable": false,
+      "sha": "Q0NjA1FTIooKYsxrfXSFHfVG9w6ckakqa1Ze+snTk9zf/kaYDp+H0BtyvSdm8IMEFW377hXKm/Nge9iP+Ew6Kw==",
+      "frameworks": {
+        "DNX,Version=v4.5.1": {
+          "dependencies": {
+            "Microsoft.CodeAnalysis.Common": "[1.0.0-rc3-20150514-02]"
+          },
+          "frameworkAssemblies": [],
+          "runtimeAssemblies": [
+            "lib/net45/Microsoft.CodeAnalysis.Scripting.dll"
+          ],
+          "compileAssemblies": [
+            "lib/net45/Microsoft.CodeAnalysis.Scripting.dll"
+          ]
+        }
+      },
+      "files": [
+        "Microsoft.CodeAnalysis.Scripting.Common.1.0.0-rc3-20150514-02.nupkg",
+        "Microsoft.CodeAnalysis.Scripting.Common.1.0.0-rc3-20150514-02.nupkg.sha512",
+        "Microsoft.CodeAnalysis.Scripting.Common.nuspec",
+        "ThirdPartyNotices.rtf",
+        "lib/net45/Microsoft.CodeAnalysis.Scripting.dll",
+        "lib/net45/Microsoft.CodeAnalysis.Scripting.xml"
+      ]
+    },
+    "Microsoft.CodeAnalysis.Scripting.CSharp/1.0.0-rc3-20150514-02": {
+      "serviceable": false,
+      "sha": "k129XgrwlkXSyAUlB14RNOiTQSlbzlXLBgIy6SW2oNmkvRh1xiKC57sX/CMqgTAOGpe7DNW7TYxSMSCbouCsVQ==",
+      "frameworks": {
+        "DNX,Version=v4.5.1": {
+          "dependencies": {
+            "Microsoft.CodeAnalysis.Scripting.Common": "[1.0.0-rc3-20150514-02]"
+          },
+          "frameworkAssemblies": [],
+          "runtimeAssemblies": [
+            "lib/net45/Microsoft.CodeAnalysis.Scripting.CSharp.dll"
+          ],
+          "compileAssemblies": [
+            "lib/net45/Microsoft.CodeAnalysis.Scripting.CSharp.dll"
+          ]
+        }
+      },
+      "files": [
+        "Microsoft.CodeAnalysis.Scripting.CSharp.1.0.0-rc3-20150514-02.nupkg",
+        "Microsoft.CodeAnalysis.Scripting.CSharp.1.0.0-rc3-20150514-02.nupkg.sha512",
+        "Microsoft.CodeAnalysis.Scripting.CSharp.nuspec",
+        "ThirdPartyNotices.rtf",
+        "lib/net45/Microsoft.CodeAnalysis.Scripting.CSharp.dll",
+        "lib/net45/Microsoft.CodeAnalysis.Scripting.CSharp.xml"
+      ]
+    },
+    "Microsoft.CodeAnalysis.Scripting.VisualBasic/1.0.0-rc3-20150514-02": {
+      "serviceable": false,
+      "sha": "qGTtWW7OJ3zGrPXqxBHC6SBHo9ffvcKP0fdcUSzDUXx8mYcvUbrUIKeMTVnwxA6zQZidxjub1wo4PrBM+dvVXg==",
+      "frameworks": {
+        "DNX,Version=v4.5.1": {
+          "dependencies": {
+            "Microsoft.CodeAnalysis.Scripting.Common": "[1.0.0-rc3-20150514-02]"
+          },
+          "frameworkAssemblies": [],
+          "runtimeAssemblies": [
+            "lib/net45/Microsoft.CodeAnalysis.Scripting.VisualBasic.dll"
+          ],
+          "compileAssemblies": [
+            "lib/net45/Microsoft.CodeAnalysis.Scripting.VisualBasic.dll"
+          ]
+        }
+      },
+      "files": [
+        "Microsoft.CodeAnalysis.Scripting.VisualBasic.1.0.0-rc3-20150514-02.nupkg",
+        "Microsoft.CodeAnalysis.Scripting.VisualBasic.1.0.0-rc3-20150514-02.nupkg.sha512",
+        "Microsoft.CodeAnalysis.Scripting.VisualBasic.nuspec",
+        "ThirdPartyNotices.rtf",
+        "lib/net45/Microsoft.CodeAnalysis.Scripting.VisualBasic.dll",
+        "lib/net45/Microsoft.CodeAnalysis.Scripting.VisualBasic.xml"
       ]
     },
     "Microsoft.Framework.Caching.Interfaces/1.0.0-beta4": {
@@ -2193,9 +2294,9 @@
         "tools/install.ps1"
       ]
     },
-    "System.Collections.Immutable/1.1.33-beta": {
+    "System.Collections.Immutable/1.1.36": {
       "serviceable": true,
-      "sha": "Qnv6M/BRf0w1xNoD5tH7V+jK0kdO+OZymwQS5Lj6FALt3AZMGVeJs+lHXi1PsKFll67UtGY+I7r8WDhRzspXCA==",
+      "sha": "MOlivTIeAIQPPMUPWIIoMCvZczjFRLYUWSYwqi1szu8QPyeIbsaPeI+hpXe1DzTxNwnRnmfYaoToi6kXIfSPNg==",
       "frameworks": {
         "DNX,Version=v4.5.1": {
           "dependencies": {},
@@ -2210,20 +2311,20 @@
       },
       "files": [
         "License-Stable.rtf",
-        "System.Collections.Immutable.1.1.33-beta.nupkg",
-        "System.Collections.Immutable.1.1.33-beta.nupkg.sha512",
+        "System.Collections.Immutable.1.1.36.nupkg",
+        "System.Collections.Immutable.1.1.36.nupkg.sha512",
         "System.Collections.Immutable.nuspec",
         "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.dll",
         "lib/portable-net45+win8+wp8+wpa81/System.Collections.Immutable.xml"
       ]
     },
-    "System.Reflection.Metadata/1.0.18-beta": {
+    "System.Reflection.Metadata/1.0.21": {
       "serviceable": true,
-      "sha": "4PtC2U6seQthZMvXvGTxXZUqlF0oV9jzYNTkG0Yo/D6cLO5AH3lrxh2djGyKsDYnAZjBCoyA/z3vHRCeaBEp4w==",
+      "sha": "CAhcY0EJFLXfxo5YRV/ytkTOeTBho8zKjLu+9LvEI5NIVmanp1yMUzYQdjvXpHbyV0Qt1KuLXcTCc9t9FVH3Wg==",
       "frameworks": {
         "DNX,Version=v4.5.1": {
           "dependencies": {
-            "System.Collections.Immutable": "1.1.33-beta"
+            "System.Collections.Immutable": "1.1.36"
           },
           "frameworkAssemblies": [],
           "runtimeAssemblies": [
@@ -2236,8 +2337,8 @@
       },
       "files": [
         "License-Stable.rtf",
-        "System.Reflection.Metadata.1.0.18-beta.nupkg",
-        "System.Reflection.Metadata.1.0.18-beta.nupkg.sha512",
+        "System.Reflection.Metadata.1.0.21.nupkg",
+        "System.Reflection.Metadata.1.0.21.nupkg.sha512",
         "System.Reflection.Metadata.nuspec",
         "lib/portable-net45+win8/System.Reflection.Metadata.dll",
         "lib/portable-net45+win8/System.Reflection.Metadata.xml"

@@ -14,7 +14,8 @@
     "Microsoft.Framework.ConfigurationModel.Json": "1.0.0-beta4",
     "Newtonsoft.Json": "7.0.1-beta2",
     "Microsoft.AspNet.Authentication.Cookies": "1.0.0-beta4",
-    "Spam": "1.0.0-*"
+    "Spam": "1.0.0-*",
+    "Microsoft.CodeAnalysis.Scripting": "1.0.0-*"
   },
   "commands": {
     "web": "Microsoft.AspNet.Hosting --server Microsoft.AspNet.Server.WebListener --server.urls http://katanamud.cloudapp.net",
