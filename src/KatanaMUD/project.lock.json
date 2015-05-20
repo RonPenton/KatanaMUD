@@ -16,11 +16,40 @@
       "Newtonsoft.Json >= 7.0.1-beta2",
       "Microsoft.AspNet.Authentication.Cookies >= 1.0.0-beta4",
       "Spam >= 1.0.0-*",
-      "Microsoft.CodeAnalysis.Scripting.CSharp >= 1.0.0-rc3-20150514-02"
+      "Microsoft.CodeAnalysis.Scripting.CSharp >= 1.0.0-rc3-20150514-02",
+      "C5 >= 2.3.0.1"
     ],
     "DNX,Version=v4.5.1": []
   },
   "libraries": {
+    "C5/2.3.0.1": {
+      "serviceable": false,
+      "sha": "kiOaBzgJ/BmkFVFLNGTCSC561XH/PeupYVJ0mEnqyvxCVjWPFLQCbtD2zN/CU1f2ZnHsLSxtlkBYCpaRxY2w/Q==",
+      "frameworks": {
+        "DNX,Version=v4.5.1": {
+          "dependencies": {},
+          "frameworkAssemblies": [],
+          "runtimeAssemblies": [
+            "lib/net40/C5.dll"
+          ],
+          "compileAssemblies": [
+            "lib/net40/C5.dll"
+          ]
+        }
+      },
+      "files": [
+        "C5.2.3.0.1.nupkg",
+        "C5.2.3.0.1.nupkg.sha512",
+        "C5.nuspec",
+        "lib/net35/C5.dll",
+        "lib/net40/C5.dll",
+        "lib/netcore45/C5.dll",
+        "lib/portable-net4+sl5+wp8+win8/C5.dll",
+        "lib/sl50/C5.dll",
+        "lib/wp8/C5.dll",
+        "lib/wpa81/C5.dll"
+      ]
+    },
     "Kestrel/1.0.0-beta4": {
       "serviceable": false,
       "sha": "8f2aCgtDh5ONWS7K2EYy23s3nnPvZS7rPimYHJ1DAvF7HG5GSmSC+SkKx6ZtBOjhU9agneWjDwj5jGjdPWfjsA==",
