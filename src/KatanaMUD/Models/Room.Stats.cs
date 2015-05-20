@@ -11,7 +11,7 @@ namespace KatanaMUD.Models
         public T GetStat<T>(string name, T baseValue, bool includePercent = true)
         {
             T t;
-            if (JSONStats.TryGetValue(name, out t))
+            if (Stats.TryGetValue(name, out t))
                 return t;
             return baseValue;
         }

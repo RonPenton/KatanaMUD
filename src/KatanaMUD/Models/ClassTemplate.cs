@@ -17,7 +17,7 @@ namespace KatanaMUD.Models
 
         public ClassTemplate()
         {
-            Stats = new JsonContainer(this);
+            Stats = new Spam.JsonContainer(this, null);
             Actors = new ParentChildRelationshipContainer<ClassTemplate, Actor, Guid>(this, child => child.ClassTemplate, (child, parent) => child.ClassTemplate= parent);
             RaceTemplates = new ObservableHashSet<RaceTemplate>();
             RaceTemplates.ItemsAdded += RaceTemplates_ItemsAdded;
@@ -28,7 +28,7 @@ namespace KatanaMUD.Models
         public Int32 Id { get { return _Id; } set { _Id = value; this.Changed(); } }
         public String Name { get { return _Name; } set { _Name = value; this.Changed(); } }
         public String Description { get { return _Description; } set { _Description = value; this.Changed(); } }
-        public JsonContainer Stats { get; private set; }
+        public Spam.JsonContainer Stats { get; private set; }
         public ICollection<Actor> Actors { get; private set; }
         public ObservableHashSet<RaceTemplate> RaceTemplates { get; private set; }
         public static ClassTemplate Load(SqlDataReader reader)
@@ -37,8 +37,7 @@ namespace KatanaMUD.Models
             entity._Id = reader.GetInt32(0);
             entity._Name = reader.GetString(1);
             entity._Description = reader.GetSafeString(2);
-            entity.Stats = new JsonContainer(entity);
-            entity.Stats.FromJson(reader.GetSafeString(3));
+            entity.Stats = new Spam.JsonContainer(entity, reader.GetSafeString(3));
             return entity;
         }
 
@@ -53,19 +52,19 @@ namespace KatanaMUD.Models
             c.Parameters.AddWithValue("@Id", (object)e.Id ?? DBNull.Value);
             c.Parameters.AddWithValue("@Name", (object)e.Name ?? DBNull.Value);
             c.Parameters.AddWithValue("@Description", (object)e.Description ?? DBNull.Value);
-            c.Parameters.AddWithValue("@JSONStats", e.Stats.ToJson());
+            c.Parameters.AddWithValue("@Stats", e.Stats.Serialize());
         }
 
         public static void GenerateInsertCommand(SqlCommand c, ClassTemplate e)
         {
-            c.CommandText = @"INSERT INTO [ClassTemplate]([Id], [Name], [Description], [JSONStats])
-                              VALUES (@Id, @Name, @Description, @JSONStats)";
+            c.CommandText = @"INSERT INTO [ClassTemplate]([Id], [Name], [Description], [Stats])
+                              VALUES (@Id, @Name, @Description, @Stats)";
             AddSqlParameters(c, e);
         }
 
         public static void GenerateUpdateCommand(SqlCommand c, ClassTemplate e)
         {
-            c.CommandText = @"UPDATE [ClassTemplate] SET [Id] = @Id, [Name] = @Name, [Description] = @Description, [JSONStats] = @JSONStats WHERE [Id] = @Id";
+            c.CommandText = @"UPDATE [ClassTemplate] SET [Id] = @Id, [Name] = @Name, [Description] = @Description, [Stats] = @Stats WHERE [Id] = @Id";
             AddSqlParameters(c, e);
         }
 

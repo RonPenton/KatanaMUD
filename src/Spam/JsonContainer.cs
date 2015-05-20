@@ -26,21 +26,22 @@ namespace Spam
             }
         }
 
-        public JsonContainer(IEntity owner)
+        public JsonContainer(IEntity owner, string data)
         {
             this._owner = owner;
+            FromJson(data);
         }
 
         public int Count => _dictionary.Count;
 
         public bool ContainsKey(string key) => _dictionary.ContainsKey(key);
 
-        public string ToJson()
+        public string Serialize()
         {
             return JsonConvert.SerializeObject(this._dictionary);
         }
 
-        public void FromJson(string json)
+        private void FromJson(string json)
         {
             if (String.IsNullOrWhiteSpace(json))
             {

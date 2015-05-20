@@ -27,10 +27,10 @@ namespace KatanaMUD.Models
 
         public Actor()
         {
-            JSONStats = new JsonContainer(this);
-            JSONAttributes = new JsonContainer(this);
-            Cash = new JsonContainer(this);
-            JSONAbilities = new JsonContainer(this);
+            StatsInternal = new Spam.JsonContainer(this, null);
+            Attributes = new Spam.JsonContainer(this, null);
+            Cash = new Spam.JsonContainer(this, null);
+            Abilities = new Spam.JsonContainer(this, null);
             Items = new ParentChildRelationshipContainer<Actor, Item, Guid>(this, child => child.Actor, (child, parent) => child.Actor= parent);
             OnConstruct();
         }
@@ -40,10 +40,10 @@ namespace KatanaMUD.Models
         public String Surname { get { return _Surname; } set { _Surname = value; this.Changed(); } }
         public Int32 ActorType { get { return _ActorType; } set { _ActorType = value; this.Changed(); } }
         public Int32 CharacterPoints { get { return _CharacterPoints; } set { _CharacterPoints = value; this.Changed(); } }
-        private JsonContainer JSONStats { get; set; }
-        private JsonContainer JSONAttributes { get; set; }
-        public JsonContainer Cash { get; private set; }
-        public JsonContainer JSONAbilities { get; private set; }
+        private Spam.JsonContainer StatsInternal { get; set; }
+        private Spam.JsonContainer Attributes { get; set; }
+        public Spam.JsonContainer Cash { get; private set; }
+        public Spam.JsonContainer Abilities { get; private set; }
         partial void OnUserChanging(User oldValue, User newValue);
         public User User {
             get { return _User; }
@@ -105,14 +105,10 @@ namespace KatanaMUD.Models
             entity._ClassTemplateId = reader.GetSafeInt32(6);
             entity._RaceTemplateId = reader.GetSafeInt32(7);
             entity._CharacterPoints = reader.GetInt32(8);
-            entity.JSONStats = new JsonContainer(entity);
-            entity.JSONStats.FromJson(reader.GetSafeString(9));
-            entity.JSONAttributes = new JsonContainer(entity);
-            entity.JSONAttributes.FromJson(reader.GetSafeString(10));
-            entity.Cash = new JsonContainer(entity);
-            entity.Cash.FromJson(reader.GetSafeString(11));
-            entity.JSONAbilities = new JsonContainer(entity);
-            entity.JSONAbilities.FromJson(reader.GetSafeString(12));
+            entity.StatsInternal = new Spam.JsonContainer(entity, reader.GetSafeString(9));
+            entity.Attributes = new Spam.JsonContainer(entity, reader.GetSafeString(10));
+            entity.Cash = new Spam.JsonContainer(entity, reader.GetSafeString(11));
+            entity.Abilities = new Spam.JsonContainer(entity, reader.GetSafeString(12));
             return entity;
         }
 
@@ -136,22 +132,22 @@ namespace KatanaMUD.Models
             c.Parameters.AddWithValue("@ClassTemplateId", (object)e.ClassTemplate?.Id ?? DBNull.Value);
             c.Parameters.AddWithValue("@RaceTemplateId", (object)e.RaceTemplate?.Id ?? DBNull.Value);
             c.Parameters.AddWithValue("@CharacterPoints", (object)e.CharacterPoints ?? DBNull.Value);
-            c.Parameters.AddWithValue("@JSONStats", e.JSONStats.ToJson());
-            c.Parameters.AddWithValue("@JSONAttributes", e.JSONAttributes.ToJson());
-            c.Parameters.AddWithValue("@JSONCash", e.Cash.ToJson());
-            c.Parameters.AddWithValue("@JSONAbilities", e.JSONAbilities.ToJson());
+            c.Parameters.AddWithValue("@Stats", e.StatsInternal.Serialize());
+            c.Parameters.AddWithValue("@Attributes", e.Attributes.Serialize());
+            c.Parameters.AddWithValue("@Cash", e.Cash.Serialize());
+            c.Parameters.AddWithValue("@Abilities", e.Abilities.Serialize());
         }
 
         public static void GenerateInsertCommand(SqlCommand c, Actor e)
         {
-            c.CommandText = @"INSERT INTO [Actor]([Id], [Name], [Surname], [ActorType], [UserId], [RoomId], [ClassTemplateId], [RaceTemplateId], [CharacterPoints], [JSONStats], [JSONAttributes], [JSONCash], [JSONAbilities])
-                              VALUES (@Id, @Name, @Surname, @ActorType, @UserId, @RoomId, @ClassTemplateId, @RaceTemplateId, @CharacterPoints, @JSONStats, @JSONAttributes, @JSONCash, @JSONAbilities)";
+            c.CommandText = @"INSERT INTO [Actor]([Id], [Name], [Surname], [ActorType], [UserId], [RoomId], [ClassTemplateId], [RaceTemplateId], [CharacterPoints], [Stats], [Attributes], [Cash], [Abilities])
+                              VALUES (@Id, @Name, @Surname, @ActorType, @UserId, @RoomId, @ClassTemplateId, @RaceTemplateId, @CharacterPoints, @Stats, @Attributes, @Cash, @Abilities)";
             AddSqlParameters(c, e);
         }
 
         public static void GenerateUpdateCommand(SqlCommand c, Actor e)
         {
-            c.CommandText = @"UPDATE [Actor] SET [Id] = @Id, [Name] = @Name, [Surname] = @Surname, [ActorType] = @ActorType, [UserId] = @UserId, [RoomId] = @RoomId, [ClassTemplateId] = @ClassTemplateId, [RaceTemplateId] = @RaceTemplateId, [CharacterPoints] = @CharacterPoints, [JSONStats] = @JSONStats, [JSONAttributes] = @JSONAttributes, [JSONCash] = @JSONCash, [JSONAbilities] = @JSONAbilities WHERE [Id] = @Id";
+            c.CommandText = @"UPDATE [Actor] SET [Id] = @Id, [Name] = @Name, [Surname] = @Surname, [ActorType] = @ActorType, [UserId] = @UserId, [RoomId] = @RoomId, [ClassTemplateId] = @ClassTemplateId, [RaceTemplateId] = @RaceTemplateId, [CharacterPoints] = @CharacterPoints, [Stats] = @Stats, [Attributes] = @Attributes, [Cash] = @Cash, [Abilities] = @Abilities WHERE [Id] = @Id";
             AddSqlParameters(c, e);
         }
 

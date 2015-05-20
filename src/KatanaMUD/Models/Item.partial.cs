@@ -13,13 +13,13 @@ namespace KatanaMUD.Models
 
         partial void OnConstruct()
         {
-            Stats = new AddingContainer(this.JSONStats, GetStatContainers);
+            Stats = new AddingContainer(this.StatsInternal, GetStatContainers);
         }
 
         private IEnumerable<IDictionaryStore> GetStatContainers()
         {
-            yield return this.JSONStats;
-            yield return this.ItemTemplate.JSONStats;
+            yield return this.StatsInternal;
+            yield return this.ItemTemplate.Stats;
         }
 
         public long Weight => Stats.GetCalculatedValue<long>("Weight");

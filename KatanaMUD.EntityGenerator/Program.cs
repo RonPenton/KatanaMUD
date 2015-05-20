@@ -23,16 +23,30 @@ namespace KatanaMUD.EntityGenerator
             AddTypeOverride("ItemTemplate", "EquipType", "EquipmentSlot?");
             AddTypeOverride("User", "AccessLevel", "AccessLevel");
 
-            AddAccessOverride("Item", "JSONStats", "private");
-            AddAccessOverride("Item", "JSONAttributes", "private");
-            AddAccessOverride("Actor", "JSONStats", "private");
-            AddAccessOverride("Actor", "JSONAttributes", "private");
+            AddTypeOverride("Item", "Stats", "Spam.JsonContainer");
+            AddTypeOverride("Item", "Attributes", "Spam.JsonContainer");
+            AddTypeOverride("Actor", "Stats", "Spam.JsonContainer");
+            AddTypeOverride("Actor", "Attributes", "Spam.JsonContainer");
+            AddTypeOverride("Actor", "Cash", "Spam.JsonContainer");
+            AddTypeOverride("Actor", "Abilities", "Spam.JsonContainer");
+            AddTypeOverride("ClassTemplate", "Stats", "Spam.JsonContainer");
+            AddTypeOverride("ItemTemplate", "Stats", "Spam.JsonContainer");
+            AddTypeOverride("ItemTemplate", "Requirements", "Spam.JsonContainer");
+            AddTypeOverride("ItemTemplate", "Attributes", "Spam.JsonContainer");
+            AddTypeOverride("RaceTemplate", "Stats", "Spam.JsonContainer");
+            AddTypeOverride("Room", "Cash", "Spam.JsonContainer");
+            AddTypeOverride("Room", "HiddenCash", "Spam.JsonContainer");
+            AddTypeOverride("Room", "Stats", "Spam.JsonContainer");
 
-            AddNameOverride("Actor", "JSONCash", "Cash");
-            AddNameOverride("Room", "JSONCash", "Cash");
-            AddNameOverride("Room", "JSONHiddenCash", "HiddenCash");
-            AddNameOverride("ClassTemplate", "JSONStats", "Stats");
-            AddNameOverride("RaceTemplate", "JSONStats", "Stats");
+
+
+            AddAccessOverride("Item", "Stats", "private");
+            AddAccessOverride("Item", "Attributes", "private");
+            AddAccessOverride("Actor", "Stats", "private");
+            AddAccessOverride("Actor", "Attributes", "private");
+
+            AddNameOverride("Actor", "Stats", "StatsInternal");
+            AddNameOverride("Item", "Stats", "StatsInternal");
 
             string connectionString = "Data Source=(local);Initial Catalog=KatanaMUD;Integrated Security=true";
             List<ColumnMetadata> columns = null;
@@ -207,7 +221,11 @@ namespace {0}
 
                 foreach (var column in table.NormalColumns)
                 {
-                    builder.AppendFormat("        private {0} _{1};\r\n", column.TypeName, column.CodeName);
+                    var type = GetTypeOverride(table.Name, column.Column);
+                    if (String.IsNullOrEmpty(type) || column.DataType == "int")
+                    {
+                        builder.AppendFormat("        private {0} _{1};\r\n", column.TypeName, column.CodeName);
+                    }
                 }
 
                 foreach (var relationship in table.Relationships)
@@ -217,9 +235,13 @@ namespace {0}
                 }
 
                 builder.AppendFormat("\r\n        public {0}()\r\n        {{\r\n", table.Name);
-                foreach (var column in table.JsonColumns)
+                foreach (var column in table.NormalColumns)
                 {
-                    builder.AppendFormat("            {0} = new JsonContainer(this);\r\n", column.CodeName);
+                    var type = GetTypeOverride(table.Name, column.Column);
+                    if (type != null && column.DataType == "nvarchar")
+                    {
+                        builder.AppendFormat("            {0} = new {1}(this, null);\r\n", column.CodeName, type);
+                    }
                 }
                 foreach (var child in table.Children)
                 {
@@ -249,17 +271,22 @@ namespace {0}
                     }
                     else
                     {
-                        builder.AppendFormat("        {2} {0} {1} {{ get {{ return ({0})_{1}; }} set {{ _{1} = ({3})value; this.Changed(); }} }}\r\n", alteredType, column.CodeName, access, column.TypeName);
+                        if(column.DataType == "nvarchar")
+                        {
+                            string setAccess = "private ";
+                            if (access == "private")
+                                setAccess = "";
+                            builder.AppendFormat("        {1} {3} {0} {{ get; {2}set; }}\r\n", column.CodeName, access, setAccess, alteredType);
+                        }
+                        else if(column.DataType == "int")
+                        {
+                            builder.AppendFormat("        {2} {0} {1} {{ get {{ return ({0})_{1}; }} set {{ _{1} = ({3})value; this.Changed(); }} }}\r\n", alteredType, column.CodeName, access, column.TypeName);
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Generator does not support " + column.DataType + " columns as custom types");
+                        }
                     }
-                }
-
-                foreach (var column in table.JsonColumns)
-                {
-                    var access = GetAccessOverride(table.Name, column.Column);
-                    string setAccess = "private ";
-                    if (access == "private")
-                        setAccess = "";
-                    builder.AppendFormat("        {1} JsonContainer {0} {{ get; {2}set; }}\r\n", column.CodeName, access, setAccess);
                 }
 
                 foreach (var relationship in table.Relationships)
@@ -303,17 +330,15 @@ namespace {0}
                 var i = 0;
                 foreach (var column in table.Columns)
                 {
-                    if (!column.Column.StartsWith("JSON", StringComparison.InvariantCultureIgnoreCase))
+                    var type = GetTypeOverride(table.Name, column.Column);
+                    if (type == null || column.DataType == "int")
                     {
                         builder.AppendFormat("            entity._{0} = reader.Get{1}({2});\r\n", column.CodeName, GetSqlName(column), i);
                     }
                     else
                     {
-                        builder.AppendFormat(@"            entity.{0} = new JsonContainer(entity);
-            entity.{0}.FromJson(reader.GetSafeString({1}));
-", column.CodeName, i);
+                        builder.AppendFormat("            entity.{0} = new {2}(entity, reader.GetSafeString({1}));\r\n", column.CodeName, i, type);
                     }
-
                     i++;
                 }
 
@@ -360,9 +385,10 @@ namespace {0}
 
                 foreach (var column in table.Columns)
                 {
-                    if (column.Column.StartsWith("JSON", StringComparison.InvariantCultureIgnoreCase))
+                    var type = GetTypeOverride(table.Name, column.Column);
+                    if(type != null && column.DataType == "nvarchar")
                     {
-                        builder.AppendFormat("            c.Parameters.AddWithValue(\"@{0}\", e.{1}.ToJson());\r\n", column.Column, column.CodeName);
+                        builder.AppendFormat("            c.Parameters.AddWithValue(\"@{0}\", e.{1}.Serialize());\r\n", column.Column, column.CodeName);
                     }
                     else if (column.ForeignKeyTable != null)
                     {

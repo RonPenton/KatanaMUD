@@ -19,8 +19,7 @@ namespace KatanaMUD.EntityGenerator
         public string Name { get; set; }
         public List<ColumnMetadata> Columns { get; set; }
 
-        public IEnumerable<ColumnMetadata> NormalColumns => Columns.Where(x => !x.Column.StartsWith("JSON", StringComparison.InvariantCultureIgnoreCase) && x.ForeignKeyTable == null);
-        public IEnumerable<ColumnMetadata> JsonColumns => Columns.Where(x => x.Column.StartsWith("JSON", StringComparison.InvariantCultureIgnoreCase));
+        public IEnumerable<ColumnMetadata> NormalColumns => Columns.Where(x => x.ForeignKeyTable == null);
 
         public string PluralName
         {

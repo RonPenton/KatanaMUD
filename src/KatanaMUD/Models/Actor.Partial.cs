@@ -13,15 +13,21 @@ namespace KatanaMUD.Models
         private Party _party;
         public AddingContainer Stats;
         private ConcurrentQueue<MessageBase> _messages = new ConcurrentQueue<MessageBase>();
+        private TimeSpan _nextAvailableActionTime;
+
+        public void AddDelay(TimeSpan time)
+        {
+            _nextAvailableActionTime = Game.GameTime.Add(time);
+        }
 
         partial void OnConstruct()
         {
-            Stats = new AddingContainer(this.JSONStats, GetStatContainers);
+            Stats = new AddingContainer(this.StatsInternal, GetStatContainers);
         }
 
         private IEnumerable<IDictionaryStore> GetStatContainers()
         {
-            yield return this.JSONStats;
+            yield return this.StatsInternal;
             yield return this.ClassTemplate.Stats;
             yield return this.RaceTemplate.Stats;
             foreach(var item in EquippedItems)
@@ -93,6 +99,13 @@ namespace KatanaMUD.Models
 
         internal MessageBase GetNextMessage(out bool remaining)
         {
+            if(Game.GameTime < this._nextAvailableActionTime)
+            {
+                // Cannot process the command yet, still waiting.
+                remaining = _messages.Count > 0;
+                return null;
+            }
+
             MessageBase result;
             _messages.TryDequeue(out result);
             remaining = _messages.Count > 0;
@@ -138,8 +151,6 @@ namespace KatanaMUD.Models
             {
                 message.Description = room.TextBlock.Text;
             }
-
-            //TODO: Hidden stuff
 
             message.Name = room.Name;
             message.RoomId = room.Id;
@@ -425,8 +436,13 @@ namespace KatanaMUD.Models
 
                 Move(newRoom, null, null);
 
-                message.Direction = Directions.Opposite(exit.Direction);
-                message.Enter = true;
+                message = new PartyMovementMessage()
+                {
+                    Leader = new ActorDescription(Leader),
+                    Actors = partyDescription,
+                    Direction = Directions.Opposite(exit.Direction),
+                    Enter = true
+                };
                 newRoom.ActiveActors.ForEach(x => x.SendMessage(message));
 
                 // send "movement" messages to adjacent rooms. 
@@ -458,9 +474,13 @@ namespace KatanaMUD.Models
 
         public void Move(Room newRoom, RoomMessage exit, RoomMessage entrance)
         {
+            var highestEncumbrance = Members.Max(x => (double)x.Encumbrance / (double)x.MaxEncumbrance);
+            var delay = 4.0 * highestEncumbrance;   // TODO: If round lengths become altered...
+
             Members.ForEach(x =>
             {
                 x.Room = newRoom;
+                x.AddDelay(TimeSpan.FromSeconds(delay));
             });
 
             Members.ForEach(x =>
