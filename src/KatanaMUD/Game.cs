@@ -9,6 +9,8 @@ using System.Threading;
 using System.Linq;
 using KatanaMUD.Models;
 using KatanaMUD.Helpers;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.CodeAnalysis.Scripting.CSharp;
 
 namespace KatanaMUD
 {

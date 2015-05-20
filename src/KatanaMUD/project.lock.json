@@ -16,7 +16,7 @@
       "Newtonsoft.Json >= 7.0.1-beta2",
       "Microsoft.AspNet.Authentication.Cookies >= 1.0.0-beta4",
       "Spam >= 1.0.0-*",
-      "Microsoft.CodeAnalysis.Scripting >= 1.0.0-*"
+      "Microsoft.CodeAnalysis.Scripting.CSharp >= 1.0.0-rc3-20150514-02"
     ],
     "DNX,Version=v4.5.1": []
   },
@@ -1513,28 +1513,6 @@
         "lib/portable-net45+win8/Microsoft.CodeAnalysis.CSharp.xml"
       ]
     },
-    "Microsoft.CodeAnalysis.Scripting/1.0.0-rc3-20150514-02": {
-      "serviceable": false,
-      "sha": "dtEKyZvtCEeTVe0mQiGkDMWIXNzCIahOSzGD6HvUv6LtLez00lCp7JbViEfWP6qKexviiWPtKgbm4WqFHvkvHg==",
-      "frameworks": {
-        "DNX,Version=v4.5.1": {
-          "dependencies": {
-            "Microsoft.CodeAnalysis.Scripting.Common": "[1.0.0-rc3-20150514-02]",
-            "Microsoft.CodeAnalysis.Scripting.CSharp": "[1.0.0-rc3-20150514-02]",
-            "Microsoft.CodeAnalysis.Scripting.VisualBasic": "[1.0.0-rc3-20150514-02]"
-          },
-          "frameworkAssemblies": [],
-          "runtimeAssemblies": [],
-          "compileAssemblies": []
-        }
-      },
-      "files": [
-        "Microsoft.CodeAnalysis.Scripting.1.0.0-rc3-20150514-02.nupkg",
-        "Microsoft.CodeAnalysis.Scripting.1.0.0-rc3-20150514-02.nupkg.sha512",
-        "Microsoft.CodeAnalysis.Scripting.nuspec",
-        "ThirdPartyNotices.rtf"
-      ]
-    },
     "Microsoft.CodeAnalysis.Scripting.Common/1.0.0-rc3-20150514-02": {
       "serviceable": false,
       "sha": "Q0NjA1FTIooKYsxrfXSFHfVG9w6ckakqa1Ze+snTk9zf/kaYDp+H0BtyvSdm8IMEFW377hXKm/Nge9iP+Ew6Kw==",
@@ -1585,32 +1563,6 @@
         "ThirdPartyNotices.rtf",
         "lib/net45/Microsoft.CodeAnalysis.Scripting.CSharp.dll",
         "lib/net45/Microsoft.CodeAnalysis.Scripting.CSharp.xml"
-      ]
-    },
-    "Microsoft.CodeAnalysis.Scripting.VisualBasic/1.0.0-rc3-20150514-02": {
-      "serviceable": false,
-      "sha": "qGTtWW7OJ3zGrPXqxBHC6SBHo9ffvcKP0fdcUSzDUXx8mYcvUbrUIKeMTVnwxA6zQZidxjub1wo4PrBM+dvVXg==",
-      "frameworks": {
-        "DNX,Version=v4.5.1": {
-          "dependencies": {
-            "Microsoft.CodeAnalysis.Scripting.Common": "[1.0.0-rc3-20150514-02]"
-          },
-          "frameworkAssemblies": [],
-          "runtimeAssemblies": [
-            "lib/net45/Microsoft.CodeAnalysis.Scripting.VisualBasic.dll"
-          ],
-          "compileAssemblies": [
-            "lib/net45/Microsoft.CodeAnalysis.Scripting.VisualBasic.dll"
-          ]
-        }
-      },
-      "files": [
-        "Microsoft.CodeAnalysis.Scripting.VisualBasic.1.0.0-rc3-20150514-02.nupkg",
-        "Microsoft.CodeAnalysis.Scripting.VisualBasic.1.0.0-rc3-20150514-02.nupkg.sha512",
-        "Microsoft.CodeAnalysis.Scripting.VisualBasic.nuspec",
-        "ThirdPartyNotices.rtf",
-        "lib/net45/Microsoft.CodeAnalysis.Scripting.VisualBasic.dll",
-        "lib/net45/Microsoft.CodeAnalysis.Scripting.VisualBasic.xml"
       ]
     },
     "Microsoft.Framework.Caching.Interfaces/1.0.0-beta4": {

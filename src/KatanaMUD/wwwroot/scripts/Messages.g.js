@@ -340,6 +340,25 @@ var KMud;
         return SysopMessage;
     })(KMud.MessageBase);
     KMud.SysopMessage = SysopMessage;
+    var WhoCommand = (function (_super) {
+        __extends(WhoCommand, _super);
+        function WhoCommand() {
+            _super.call(this, 'WhoCommand');
+        }
+        WhoCommand.ClassName = 'WhoCommand';
+        return WhoCommand;
+    })(KMud.MessageBase);
+    KMud.WhoCommand = WhoCommand;
+    var WhoMessage = (function (_super) {
+        __extends(WhoMessage, _super);
+        function WhoMessage(Actors) {
+            _super.call(this, 'WhoMessage');
+            this.Actors = Actors;
+        }
+        WhoMessage.ClassName = 'WhoMessage';
+        return WhoMessage;
+    })(KMud.MessageBase);
+    KMud.WhoMessage = WhoMessage;
     var ItemDescription = (function () {
         function ItemDescription() {
         }

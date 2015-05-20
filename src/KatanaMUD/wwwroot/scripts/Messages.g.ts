@@ -111,6 +111,14 @@ module KMud {
         constructor(public Command?: string) { super('SysopMessage'); }
         public static ClassName: string = 'SysopMessage';
     }
+    export class WhoCommand extends MessageBase {
+        constructor() { super('WhoCommand'); }
+        public static ClassName: string = 'WhoCommand';
+    }
+    export class WhoMessage extends MessageBase {
+        constructor(public Actors?: ActorDescription[]) { super('WhoMessage'); }
+        public static ClassName: string = 'WhoMessage';
+    }
     export class ItemDescription {
         public Name: string;
         public Id: string;
@@ -120,7 +128,12 @@ module KMud {
     }
     export class ActorDescription {
         public Name: string;
+        public Surname: string;
         public Id: string;
+        public EvilPoints: number;
+        public Title: string;
+        public Gang: string;
+        public Gossip: boolean;
     }
     export class CurrencyDescription {
         public Name: string;

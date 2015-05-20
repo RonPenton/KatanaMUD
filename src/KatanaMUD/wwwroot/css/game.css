@@ -170,3 +170,29 @@ a:hover {
   text-decoration: underline;
   cursor: pointer;
 }
+.who-header {
+  font-weight: bold;
+  white-space: pre;
+  color: yellow;
+}
+.divider {
+  white-space: pre;
+  color: darkgray;
+}
+.who-faction {
+  white-space: pre;
+  color: white;
+}
+.who-name {
+  color: #16be16;
+  white-space: pre;
+}
+.who-gossip {
+  color: #16be16;
+}
+.who-title {
+  color: mediumpurple;
+}
+.who-gang {
+  color: goldenrod;
+}

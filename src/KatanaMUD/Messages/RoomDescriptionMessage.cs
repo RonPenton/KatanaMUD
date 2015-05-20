@@ -47,14 +47,25 @@ namespace KatanaMUD.Messages
     public class ActorDescription
     {
         public string Name { get; set; }
+        public string Surname { get; set; }
         public Guid Id { get; set; }
+        public int EvilPoints { get; set; }
+        public string Title { get; set; }
+        public string Gang { get; set; }
+        public bool Gossip { get; set; }
 
         public ActorDescription() { }
 
         public ActorDescription(Actor actor)
         {
             this.Name = actor.Name;
+            this.Surname = actor.Surname;
             this.Id = actor.Id;
+            //TODO: Evil Points
+            //TODO: Title
+            this.Title = "Novice";
+            //TODO: Gang
+            //TODO: Gossip
         }
     }
 

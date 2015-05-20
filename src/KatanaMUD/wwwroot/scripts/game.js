@@ -151,6 +151,7 @@ var KMud;
             this.messageHandlers[KMud.AmbiguousActorMessage.ClassName] = function (message) { return _this.ambiguousActors(message); };
             this.messageHandlers[KMud.AmbiguousItemMessage.ClassName] = function (message) { return _this.ambiguousItems(message); };
             this.messageHandlers[KMud.ItemEquippedChangedMessage.ClassName] = function (message) { return _this.equipChanged(message); };
+            this.messageHandlers[KMud.WhoMessage.ClassName] = function (message) { return _this.who(message); };
         };
         Game.prototype.registerCommandHandlers = function () {
             var _this = this;
@@ -176,6 +177,7 @@ var KMud;
             this.commandHandlers["give"] = function (words) { return _this.give(words.tail(0)); };
             this.commandHandlers["gos"] = this.commandHandlers["gossip"] = function (words) { return _this.talk(words.tail(0), 0 /* Gossip */); };
             this.commandHandlers["say"] = function (words) { return _this.talk(words.tail(0), 2 /* Say */); };
+            this.commandHandlers["who"] = function (words) { return _this.SendMessage(new KMud.WhoCommand()); };
             this.commandHandlers["sys"] = this.commandHandlers["sysop"] = function (words) {
                 _this.SendMessage(new KMud.SysopMessage(words.tail(0)));
             };
@@ -502,6 +504,27 @@ var KMud;
                 }
             }
         };
+        Game.prototype.who = function (message) {
+            var actors = KMud.Linq(message.Actors).orderBy(function (x) { return x.Name; });
+            // TODO: Factions/EPs
+            var factionColumn = 9;
+            var nameColumn = actors.select(function (x) { return x.Name + " " + Str.safe(x.Surname); }).max(function (x) { return x.length; }) + 1;
+            this.addOutput(this.mainOutput, Str.repeat(" ", factionColumn) + "Current Adventurers", "who-header");
+            this.addOutput(this.mainOutput, Str.repeat(" ", factionColumn) + "===================", "divider");
+            this.addOutput(this.mainOutput, "");
+            for (var i = 0; i < message.Actors.length; i++) {
+                var actor = message.Actors[i];
+                this.addOutput(this.mainOutput, Str.repeat(" ", factionColumn), "who-faction", false);
+                this.addOutput(this.mainOutput, Str.pad(actor.Name + " " + Str.safe(actor.Surname), " ", nameColumn), "who-name", false);
+                this.addOutput(this.mainOutput, "-  ", "who-gossip", false);
+                this.addOutput(this.mainOutput, actor.Title, "who-title", Str.empty(actor.Gang) ? true : false);
+                if (!Str.empty(actor.Gang)) {
+                    this.addOutput(this.mainOutput, "of", "who-name", false);
+                    this.addOutput(this.mainOutput, actor.Gang, "who-gang", true);
+                }
+            }
+            this.addOutput(this.mainOutput, "");
+        };
         //////////////////////////////////////////////////////////////////////////////////
         // OUTPUT ROUTINES 
         /////////////////////////////////////////////////////////////////////////////////
@@ -660,6 +683,24 @@ var KMud;
                 result[1] = str;
             }
             return result;
+        };
+        Str.repeat = function (char, times) {
+            return Array(times + 1).join(char);
+        };
+        Str.pad = function (str, padChar, totalLength) {
+            while (str.length < totalLength)
+                str += padChar;
+            return str;
+        };
+        Str.padLeft = function (str, padChar, totalLength) {
+            while (str.length < totalLength)
+                str = padChar + str;
+            return str;
+        };
+        Str.safe = function (str) {
+            if (str === null || str === undefined)
+                return "";
+            return str;
         };
         // Referring to the table here:
         // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/regexp

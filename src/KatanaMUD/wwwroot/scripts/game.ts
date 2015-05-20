@@ -171,8 +171,8 @@ module KMud {
             this.messageHandlers[GenericMessage.ClassName] = (message: GenericMessage) => this.addOutput(this.mainOutput, message.Message, message.Class);
             this.messageHandlers[AmbiguousActorMessage.ClassName] = (message: AmbiguousActorMessage) => this.ambiguousActors(message);
             this.messageHandlers[AmbiguousItemMessage.ClassName] = (message: AmbiguousItemMessage) => this.ambiguousItems(message);
-
             this.messageHandlers[ItemEquippedChangedMessage.ClassName] = (message: ItemEquippedChangedMessage) => this.equipChanged(message);
+            this.messageHandlers[WhoMessage.ClassName] = (message: WhoMessage) => this.who(message);
         }
 
         private registerCommandHandlers() {
@@ -202,6 +202,8 @@ module KMud {
 
             this.commandHandlers["gos"] = this.commandHandlers["gossip"] = words => this.talk(words.tail(0), CommunicationType.Gossip);
             this.commandHandlers["say"] = words => this.talk(words.tail(0), CommunicationType.Say);
+
+            this.commandHandlers["who"] = words => this.SendMessage(new WhoCommand());
 
             this.commandHandlers["sys"] = this.commandHandlers["sysop"] = words => { this.SendMessage(new SysopMessage(words.tail(0))) }
 
@@ -578,6 +580,32 @@ module KMud {
             }
         }
 
+        private who(message: WhoMessage) {
+
+            var actors = Linq(message.Actors).orderBy(x=> x.Name);
+
+            // TODO: Factions/EPs
+            var factionColumn = 9;
+            var nameColumn = actors.select(x => x.Name + " " + Str.safe(x.Surname)).max(x => x.length) + 1;
+
+            this.addOutput(this.mainOutput, Str.repeat(" ", factionColumn) + "Current Adventurers", "who-header");
+            this.addOutput(this.mainOutput, Str.repeat(" ", factionColumn) + "===================", "divider");
+            this.addOutput(this.mainOutput, "");
+
+            for (var i = 0; i < message.Actors.length; i++) {
+                var actor = message.Actors[i];
+                this.addOutput(this.mainOutput, Str.repeat(" ", factionColumn), "who-faction", false);
+                this.addOutput(this.mainOutput, Str.pad(actor.Name + " " + Str.safe(actor.Surname), " ", nameColumn), "who-name", false);
+                this.addOutput(this.mainOutput, "-  ", "who-gossip", false);
+                this.addOutput(this.mainOutput, actor.Title, "who-title", Str.empty(actor.Gang) ? true : false);
+                if (!Str.empty(actor.Gang)) {
+                    this.addOutput(this.mainOutput, "of", "who-name", false);
+                    this.addOutput(this.mainOutput, actor.Gang, "who-gang", true);
+                }
+            }
+            this.addOutput(this.mainOutput, "");
+        }
+
 
         //////////////////////////////////////////////////////////////////////////////////
         // OUTPUT ROUTINES 
@@ -773,6 +801,28 @@ module KMud {
             }
 
             return result;
+        }
+
+        public static repeat(char: string, times: number): string {
+            return Array(times + 1).join(char);
+        }
+
+        public static pad(str: string, padChar: string, totalLength: number): string {
+            while (str.length < totalLength)
+                str += padChar;
+            return str;
+        }
+
+        public static padLeft(str: string, padChar: string, totalLength: number): string {
+            while (str.length < totalLength)
+                str = padChar + str;
+            return str;
+        }
+
+        public static safe(str: string): string {
+            if (str === null || str === undefined)
+                return "";
+            return str;
         }
     }
 
