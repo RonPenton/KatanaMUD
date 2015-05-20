@@ -69,7 +69,7 @@ namespace KatanaMUD
                         bool remaining;
                         var message = x.GetNextMessage(out remaining);
                         return Tuple.Create(x, message, remaining);
-                    }).Where(x => x.Item2 != null).OrderBy(x => x.Item2.MessageTime).ToList();
+                    }).OrderBy(x => x.Item2?.MessageTime).ToList();
 
                     // If any actors have more messages, re-add them to the active list.
                     // we only grab the top message from each actor because each action may have a time component to it,
@@ -83,7 +83,7 @@ namespace KatanaMUD
                         ActiveActors.Add(message.Item1);
                     }
 
-                    foreach (var message in messages)
+                    foreach (var message in messages.Where(x => x.Item2 != null))
                     {
                         message.Item2.Process(message.Item1);
                     }

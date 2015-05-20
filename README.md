@@ -51,12 +51,9 @@ This is a preliminary roadmap for the game. Everything is subject to change on m
 
 ## 0.2
 
-- [ ] Item module
-- [ ] Movement Limitation
+- [x] Item module
+- [x] Movement Limitation
 - [ ] Command/Data Rate Limitations and queuing
-- [ ] Admin/Log Module (All admin commands will be publicly logged, to promote honesty in operation)
-- [ ] Gangs
-- [ ] Communication Enhancements: chatrooms, gangpaths, officerpaths
 
 ## 0.3
 
@@ -69,6 +66,8 @@ This is a preliminary roadmap for the game. Everything is subject to change on m
 
 - [ ] Combat
 - [ ] Skill Trees (spells, skills)
+- [ ] Gangs
+- [ ] Communication Enhancements: chatrooms, gangpaths, officerpaths
 
 ## 0.5
 
@@ -81,6 +80,7 @@ This is a preliminary roadmap for the game. Everything is subject to change on m
 
 ## 1.0
 
+- [ ] Admin/Log Module (All admin commands will be publicly logged, to promote honesty in operation)
 - [ ] Balancing of the game
 - [ ] Automation of client (ie: MegaMUD-like features)
 
