@@ -145,7 +145,7 @@ namespace KatanaMUD.Importer.Structures
             item.Id = Number;
             item.Name = new string(Name.TakeWhile(x => x != '\0').ToArray()).Trim();
 
-            item.JSONStats.Set<long>("Weight", Weight);
+            item.Stats.Set<long>("Weight", Weight);
 
             switch (WornOn)
             {

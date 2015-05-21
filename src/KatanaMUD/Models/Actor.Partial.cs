@@ -474,13 +474,9 @@ namespace KatanaMUD.Models
 
         public void Move(Room newRoom, RoomMessage exit, RoomMessage entrance)
         {
-            var highestEncumbrance = Members.Max(x => (double)x.Encumbrance / (double)x.MaxEncumbrance);
-            var delay = 4.0 * highestEncumbrance;   // TODO: If round lengths become altered...
-
             Members.ForEach(x =>
             {
                 x.Room = newRoom;
-                x.AddDelay(TimeSpan.FromSeconds(delay));
             });
 
             Members.ForEach(x =>

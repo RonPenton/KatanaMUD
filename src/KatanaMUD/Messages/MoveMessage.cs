@@ -1,4 +1,5 @@
-﻿using KatanaMUD.Models;
+﻿using KatanaMUD.Events;
+using KatanaMUD.Models;
 using System;
 using System.Linq;
 
@@ -25,7 +26,12 @@ namespace KatanaMUD.Messages
 
                     if (action.Allowed)
                     {
-                        actor.Party.Move(exit);
+                        var highestEncumbrance = actor.Party.Members.Max(x => (double)x.Encumbrance / (double)x.MaxEncumbrance);
+                        var delay = 4.0 * highestEncumbrance;   // TODO: If round lengths become altered...
+
+                        var ev = new MoveEvent(actor, exit, Game.GameTime.Add(TimeSpan.FromSeconds(delay)));
+                        actor.Party.Members.ForEach(x => x.AddDelay(TimeSpan.FromSeconds(delay)));
+                        Game.AddEvent(ev);
                     }
                     else
                     {

@@ -11,6 +11,8 @@ using KatanaMUD.Models;
 using KatanaMUD.Helpers;
 using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.CSharp;
+using C5;
+using KatanaMUD.Events;
 
 namespace KatanaMUD
 {
@@ -26,6 +28,27 @@ namespace KatanaMUD
         public static Random Random { get; } = new Random();
 
         public static TimeSpan GameTime { get; private set; }
+
+        private static IntervalHeap<GameEvent> _eventQueue = new IntervalHeap<GameEvent>();
+
+        public static void AddEvent(GameEvent e) {
+            IPriorityQueueHandle<GameEvent> handle = null;
+            _eventQueue.Add(ref handle, e);
+            e.Handle = handle;
+        }
+
+        public static void CancelEvent(GameEvent e)
+        {
+            _eventQueue.Delete(e.Handle);
+            e.Handle = null;
+        }
+
+        public static void RescheduleEvent(GameEvent e, TimeSpan newTime)
+        {
+            CancelEvent(e);
+            e.ExecutionTime = newTime;
+            AddEvent(e);
+        }
 
         async public static void Run()
         {
@@ -59,6 +82,13 @@ namespace KatanaMUD
 
                     // handle connections/disconnections
                     Connections.HandleConnectsAndDisconnects();
+
+                    // Handle all timed events.
+                    while(_eventQueue.Count > 0 && _eventQueue.FindMin().ExecutionTime < GameTime)
+                    {
+                        var ev = _eventQueue.DeleteMin();
+                        ev.Execute();
+                    }
 
                     // Grab a snapshot of all active actors (will clear the active list)
                     var actors = ActiveActors.Snapshot();
