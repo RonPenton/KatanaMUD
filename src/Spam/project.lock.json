@@ -1,31 +1,21 @@
 {
   "locked": false,
-  "version": -9998,
-  "projectFileDependencyGroups": {
-    "": [
-      "KatanaMUD.Helpers >= 1.0.0-*",
-      "Newtonsoft.Json >= 7.0.1-beta2"
-    ],
-    "DNX,Version=v4.5.1": [
-      "framework/System.Data >= 4.0.0.0"
-    ]
+  "version": -9996,
+  "targets": {
+    "DNX,Version=v4.5.1": {
+      "Newtonsoft.Json/7.0.1-beta2": {
+        "compile": {
+          "lib/net45/Newtonsoft.Json.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Newtonsoft.Json.dll": {}
+        }
+      }
+    }
   },
   "libraries": {
     "Newtonsoft.Json/7.0.1-beta2": {
-      "serviceable": false,
-      "sha": "/NZ+ZdbbNyoWYrjRajzERgKGGOcbjfGbi2mi/4C5MpT5BOV2nUoQ+RIYaN0WxYq6i20nHQbYN56IWBTB4ut20Q==",
-      "frameworks": {
-        "DNX,Version=v4.5.1": {
-          "dependencies": {},
-          "frameworkAssemblies": [],
-          "runtimeAssemblies": [
-            "lib/net45/Newtonsoft.Json.dll"
-          ],
-          "compileAssemblies": [
-            "lib/net45/Newtonsoft.Json.dll"
-          ]
-        }
-      },
+      "sha512": "/NZ+ZdbbNyoWYrjRajzERgKGGOcbjfGbi2mi/4C5MpT5BOV2nUoQ+RIYaN0WxYq6i20nHQbYN56IWBTB4ut20Q==",
       "files": [
         "Newtonsoft.Json.7.0.1-beta2.nupkg",
         "Newtonsoft.Json.7.0.1-beta2.nupkg.sha512",
@@ -45,5 +35,14 @@
         "tools/install.ps1"
       ]
     }
+  },
+  "projectFileDependencyGroups": {
+    "": [
+      "KatanaMUD.Helpers >= 1.0.0-*",
+      "Newtonsoft.Json >= 7.0.1-beta2"
+    ],
+    "DNX,Version=v4.5.1": [
+      "framework/System.Data >= 4.0.0.0"
+    ]
   }
 }

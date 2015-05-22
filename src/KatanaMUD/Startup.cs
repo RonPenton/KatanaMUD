@@ -13,6 +13,7 @@ using Microsoft.AspNet.StaticFiles;
 using KatanaMUD.Messages;
 using System.Linq;
 using Microsoft.AspNet.Authentication.Cookies;
+using Microsoft.AspNet.Http.Features;
 
 namespace KatanaMUD
 {
@@ -60,9 +61,9 @@ namespace KatanaMUD
 
             app.Use(async (HttpContext context, Func<Task> next) =>
             {
-                if (context.IsWebSocketRequest)
+                if (context.WebSockets.IsWebSocketRequest)
                 {
-                    var socket = await context.AcceptWebSocketAsync(context.WebSocketRequestedProtocols[0]);
+                    var socket = await context.WebSockets.AcceptWebSocketAsync(context.WebSockets.WebSocketRequestedProtocols[0]);
                     var ip = context.GetFeature<IHttpConnectionFeature>()?.RemoteIpAddress?.ToString() ?? "No IP Address";
                     Console.WriteLine(String.Format("[{0}] Incoming connection: {1}", DateTime.Now.ToShortTimeString(), ip));
 

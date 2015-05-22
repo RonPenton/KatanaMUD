@@ -52,7 +52,7 @@ namespace KatanaMUD.Controllers
 
             var claim = new Claim(ClaimTypes.Name, model.Username);
             var identity = new ClaimsIdentity(new List<Claim>() { claim }, CookieAuthenticationDefaults.AuthenticationScheme);
-            Context.Response.SignIn(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(new[] { identity }));
+            Context.Authentication.SignIn(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(new[] { identity }));
 
             return RedirectToAction("Index", controllerName: "Home");
         }
@@ -69,7 +69,7 @@ namespace KatanaMUD.Controllers
             {
                 var claim = new Claim(ClaimTypes.Name, model.Username);
                 var identity = new ClaimsIdentity(new List<Claim>() { claim }, CookieAuthenticationDefaults.AuthenticationScheme);
-                Context.Response.SignIn(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(new[] { identity }));
+                Context.Authentication.SignIn(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(new[] { identity }));
 
                 return RedirectToAction("Index", controllerName: "Home");
             }
@@ -85,7 +85,7 @@ namespace KatanaMUD.Controllers
         [HttpPost]
         public IActionResult Logout()
         {
-            Context.Response.SignOut(CookieAuthenticationDefaults.AuthenticationScheme);
+            Context.Authentication.SignOut(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login");
         }
 
