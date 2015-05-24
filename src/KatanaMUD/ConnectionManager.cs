@@ -34,6 +34,10 @@ namespace KatanaMUD
             }
         }
 
+        /// <summary>
+        /// This is called whenever a connection needs to be forcibly closed. 
+        /// </summary>
+        /// <param name="user"></param>
         internal void Disconnect(User user)
         {
             lock (syncRoot)
@@ -47,6 +51,10 @@ namespace KatanaMUD
             }
         }
 
+        /// <summary>
+        /// This is called whenever a connection has closed from the client side. It notifies the game of the disconnection.
+        /// </summary>
+        /// <param name="connection"></param>
         internal void Disconnected(Connection connection)
         {
             if (connection.Disconnected)

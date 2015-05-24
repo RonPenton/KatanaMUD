@@ -24,5 +24,10 @@ namespace KatanaMUD
         {
             return type.GetProperties().Single(x => x.Name == propertyName);
         }
+
+        public static bool ImplementsInterface<InterfaceType>(this Type toCheck)
+        {
+            return typeof(InterfaceType).IsAssignableFrom(toCheck);
+        }
     }
 }
