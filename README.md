@@ -53,7 +53,7 @@ This is a preliminary roadmap for the game. Everything is subject to change on m
 
 - [x] Item module
 - [x] Movement Limitation
-- [ ] Command/Data Rate Limitations and queuing
+- [x] Command/Data Rate Limitations and queuing
 
 ## 0.3
 
