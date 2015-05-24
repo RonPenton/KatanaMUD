@@ -58,6 +58,7 @@ This is a preliminary roadmap for the game. Everything is subject to change on m
 ## 0.3
 
 - [ ] Scripting Engine
+- [ ] Configuration Setting system
 - [ ] Portals (advanced exit types)
 - [ ] Stat System
 - [ ] Buff System
