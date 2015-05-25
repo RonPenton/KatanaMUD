@@ -2,14 +2,43 @@
 using Microsoft.CodeAnalysis.Scripting.CSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace KatanaMUD.Scripts
 {
-    public static class ScriptLoader
+    public static class ScriptManager
     {
-        public static IEnumerable<Type> Load<T>(string code)
+        static Dictionary<string, Type> _roomScripts = new Dictionary<string, Type>(StringComparer.InvariantCultureIgnoreCase);
+
+        public static IRoomScript GetRoomScript(string name)
+        {
+            return GetScript<IRoomScript>(name, new Lazy<IRoomScript>(() => new DefaultRoomScript()), _roomScripts);
+        }
+
+        private static T GetScript<T>(string name, Lazy<T> defaultScript, Dictionary<string, Type> dictionary)
+        {
+            Type type;
+            if (!dictionary.TryGetValue(name, out type))
+                return defaultScript.Value;
+            return (T)type.Assembly.CreateInstance(type.FullName);
+        }
+
+        public static void LoadScripts()
+        {
+            Load<IRoomScript>("Rooms", _roomScripts);
+        }
+
+        private static void Load<T>(string directoryName, Dictionary<string, Type> dictionary)
+        {
+            var files = Directory.EnumerateFiles(@"..\Scripts\" + directoryName, "*.cs", SearchOption.AllDirectories);
+            List<Type> types = new List<Type>();
+            files.ForEach(x => types.AddRange(Load<T>(File.ReadAllText(x))));
+            types.ForEach(x => dictionary[x.Name] = x);
+        }
+
+        private static IEnumerable<Type> Load<T>(string code)
         {
             //TODO: Figure out if we need to load references dynamically to support a rich scripting environment.
             ScriptOptions options = ScriptOptions.Default

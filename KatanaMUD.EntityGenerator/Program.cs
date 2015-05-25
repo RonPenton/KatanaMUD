@@ -38,15 +38,15 @@ namespace KatanaMUD.EntityGenerator
             AddTypeOverride("Room", "HiddenCash", "Spam.JsonContainer");
             AddTypeOverride("Room", "Stats", "Spam.JsonContainer");
 
-
-
             AddAccessOverride("Item", "Stats", "private");
             AddAccessOverride("Item", "Attributes", "private");
             AddAccessOverride("Actor", "Stats", "private");
             AddAccessOverride("Actor", "Attributes", "private");
+            AddAccessOverride("Room", "Scripts", "private");
 
             AddNameOverride("Actor", "Stats", "StatsInternal");
             AddNameOverride("Item", "Stats", "StatsInternal");
+            AddNameOverride("Room", "Scripts", "ScriptsInternal");
 
             string connectionString = "Data Source=(local);Initial Catalog=KatanaMUD;Integrated Security=true";
             List<ColumnMetadata> columns = null;
@@ -216,6 +216,7 @@ namespace {0}
 ", namespaceName);
                 builder.AppendFormat("    public partial class {0} : Entity<{1}>\r\n    {{\r\n", table.Name, table.PrimaryKey.TypeName);
                 builder.Append("        partial void OnConstruct();\r\n");
+                builder.Append("        partial void OnLoaded();\r\n");
                 builder.AppendFormat("        public override {0} Key {{ get {{ return {1}; }} set {{ {1} = value; }} }}\r\n", table.PrimaryKey.TypeName, table.PrimaryKey.CodeName);
                 builder.AppendFormat("        private {0} Context => ({0})__context;\r\n", className);
 
@@ -342,7 +343,8 @@ namespace {0}
                     i++;
                 }
 
-                builder.AppendFormat(@"            return entity;
+                builder.AppendFormat(@"            entity.OnLoaded();
+            return entity;
         }}
 
         public override void LoadRelationships()

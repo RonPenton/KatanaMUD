@@ -4,11 +4,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Spam;
+using KatanaMUD.Scripts;
 
 namespace KatanaMUD.Models
 {
     public partial class Room
-    { 
+    {
+        public IReadOnlyList<IRoomScript> Scripts { get; private set; } = new List<IRoomScript>();
+        partial void OnLoaded()
+        {
+            var scripts = this.ScriptsInternal.Split(';');
+            Scripts = scripts.Select(x => ScriptManager.GetRoomScript(x)).ToList();
+        }
+
         public Exit GetExit(Direction direction)
         {
             var exit = new Exit() { Direction = direction };

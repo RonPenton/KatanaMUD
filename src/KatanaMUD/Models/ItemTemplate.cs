@@ -9,6 +9,7 @@ namespace KatanaMUD.Models
     public partial class ItemTemplate : Entity<Int32>
     {
         partial void OnConstruct();
+        partial void OnLoaded();
         public override Int32 Key { get { return Id; } set { Id = value; } }
         private GameEntities Context => (GameEntities)__context;
         private Int32 _Id;
@@ -70,6 +71,7 @@ namespace KatanaMUD.Models
             entity.Stats = new Spam.JsonContainer(entity, reader.GetSafeString(13));
             entity.Requirements = new Spam.JsonContainer(entity, reader.GetSafeString(14));
             entity.Attributes = new Spam.JsonContainer(entity, reader.GetSafeString(15));
+            entity.OnLoaded();
             return entity;
         }
 

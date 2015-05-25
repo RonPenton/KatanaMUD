@@ -9,6 +9,7 @@ namespace KatanaMUD.Models
     public partial class Room : Entity<Int32>
     {
         partial void OnConstruct();
+        partial void OnLoaded();
         public override Int32 Key { get { return Id; } set { Id = value; } }
         private GameEntities Context => (GameEntities)__context;
         private Int32 _Id;
@@ -23,6 +24,7 @@ namespace KatanaMUD.Models
         private Int32? _SouthWestExit;
         private Int32? _UpExit;
         private Int32? _DownExit;
+        private String _ScriptsInternal;
         private Int32? _RegionId;
         private Region _Region;
         private Int32 _TextBlockId;
@@ -53,6 +55,7 @@ namespace KatanaMUD.Models
         public Spam.JsonContainer Cash { get; private set; }
         public Spam.JsonContainer HiddenCash { get; private set; }
         public Spam.JsonContainer Stats { get; private set; }
+        private String ScriptsInternal { get { return _ScriptsInternal; } set { _ScriptsInternal = value; this.Changed(); } }
         partial void OnRegionChanging(Region oldValue, Region newValue);
         public Region Region {
             get { return _Region; }
@@ -99,6 +102,8 @@ namespace KatanaMUD.Models
             entity.Cash = new Spam.JsonContainer(entity, reader.GetSafeString(14));
             entity.HiddenCash = new Spam.JsonContainer(entity, reader.GetSafeString(15));
             entity.Stats = new Spam.JsonContainer(entity, reader.GetSafeString(16));
+            entity._ScriptsInternal = reader.GetSafeString(17);
+            entity.OnLoaded();
             return entity;
         }
 
@@ -128,18 +133,19 @@ namespace KatanaMUD.Models
             c.Parameters.AddWithValue("@Cash", e.Cash.Serialize());
             c.Parameters.AddWithValue("@HiddenCash", e.HiddenCash.Serialize());
             c.Parameters.AddWithValue("@Stats", e.Stats.Serialize());
+            c.Parameters.AddWithValue("@ScriptsInternal", (object)e.ScriptsInternal ?? DBNull.Value);
         }
 
         public static void GenerateInsertCommand(SqlCommand c, Room e)
         {
-            c.CommandText = @"INSERT INTO [Room]([Id], [RegionId], [Name], [TextBlockId], [NorthExit], [SouthExit], [EastExit], [WestExit], [NorthEastExit], [NorthWestExit], [SouthEastExit], [SouthWestExit], [UpExit], [DownExit], [Cash], [HiddenCash], [Stats])
-                              VALUES (@Id, @RegionId, @Name, @TextBlockId, @NorthExit, @SouthExit, @EastExit, @WestExit, @NorthEastExit, @NorthWestExit, @SouthEastExit, @SouthWestExit, @UpExit, @DownExit, @Cash, @HiddenCash, @Stats)";
+            c.CommandText = @"INSERT INTO [Room]([Id], [RegionId], [Name], [TextBlockId], [NorthExit], [SouthExit], [EastExit], [WestExit], [NorthEastExit], [NorthWestExit], [SouthEastExit], [SouthWestExit], [UpExit], [DownExit], [Cash], [HiddenCash], [Stats], [Scripts])
+                              VALUES (@Id, @RegionId, @Name, @TextBlockId, @NorthExit, @SouthExit, @EastExit, @WestExit, @NorthEastExit, @NorthWestExit, @SouthEastExit, @SouthWestExit, @UpExit, @DownExit, @Cash, @HiddenCash, @Stats, @Scripts)";
             AddSqlParameters(c, e);
         }
 
         public static void GenerateUpdateCommand(SqlCommand c, Room e)
         {
-            c.CommandText = @"UPDATE [Room] SET [Id] = @Id, [RegionId] = @RegionId, [Name] = @Name, [TextBlockId] = @TextBlockId, [NorthExit] = @NorthExit, [SouthExit] = @SouthExit, [EastExit] = @EastExit, [WestExit] = @WestExit, [NorthEastExit] = @NorthEastExit, [NorthWestExit] = @NorthWestExit, [SouthEastExit] = @SouthEastExit, [SouthWestExit] = @SouthWestExit, [UpExit] = @UpExit, [DownExit] = @DownExit, [Cash] = @Cash, [HiddenCash] = @HiddenCash, [Stats] = @Stats WHERE [Id] = @Id";
+            c.CommandText = @"UPDATE [Room] SET [Id] = @Id, [RegionId] = @RegionId, [Name] = @Name, [TextBlockId] = @TextBlockId, [NorthExit] = @NorthExit, [SouthExit] = @SouthExit, [EastExit] = @EastExit, [WestExit] = @WestExit, [NorthEastExit] = @NorthEastExit, [NorthWestExit] = @NorthWestExit, [SouthEastExit] = @SouthEastExit, [SouthWestExit] = @SouthWestExit, [UpExit] = @UpExit, [DownExit] = @DownExit, [Cash] = @Cash, [HiddenCash] = @HiddenCash, [Stats] = @Stats, [Scripts] = @Scripts WHERE [Id] = @Id";
             AddSqlParameters(c, e);
         }
 

@@ -9,6 +9,7 @@ namespace KatanaMUD.Models
     public partial class User : Entity<String>
     {
         partial void OnConstruct();
+        partial void OnLoaded();
         public override String Key { get { return Id; } set { Id = value; } }
         private GameEntities Context => (GameEntities)__context;
         private String _Id;
@@ -40,6 +41,7 @@ namespace KatanaMUD.Models
             entity._PasswordHash = reader.GetSafeString(3);
             entity._IsConfirmed = reader.GetBoolean(4);
             entity._AccessLevel = reader.GetInt32(5);
+            entity.OnLoaded();
             return entity;
         }
 

@@ -9,6 +9,7 @@ namespace KatanaMUD.Models
     public partial class Actor : Entity<Guid>
     {
         partial void OnConstruct();
+        partial void OnLoaded();
         public override Guid Key { get { return Id; } set { Id = value; } }
         private GameEntities Context => (GameEntities)__context;
         private Guid _Id;
@@ -109,6 +110,7 @@ namespace KatanaMUD.Models
             entity.Attributes = new Spam.JsonContainer(entity, reader.GetSafeString(10));
             entity.Cash = new Spam.JsonContainer(entity, reader.GetSafeString(11));
             entity.Abilities = new Spam.JsonContainer(entity, reader.GetSafeString(12));
+            entity.OnLoaded();
             return entity;
         }
 

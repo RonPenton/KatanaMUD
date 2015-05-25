@@ -56,12 +56,22 @@ namespace KatanaMUD.Messages
 
         private void Say(Actor actor)
         {
-            var actors = actor.Room.ActiveActors;
-            ActorName = actor.Name;
-            ActorId = actor.Id;
-            foreach (var a in actors)
+            var validation = new Validation();
+            actor.Room.Scripts.ForEach(x => x.CanActorCommunicate(actor.Room, actor, CommunicationType.Say, this.Message, validation));
+
+            if (validation.Allowed)
             {
-                a.SendMessage(this);
+                var actors = actor.Room.ActiveActors;
+                ActorName = actor.Name;
+                ActorId = actor.Id;
+                foreach (var a in actors)
+                {
+                    a.SendMessage(this);
+                }
+            }
+            else if(!String.IsNullOrEmpty(validation.FirstPerson))
+            {
+                actor.SendMessage(new ActionNotAllowedMessage() { Message = validation.FirstPerson });
             }
         }
 

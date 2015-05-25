@@ -19,5 +19,12 @@ namespace KatanaMUD
             FirstPerson = firstPerson;
             ThirdPerson = thirdPerson;
         }
+
+        public void Fail(string firstPerson, string thirdPerson = null)
+        {
+            Allowed = false;
+            this.FirstPerson = firstPerson;
+            this.ThirdPerson = thirdPerson;
+        }
     }
 }

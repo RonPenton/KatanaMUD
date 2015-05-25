@@ -9,6 +9,7 @@ namespace KatanaMUD.Models
     public partial class Currency : Entity<Int32>
     {
         partial void OnConstruct();
+        partial void OnLoaded();
         public override Int32 Key { get { return Id; } set { Id = value; } }
         private GameEntities Context => (GameEntities)__context;
         private Int32 _Id;
@@ -35,6 +36,7 @@ namespace KatanaMUD.Models
             entity._ShortName = reader.GetString(2);
             entity._Value = reader.GetInt64(3);
             entity._Weight = reader.GetDouble(4);
+            entity.OnLoaded();
             return entity;
         }
 
