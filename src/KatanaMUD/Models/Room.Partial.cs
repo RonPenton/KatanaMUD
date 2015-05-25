@@ -13,8 +13,11 @@ namespace KatanaMUD.Models
         public IReadOnlyList<IRoomScript> Scripts { get; private set; } = new List<IRoomScript>();
         partial void OnLoaded()
         {
-            var scripts = this.ScriptsInternal.Split(';');
-            Scripts = scripts.Select(x => ScriptManager.GetRoomScript(x)).ToList();
+            if (!String.IsNullOrEmpty(ScriptsInternal))
+            {
+                var scripts = this.ScriptsInternal.Split(';');
+                Scripts = scripts.Select(x => ScriptManager.GetRoomScript(x)).ToList();
+            }
         }
 
         public Exit GetExit(Direction direction)

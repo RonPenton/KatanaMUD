@@ -398,7 +398,7 @@ namespace {0}
                     }
                     else
                     {
-                        builder.AppendFormat("            c.Parameters.AddWithValue(\"@{0}\", (object)e.{0} ?? DBNull.Value);\r\n", column.CodeName);
+                        builder.AppendFormat("            c.Parameters.AddWithValue(\"@{0}\", (object)e.{1} ?? DBNull.Value);\r\n", column.Column, column.CodeName);
                     }
                 }
 

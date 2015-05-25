@@ -797,7 +797,6 @@
       },
       "Microsoft.CodeAnalysis.Analyzers/1.0.0-rc3-20150521-02": {
         "frameworkAssemblies": [
-          "System",
           "System"
         ]
       },

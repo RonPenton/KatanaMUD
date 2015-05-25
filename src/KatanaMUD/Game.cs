@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.CSharp;
 using C5;
 using KatanaMUD.Events;
+using KatanaMUD.Scripts;
 
 namespace KatanaMUD
 {
@@ -52,6 +53,7 @@ namespace KatanaMUD
 
         async public static void Run()
         {
+            ScriptManager.LoadScripts();
             Data = new GameEntities("Server=KATANAMUD\\SQLEXPRESS;Database=KatanaMUD;integrated security=True;");
             Data.LoadFromDatabase();
 

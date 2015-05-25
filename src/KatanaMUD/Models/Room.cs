@@ -133,7 +133,7 @@ namespace KatanaMUD.Models
             c.Parameters.AddWithValue("@Cash", e.Cash.Serialize());
             c.Parameters.AddWithValue("@HiddenCash", e.HiddenCash.Serialize());
             c.Parameters.AddWithValue("@Stats", e.Stats.Serialize());
-            c.Parameters.AddWithValue("@ScriptsInternal", (object)e.ScriptsInternal ?? DBNull.Value);
+            c.Parameters.AddWithValue("@Scripts", (object)e.ScriptsInternal ?? DBNull.Value);
         }
 
         public static void GenerateInsertCommand(SqlCommand c, Room e)

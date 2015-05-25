@@ -43,7 +43,11 @@ namespace KatanaMUD.Scripts
             //TODO: Figure out if we need to load references dynamically to support a rich scripting environment.
             ScriptOptions options = ScriptOptions.Default
                 .AddReferences(new System.IO.FileInfo(@"..\..\artifacts\bin\KatanaMUD\Debug\dnx451\KatanaMUD.dll").FullName)
-                .AddNamespaces("KatanaMUD");
+                .AddReferences(new System.IO.FileInfo(@"..\..\artifacts\bin\KatanaMUD.Helpers\Debug\dnx451\KatanaMUD.Helpers.dll").FullName)
+                .AddReferences(typeof(Enumerable).Assembly)
+                .AddNamespaces("System.Linq")
+                .AddNamespaces("KatanaMUD")
+                .AddNamespaces("KatanaMUD.Helpers");
 
             var script = CSharpScript.Create(code + @"
             public class __Anchor {
