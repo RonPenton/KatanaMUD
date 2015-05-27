@@ -1,6 +1,7 @@
 ﻿using System;
 using KatanaMUD.Models;
 using System.Linq;
+using KatanaMUD.Scripts;
 
 namespace KatanaMUD.Messages
 {
@@ -17,6 +18,13 @@ namespace KatanaMUD.Messages
             if (String.IsNullOrWhiteSpace(Message))
                 return;
 
+            var validation = actor.Room.Scripts.Validate((x, v) => x.CanActorCommunicate(actor.Room, actor, Type, Message, v));
+            if (!validation.Allowed)
+            {
+                validation.HandleFailure(actor);
+                return;
+            }
+
             //TODO: process message to remove extranaeous characters/codes.
             switch (Type)
             {
@@ -24,6 +32,8 @@ namespace KatanaMUD.Messages
                 case CommunicationType.Say: Say(actor); break;
                 case CommunicationType.Telepath: Telepath(actor); break;
             }
+
+            actor.Room.Scripts.ForEach(x => x.ActorCommunicated(actor.Room, actor, Type, Message));
         }
 
         private void Telepath(Actor actor)
@@ -56,22 +66,12 @@ namespace KatanaMUD.Messages
 
         private void Say(Actor actor)
         {
-            var validation = new Validation();
-            actor.Room.Scripts.ForEach(x => x.CanActorCommunicate(actor.Room, actor, CommunicationType.Say, this.Message, validation));
-
-            if (validation.Allowed)
+            var actors = actor.Room.ActiveActors;
+            ActorName = actor.Name;
+            ActorId = actor.Id;
+            foreach (var a in actors)
             {
-                var actors = actor.Room.ActiveActors;
-                ActorName = actor.Name;
-                ActorId = actor.Id;
-                foreach (var a in actors)
-                {
-                    a.SendMessage(this);
-                }
-            }
-            else if(!String.IsNullOrEmpty(validation.FirstPerson))
-            {
-                actor.SendMessage(new ActionNotAllowedMessage() { Message = validation.FirstPerson });
+                a.SendMessage(this);
             }
         }
 
