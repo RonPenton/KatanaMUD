@@ -16,11 +16,11 @@ namespace KatanaMUD.Models
         {
             // Make sure fixed items aren't able to be gotten
             if (item.ItemTemplate.Fixed)
-                return new Validation("You cannot pick up that item!", Name + " cannot pick up that item!");
+                return new Validation().Fail("You cannot pick up that item!", Name + " cannot pick up that item!", "Base");
 
             // Check weight.
             if (Encumbrance + item.Weight > MaxEncumbrance)
-                return new Validation("You cannot carry that much!", Name + " cannot carry that much!");
+                return new Validation().Fail("You cannot carry that much!", Name + " cannot carry that much!", "Base");
 
             //TODO: Ask item if it can be gotten. 
             //TODO: Ask buffs.
@@ -36,7 +36,7 @@ namespace KatanaMUD.Models
         {
             // Make sure item is actually in the room.
             if (item.Room != Room)
-                return new Validation("You are not in the same room as that item!", null);
+                return new Validation().Fail("You are not in the same room as that item!", null, "Base");
 
             return CanAcceptItem(item);
         }
@@ -51,7 +51,7 @@ namespace KatanaMUD.Models
         {
             // Check weight.
             if (Encumbrance + (currency.Weight * quantity) > MaxEncumbrance)
-                return new Validation("You cannot carry that much!", Name + " cannot carry that much!");
+                return new Validation().Fail("You cannot carry that much!", Name + " cannot carry that much!", "Base");
 
             //TODO: Ask buffs.
             return new Validation();
@@ -69,7 +69,12 @@ namespace KatanaMUD.Models
 
             // Make sure item is actually in the room.
             if (q.Total < quantity)
-                return new Validation("You do not see that here!", null);
+                return new Validation().Fail("You do not see that here!");
+
+            // Ask the room scripts if the get is allowed.
+            var validation = Room.Scripts.Validate((x, v) => x.CanGetCash(Room, currency, quantity, this, v));
+            if (!validation.Allowed)
+                return validation;
 
             return CanAcceptCash(currency, quantity);
         }
@@ -131,11 +136,11 @@ namespace KatanaMUD.Models
         {
             // Make sure item is actually in the room.
             if (item.Actor != this)
-                return new Validation("Item is not owned by the actor", null);
+                return new Validation().Fail("Item is not owned by the actor");
 
             // TODO: Ask item for a reason why it can't be dropped?
             if (item.ItemTemplate.NotDroppable)
-                return new Validation("You cannot drop that!", null);
+                return new Validation().Fail("You cannot drop that!");
 
             //TODO: Ask item if it can be dropped.
 

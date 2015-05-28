@@ -9,12 +9,12 @@ namespace KatanaMUD.Scripts
 {
     public interface IRoomScript : IScript
     {
-        void CanDropItem(Room room, Item item, Actor actor, ScriptValidation validation);
-        void CanHideItem(Room room, Item item, Actor actor, ScriptValidation validation);
-        void CanDropCash(Room room, Currency currency, long quantity, Actor actor, ScriptValidation validation);
-        void CanHideCash(Room room, Currency currency, long quantity, Actor actor, ScriptValidation validation);
-        void CanGetItem(Room room, Item item, Actor actor, ScriptValidation validation);
-        void CanGetCash(Room room, Currency currency, long quantity, Actor actor, ScriptValidation validation);
+        void CanDropItem(Room room, Item item, Actor actor, Validation validation);
+        void CanHideItem(Room room, Item item, Actor actor, Validation validation);
+        void CanDropCash(Room room, Currency currency, long quantity, Actor actor, Validation validation);
+        void CanHideCash(Room room, Currency currency, long quantity, Actor actor, Validation validation);
+        void CanGetItem(Room room, Item item, Actor actor, Validation validation);
+        void CanGetCash(Room room, Currency currency, long quantity, Actor actor, Validation validation);
         void ItemDropped(Room room, Item item, Actor actor);
         void ItemHidden(Room room, Item item, Actor actor);
         void CashDropped(Room room, Currency currency, long quantity, Actor actor);
@@ -22,19 +22,19 @@ namespace KatanaMUD.Scripts
         void ItemGotten(Room room, Item item, Actor actor);
         void CashGotten(Room room, Currency currency, long quantity, Actor actor);
 
-        void CanPartyLeave(Room room, Party party, ScriptValidation validation);
-        void CanPartyEnter(Room room, Party party, ScriptValidation validation);
+        void CanPartyLeave(Room room, Party party, Validation validation);
+        void CanPartyEnter(Room room, Party party, Validation validation);
         void PartyEntered(Room room, Party party);
         void PartyLeft(Room room, Party party);
 
-        void CanActorCommunicate(Room room, Actor actor, CommunicationType type, string message, ScriptValidation validation);
+        void CanActorCommunicate(Room room, Actor actor, CommunicationType type, string message, Validation validation);
         void ActorCommunicated(Room room, Actor actor, CommunicationType type, string message);
 
-        void CanActorEmote(Room room, Actor actor, string emoteName, string target, ScriptValidation validation);
+        void CanActorEmote(Room room, Actor actor, string emoteName, string target, Validation validation);
         void ActorEmoted(Room room, Actor actor, string emoteName, string target);
 
         //TODO: Possibly include the method of attack as well.
-        void CanActorAttack(Room room, Actor attacker, IEnumerable<Actor> defenders, ScriptValidation validation);
+        void CanActorAttack(Room room, Actor attacker, IEnumerable<Actor> defenders, Validation validation);
         void ActorAttacks(Room room, Actor attacker, IEnumerable<Actor> defenders);
 
         void ActorDropped(Room room, Actor actor);
@@ -45,19 +45,19 @@ namespace KatanaMUD.Scripts
 
     public class DefaultRoomScript : IRoomScript
     {
-        public void CanActorCommunicate(Room room, Actor actor, CommunicationType type, string message, ScriptValidation validation) { }
+        public void CanActorCommunicate(Room room, Actor actor, CommunicationType type, string message, Validation validation) { }
         public void ActorCommunicated(Room room, Actor actor, CommunicationType type, string message) { }
         public void ActorEmoted(Room room, Actor actor, string emoteName, string target) { }
-        public void CanActorEmote(Room room, Actor actor, string emoteName, string target, ScriptValidation validation) { }
-        public void CanDropCash(Room room, Currency currency, long quantity, Actor actor, ScriptValidation validation) { }
-        public void CanDropItem(Room room, Item item, Actor actor, ScriptValidation validation) { }
-        public void CanGetCash(Room room, Currency currency, long quantity, Actor actor, ScriptValidation validation) { }
-        public void CanGetItem(Room room, Item item, Actor actor, ScriptValidation validation) { }
-        public void CanHideCash(Room room, Currency currency, long quantity, Actor actor, ScriptValidation validation) { }
-        public void CanHideItem(Room room, Item item, Actor actor, ScriptValidation validation) { }
-        public void CanPartyEnter(Room room, Party party, ScriptValidation validation) { }
-        public void CanPartyLeave(Room room, Party party, ScriptValidation validation) { }
-        public void CanActorAttack(Room room, Actor attacker, IEnumerable<Actor> defenders, ScriptValidation validation) { }
+        public void CanActorEmote(Room room, Actor actor, string emoteName, string target, Validation validation) { }
+        public void CanDropCash(Room room, Currency currency, long quantity, Actor actor, Validation validation) { }
+        public void CanDropItem(Room room, Item item, Actor actor, Validation validation) { }
+        public void CanGetCash(Room room, Currency currency, long quantity, Actor actor, Validation validation) { }
+        public void CanGetItem(Room room, Item item, Actor actor, Validation validation) { }
+        public void CanHideCash(Room room, Currency currency, long quantity, Actor actor, Validation validation) { }
+        public void CanHideItem(Room room, Item item, Actor actor, Validation validation) { }
+        public void CanPartyEnter(Room room, Party party, Validation validation) { }
+        public void CanPartyLeave(Room room, Party party, Validation validation) { }
+        public void CanActorAttack(Room room, Actor attacker, IEnumerable<Actor> defenders, Validation validation) { }
         public void CashDropped(Room room, Currency currency, long quantity, Actor actor) { }
         public void CashGotten(Room room, Currency currency, long quantity, Actor actor) { }
         public void CashHidden(Room room, Currency currency, long quantity, Actor actor) { }

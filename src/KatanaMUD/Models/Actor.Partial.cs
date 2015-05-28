@@ -188,10 +188,10 @@ namespace KatanaMUD.Models
         public Validation CanUnEquip(Item item)
         {
             if (item.Actor != this)
-                return new Validation("You do not own that!", null);
+                return new Validation().Fail("You do not own that!");
 
             if (item.EquippedSlot == null)
-                return new Validation("You do not have that equipped!", null);
+                return new Validation().Fail("You do not have that equipped!");
 
             // TODO: Ask the item if it can be removed
 
@@ -285,17 +285,17 @@ namespace KatanaMUD.Models
         public Validation CanEquipItem(Item item)
         {
             if (item.Actor != this)
-                return new Validation("You do not own that item!", null);
+                return new Validation().Fail("You do not own that item!");
 
             if (item.ItemTemplate.EquipType == null)
-                return new Validation("You may not wear that item!", null);
+                return new Validation().Fail("You may not wear that item!");
 
             var open = IsSlotOpen(item);
             if(!open.IsOpen && open.ItemsToRemove.Any())
-                return new Validation("You currently have an item equipped in that slot!", null);
+                return new Validation().Fail("You currently have an item equipped in that slot!");
 
             if (!open.IsOpen && !String.IsNullOrEmpty(open.FailureReason))
-                return new Validation(open.FailureReason, null);
+                return new Validation().Fail(open.FailureReason);
 
             // TODO: Validate Weapon Type/Armour Type
             // TODO: ask item if it can be equipped
@@ -411,7 +411,7 @@ namespace KatanaMUD.Models
         {
             if (Members.Any(x => x.Encumbrance > x.MaxEncumbrance))
             {
-                return new Validation("At least one person in your party is too heavy to move!", null);
+                return new Validation().Fail("At least one person in your party is too heavy to move!");
             }
 
             return new Validation();

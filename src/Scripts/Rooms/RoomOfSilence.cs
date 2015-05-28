@@ -8,7 +8,7 @@ using KatanaMUD.Scripts;
 
 public class RoomOfSilence : IRoomScript
 {
-    public void CanActorCommunicate(Room room, Actor actor, CommunicationType type, string message, ScriptValidation validation)
+    public void CanActorCommunicate(Room room, Actor actor, CommunicationType type, string message, Validation validation)
     {
         if (actor.User.AccessLevel != AccessLevel.Sysop && type == CommunicationType.Say)
         {
@@ -16,19 +16,18 @@ public class RoomOfSilence : IRoomScript
         }
     }
 
-    public void CanActorCommunicate(Room room, Actor actor, CommunicationType type, string message, ScriptValidation validation) { }
     public void ActorCommunicated(Room room, Actor actor, CommunicationType type, string message) { }
     public void ActorEmoted(Room room, Actor actor, string emoteName, string target) { }
-    public void CanActorEmote(Room room, Actor actor, string emoteName, string target, ScriptValidation validation) { }
-    public void CanDropCash(Room room, Currency currency, long quantity, Actor actor, ScriptValidation validation) { }
-    public void CanDropItem(Room room, Item item, Actor actor, ScriptValidation validation) { }
-    public void CanGetCash(Room room, Currency currency, long quantity, Actor actor, ScriptValidation validation) { }
-    public void CanGetItem(Room room, Item item, Actor actor, ScriptValidation validation) { }
-    public void CanHideCash(Room room, Currency currency, long quantity, Actor actor, ScriptValidation validation) { }
-    public void CanHideItem(Room room, Item item, Actor actor, ScriptValidation validation) { }
-    public void CanPartyEnter(Room room, Party party, ScriptValidation validation) { }
-    public void CanPartyLeave(Room room, Party party, ScriptValidation validation) { }
-    public void CanActorAttack(Room room, Actor attacker, IEnumerable<Actor> defenders, ScriptValidation validation) { }
+    public void CanActorEmote(Room room, Actor actor, string emoteName, string target, Validation validation) { }
+    public void CanDropCash(Room room, Currency currency, long quantity, Actor actor, Validation validation) { }
+    public void CanDropItem(Room room, Item item, Actor actor, Validation validation) { }
+    public void CanGetCash(Room room, Currency currency, long quantity, Actor actor, Validation validation) { }
+    public void CanGetItem(Room room, Item item, Actor actor, Validation validation) { }
+    public void CanHideCash(Room room, Currency currency, long quantity, Actor actor, Validation validation) { }
+    public void CanHideItem(Room room, Item item, Actor actor, Validation validation) { }
+    public void CanPartyEnter(Room room, Party party, Validation validation) { }
+    public void CanPartyLeave(Room room, Party party, Validation validation) { }
+    public void CanActorAttack(Room room, Actor attacker, IEnumerable<Actor> defenders, Validation validation) { }
     public void CashDropped(Room room, Currency currency, long quantity, Actor actor) { }
     public void CashGotten(Room room, Currency currency, long quantity, Actor actor) { }
     public void CashHidden(Room room, Currency currency, long quantity, Actor actor) { }

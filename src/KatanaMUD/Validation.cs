@@ -1,24 +1,29 @@
 ﻿using KatanaMUD.Messages;
 using KatanaMUD.Models;
+using KatanaMUD.Scripts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KatanaMUD.Scripts
+namespace KatanaMUD
 {
-    public class ScriptValidation : Validation
+    public class Validation
     {
+        public bool Allowed { get; set; }
+        public string FirstPerson { get; set; }
+        public string ThirdPerson { get; set; }
         public string Module { get; private set; }
         public ValidationPriority Priority { get; private set; }
         public Action FailureAction { get; private set; }
 
-        public ScriptValidation()
+        public Validation()
         {
             this.Priority = ValidationPriority.Medium;
+            this.Allowed = true;
         }
 
-        public void Fail(string module, Action action, ValidationPriority priority = ValidationPriority.Medium)
+        public Validation Fail(string module, Action action, ValidationPriority priority = ValidationPriority.Medium)
         {
             Allowed = false;
             this.Module = module;
@@ -26,9 +31,10 @@ namespace KatanaMUD.Scripts
             this.FailureAction = action;
             this.FirstPerson = null;
             this.ThirdPerson = null;
+            return this;
         }
 
-        public void Fail(string firstPerson, string thirdPerson, string module, ValidationPriority priority = ValidationPriority.Medium)
+        public Validation Fail(string firstPerson, string thirdPerson = null, string module = "Base", ValidationPriority priority = ValidationPriority.Medium)
         {
             Allowed = false;
             this.FirstPerson = firstPerson;
@@ -36,6 +42,7 @@ namespace KatanaMUD.Scripts
             this.Module = module;
             this.Priority = priority;
             this.FailureAction = null;
+            return this;
         }
 
         public void HandleFailure(Actor actor, bool useThirdPersonMessage = false)
@@ -62,11 +69,11 @@ namespace KatanaMUD.Scripts
         }
     }
 
-    public static class ScriptHelper
+    public static class ValidationHelper
     {
-        public static ScriptValidation Validate<T>(this IEnumerable<T> scripts, Action<T, ScriptValidation> action) where T : IScript
+        public static Validation Validate<T>(this IEnumerable<T> scripts, Action<T, Validation> action) where T : IScript
         {
-            var validation = new ScriptValidation();
+            var validation = new Validation();
             scripts.ForEach(x => action(x, validation));
             return validation;
         }
@@ -80,4 +87,5 @@ namespace KatanaMUD.Scripts
         High,
         Highest
     }
+
 }
