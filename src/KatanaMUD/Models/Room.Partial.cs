@@ -16,7 +16,7 @@ namespace KatanaMUD.Models
             if (!String.IsNullOrEmpty(ScriptsInternal))
             {
                 var scripts = this.ScriptsInternal.Split(';');
-                Scripts = scripts.Select(x => ScriptManager.GetRoomScript(x)).ToList();
+                Scripts = scripts.Select(x => ScriptManager.GetRoomScript(x, this)).ToList();
             }
         }
 

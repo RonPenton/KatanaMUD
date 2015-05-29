@@ -243,7 +243,7 @@ namespace KatanaMUD.Messages
 
             foreach (var item in finalItems)
             {
-                var action = actor.CanDropItem(item);
+                var action = actor.CanDropItem(item, Hide);
 
                 if (action.Allowed)
                 {
@@ -412,7 +412,7 @@ namespace KatanaMUD.Messages
 
             foreach (var item in finalItems)
             {
-                var give = actor.CanDropItem(item);
+                var give = actor.CanRemoveItem(item);
                 var take = receiver.CanAcceptItem(item);
 
                 if (give.Allowed && take.Allowed)

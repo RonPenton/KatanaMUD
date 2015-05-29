@@ -38,6 +38,11 @@ namespace KatanaMUD.Models
             if (item.Room != Room)
                 return new Validation().Fail("You are not in the same room as that item!", null, "Base");
 
+            // Ask the room.
+            var validation = Room.Scripts.Validate((x, v) => x.CanGetItem(item, this, v));
+            if (!validation.Allowed)
+                return validation;
+
             return CanAcceptItem(item);
         }
 
@@ -72,7 +77,7 @@ namespace KatanaMUD.Models
                 return new Validation().Fail("You do not see that here!");
 
             // Ask the room scripts if the get is allowed.
-            var validation = Room.Scripts.Validate((x, v) => x.CanGetCash(Room, currency, quantity, this, v));
+            var validation = Room.Scripts.Validate((x, v) => x.CanGetCash(currency, quantity, this, v));
             if (!validation.Allowed)
                 return validation;
 
@@ -151,10 +156,19 @@ namespace KatanaMUD.Models
         /// Determines if an actor can drop an item in their current room
         /// </summary>
         /// <param name="item"></param>
+        /// <param name="hide"></param>
         /// <returns></returns>
-        public Validation CanDropItem(Item item)
+        public Validation CanDropItem(Item item, bool hide)
         {
-            // TODO: Ask room if it will accept the item.
+            // Ask the room scripts if the drop is allowed.
+            Validation validation;
+            if (hide == false)
+                validation = Room.Scripts.Validate((x, v) => x.CanDropItem(item, this, v));
+            else
+                validation = Room.Scripts.Validate((x, v) => x.CanHideItem(item, this, v));
+            if (!validation.Allowed)
+                return validation;
+
             return CanRemoveItem(item);
         }
 
@@ -186,6 +200,11 @@ namespace KatanaMUD.Models
             {
                 item.HiddenTime = null;
             }
+
+            if (!hide)
+                Room.Scripts.ForEach(x => x.ItemDropped(item, this));
+            else
+                Room.Scripts.ForEach(x => x.ItemHidden(item, this));
         }
 
         /// <summary>
@@ -208,7 +227,15 @@ namespace KatanaMUD.Models
         /// <returns></returns>
         public Validation CanDropCash(Currency currency, long quantity, bool hide)
         {
-            // TODO: Ask room.
+            // Ask the room scripts if the drop is allowed.
+            Validation validation;
+            if (hide == false)
+                validation = Room.Scripts.Validate((x, v) => x.CanDropCash(currency, quantity, this, v));
+            else
+                validation = Room.Scripts.Validate((x, v) => x.CanHideCash(currency, quantity, this, v));
+            if (!validation.Allowed)
+                return validation;
+
             return CanRemoveCash(currency, quantity);
         }
 
@@ -244,6 +271,11 @@ namespace KatanaMUD.Models
 
             if (hide == true)
                 Room.ClearFoundHiddenCash(currency);
+
+            if (!hide)
+                Room.Scripts.ForEach(x => x.CashDropped(currency, quantity, this));
+            else
+                Room.Scripts.ForEach(x => x.CashHidden(currency, quantity, this));
         }
     }
 }

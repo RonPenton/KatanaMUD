@@ -8,14 +8,16 @@ namespace KatanaMUD.Scripts
 {
     public interface IItemScript : IScript
     {
-        void CanDropItem(Item item, Room room, Actor actor, Validation validation);
-        void CanHideItem(Item item, Room room, Actor actor, Validation validation);
-        void CanGetItem(Item item, Room room, Actor actor, Validation validation);
-        void ItemDropped(Item item, Room room, Actor actor);
-        void ItemHidden(Item item, Room room, Actor actor);
-        void GetItem(Item item, Room room, Actor actor);
+        Item ControllingItem { get; set; }
 
-        void PlayerDropped(Item item, Room room, Actor actor);
-        void PlayerDied(Item item, Room room, Actor actor);
+        void CanDropItem(Room room, Actor actor, Validation validation);
+        void CanHideItem(Room room, Actor actor, Validation validation);
+        void CanGetItem(Room room, Actor actor, Validation validation);
+        void ItemDropped(Room room, Actor actor);
+        void ItemHidden(Room room, Actor actor);
+        void GetItem(Room room, Actor actor);
+
+        void ActorDropped(Room room, Actor actor);
+        void ActorDied(Room room, Actor actor);
     }
 }

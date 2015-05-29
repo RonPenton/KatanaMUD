@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.Scripting;
+﻿using KatanaMUD.Models;
+using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.Scripting.CSharp;
 using System;
 using System.Collections.Generic;
@@ -12,9 +13,11 @@ namespace KatanaMUD.Scripts
     {
         static Dictionary<string, Type> _roomScripts = new Dictionary<string, Type>(StringComparer.InvariantCultureIgnoreCase);
 
-        public static IRoomScript GetRoomScript(string name)
+        public static IRoomScript GetRoomScript(string name, Room room)
         {
-            return GetScript<IRoomScript>(name, new Lazy<IRoomScript>(() => new DefaultRoomScript()), _roomScripts);
+            var script = GetScript<IRoomScript>(name, new Lazy<IRoomScript>(() => new DefaultRoomScript()), _roomScripts);
+            script.ControllingRoom = room;
+            return script;
         }
 
         private static T GetScript<T>(string name, Lazy<T> defaultScript, Dictionary<string, Type> dictionary)

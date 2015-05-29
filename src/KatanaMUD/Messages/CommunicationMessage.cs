@@ -18,7 +18,7 @@ namespace KatanaMUD.Messages
             if (String.IsNullOrWhiteSpace(Message))
                 return;
 
-            var validation = actor.Room.Scripts.Validate((x, v) => x.CanActorCommunicate(actor.Room, actor, Type, Message, v));
+            var validation = actor.Room.Scripts.Validate((x, v) => x.CanActorCommunicate(actor, Type, Message, v));
             if (!validation.Allowed)
             {
                 validation.HandleFailure(actor);
@@ -33,7 +33,7 @@ namespace KatanaMUD.Messages
                 case CommunicationType.Telepath: Telepath(actor); break;
             }
 
-            actor.Room.Scripts.ForEach(x => x.ActorCommunicated(actor.Room, actor, Type, Message));
+            actor.Room.Scripts.ForEach(x => x.ActorCommunicated(actor, Type, Message));
         }
 
         private void Telepath(Actor actor)
