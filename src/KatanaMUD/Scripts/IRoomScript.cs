@@ -24,6 +24,11 @@ namespace KatanaMUD.Scripts
         void ItemGotten(Item item, Actor actor);
         void CashGotten(Currency currency, long quantity, Actor actor);
 
+        void CanGiveItem(Item item, Actor giver, Actor receiver, Validation validation);
+        void CanGiveCash(Currency currency, long quantity, Actor giver, Actor receiver, Validation validation);
+        void GaveItem(Item item, Actor giver, Actor receiver);
+        void GaveCash(Currency currency, long quantity, Actor giver, Actor receiver);
+
         void CanPartyLeave(Party party, Validation validation);
         void CanPartyEnter(Party party, Validation validation);
         void PartyEntered(Party party);
@@ -45,35 +50,35 @@ namespace KatanaMUD.Scripts
         void ActorConnected(Actor actor);
     }
 
-    public class DefaultRoomScript : IRoomScript
+    public class BaseRoomScript : IRoomScript
     {
         public Room ControllingRoom { get; set; }
 
-        public void CanActorCommunicate(Actor actor, CommunicationType type, string message, Validation validation) { }
-        public void ActorCommunicated(Actor actor, CommunicationType type, string message) { }
-        public void ActorEmoted(Actor actor, string emoteName, string target) { }
-        public void CanActorEmote(Actor actor, string emoteName, string target, Validation validation) { }
-        public void CanDropCash(Currency currency, long quantity, Actor actor, Validation validation) { }
-        public void CanDropItem(Item item, Actor actor, Validation validation) { }
-        public void CanGetCash(Currency currency, long quantity, Actor actor, Validation validation) { }
-        public void CanGetItem(Item item, Actor actor, Validation validation) { }
-        public void CanHideCash(Currency currency, long quantity, Actor actor, Validation validation) { }
-        public void CanHideItem(Item item, Actor actor, Validation validation) { }
-        public void CanPartyEnter(Party party, Validation validation) { }
-        public void CanPartyLeave(Party party, Validation validation) { }
-        public void CanActorAttack(Actor attacker, IEnumerable<Actor> defenders, Validation validation) { }
-        public void CashDropped(Currency currency, long quantity, Actor actor) { }
-        public void CashGotten(Currency currency, long quantity, Actor actor) { }
-        public void CashHidden(Currency currency, long quantity, Actor actor) { }
-        public void ItemDropped(Item item, Actor actor) { }
-        public void ItemGotten(Item item, Actor actor) { }
-        public void ItemHidden(Item item, Actor actor) { }
-        public void PartyEntered(Party party) { }
-        public void PartyLeft(Party party) { }
-        public void ActorAttacks(Actor attacker, IEnumerable<Actor> defenders) { }
-        public void ActorDied(Actor actor) { }
-        public void ActorDropped(Actor actor) { }
-        public void ActorDisconnected(Actor actor) { }
-        public void ActorConnected(Actor actor) { }
+        public virtual void CanActorCommunicate(Actor actor, CommunicationType type, string message, Validation validation) { }
+        public virtual void ActorCommunicated(Actor actor, CommunicationType type, string message) { }
+        public virtual void ActorEmoted(Actor actor, string emoteName, string target) { }
+        public virtual void CanActorEmote(Actor actor, string emoteName, string target, Validation validation) { }
+        public virtual void CanDropCash(Currency currency, long quantity, Actor actor, Validation validation) { }
+        public virtual void CanDropItem(Item item, Actor actor, Validation validation) { }
+        public virtual void CanGetCash(Currency currency, long quantity, Actor actor, Validation validation) { }
+        public virtual void CanGetItem(Item item, Actor actor, Validation validation) { }
+        public virtual void CanHideCash(Currency currency, long quantity, Actor actor, Validation validation) { }
+        public virtual void CanHideItem(Item item, Actor actor, Validation validation) { }
+        public virtual void CanPartyEnter(Party party, Validation validation) { }
+        public virtual void CanPartyLeave(Party party, Validation validation) { }
+        public virtual void CanActorAttack(Actor attacker, IEnumerable<Actor> defenders, Validation validation) { }
+        public virtual void CashDropped(Currency currency, long quantity, Actor actor) { }
+        public virtual void CashGotten(Currency currency, long quantity, Actor actor) { }
+        public virtual void CashHidden(Currency currency, long quantity, Actor actor) { }
+        public virtual void ItemDropped(Item item, Actor actor) { }
+        public virtual void ItemGotten(Item item, Actor actor) { }
+        public virtual void ItemHidden(Item item, Actor actor) { }
+        public virtual void PartyEntered(Party party) { }
+        public virtual void PartyLeft(Party party) { }
+        public virtual void ActorAttacks(Actor attacker, IEnumerable<Actor> defenders) { }
+        public virtual void ActorDied(Actor actor) { }
+        public virtual void ActorDropped(Actor actor) { }
+        public virtual void ActorDisconnected(Actor actor) { }
+        public virtual void ActorConnected(Actor actor) { }
     }
 }

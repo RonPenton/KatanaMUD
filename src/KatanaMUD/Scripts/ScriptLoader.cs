@@ -15,7 +15,7 @@ namespace KatanaMUD.Scripts
 
         public static IRoomScript GetRoomScript(string name, Room room)
         {
-            var script = GetScript<IRoomScript>(name, new Lazy<IRoomScript>(() => new DefaultRoomScript()), _roomScripts);
+            var script = GetScript<IRoomScript>(name, new Lazy<IRoomScript>(() => new BaseRoomScript()), _roomScripts);
             script.ControllingRoom = room;
             return script;
         }
@@ -60,11 +60,6 @@ namespace KatanaMUD.Scripts
 
             var state = script.Run();
             var anchor = state.Variables["anchor"].Value;
-
-            var t = anchor.GetType();
-            var a = t.Assembly;
-            var ts = a.GetTypes();
-
             return anchor.GetType().Assembly.GetTypes().Where(x => x.ImplementsInterface<T>());
         }
     }

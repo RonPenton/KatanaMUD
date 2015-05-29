@@ -102,7 +102,7 @@ namespace KatanaMUD.Messages
 
                     if (action.Allowed)
                     {
-                        actor.AcceptItem(item);
+                        actor.PickupItem(item);
                         successes.Add(item);
                     }
                     else

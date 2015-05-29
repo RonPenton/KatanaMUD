@@ -89,6 +89,27 @@ namespace KatanaMUD.Models
         /// Notifying the room of the item transfer is up to the executor of this method.
         /// </summary>
         /// <param name="item"></param>
+        public void PickupItem(Item item)
+        {
+            var room = item.Room;
+            if (room == null)
+                throw new InvalidOperationException("Item must be in a room to be picked up.");
+
+            item.Actor = this;
+            item.Room = null;
+            item.HiddenTime = null;
+            item.EquippedSlot = null;
+
+            //TODO: Tell item it has been gotten.
+
+            room.Scripts.ForEach(x => x.ItemGotten(item, this));
+        }
+
+        /// <summary>
+        /// Gets an item. Beware that this performs no checks and essentially forces a get. 
+        /// Notifying the room of the item transfer is up to the executor of this method.
+        /// </summary>
+        /// <param name="item"></param>
         public void AcceptItem(Item item)
         {
             item.Actor = this;
@@ -127,7 +148,7 @@ namespace KatanaMUD.Models
             Currency.Add(currency, Room.HiddenCash, -hidden);
             Room.ClearFoundHiddenCash(currency);
 
-            //TODO: Tell room cash has been removed.
+            Room.Scripts.ForEach(x => x.CashGotten(currency, quantity, this));
 
             AcceptCash(currency, quantity);
         }

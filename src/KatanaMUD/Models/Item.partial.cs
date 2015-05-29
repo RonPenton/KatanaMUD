@@ -38,6 +38,17 @@ namespace KatanaMUD.Models
         }
 
         public WeaponType? WeaponType => ItemTemplate.WeaponType == null ? null : (WeaponType?)ItemTemplate.WeaponType;
+
+        public void SetOwner(Room room) => SetOwner(room, null);
+        public void SetOwner(Actor actor) => SetOwner(null, actor);
+
+        private void SetOwner(Room room, Actor actor)
+        {
+            if (room != null && actor != null)
+                throw new InvalidOperationException("An item cannot have more than one owner");
+            Room = room;
+            Actor = actor;
+        }
     }
 
     public class ItemGroup : IItem
